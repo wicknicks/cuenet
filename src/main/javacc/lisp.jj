@@ -1,0 +1,26 @@
+PARSER_BEGIN( LispParser_1 )
+package esl.cuenet.mapper.lispparser;
+public class LispParser_1 {}
+PARSER_END( LispParser_1 )
+
+
+void document() : {} { (sexpr())* <EOF> }
+
+void sexpr() : {}  { start_s_expr() operator() (operand())+ end_s_expr() }
+
+void start_s_expr(): {Token t;}    { t=<START_S_EXPR> }
+void end_s_expr() : {Token t;}    { t=<END_S_EXPR> }
+
+String word() : {Token t;} { t=<WORD> { return t.image; }}
+
+void operator(): {String operator;} { operator = word() { System.out.println("Op -> " + operator); } }
+
+void operand(): {} { (word() | sexpr()) }
+
+SKIP 	: { " " | "\t" | "\n" | "\r" }
+TOKEN	: { < WORD : (":" | "@")? (["a" - "z"]) (["a" - "z"] | "-" | "." | "_" )+ > }
+TOKEN   : { < START_S_EXPR : "(" > }
+TOKEN   : { < END_S_EXPR : ")" > }
+
+
+
