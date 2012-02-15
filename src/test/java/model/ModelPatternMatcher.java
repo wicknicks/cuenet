@@ -1,5 +1,6 @@
 package model;
 
+import com.hp.hpl.jena.ontology.ProfileRegistry;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.vocabulary.VCARD;
@@ -10,9 +11,9 @@ public class ModelPatternMatcher {
     @Test
     public void main() {
 
-        Model model = ModelFactory.createDefaultModel();
+        Model model = ModelFactory.createOntologyModel(ProfileRegistry.OWL_LANG);
 
-        String personURI = "arjun-satish-uri";
+        String personURI = "http://somewhere/arjun-satish-uri";
         String givenName = "Arjun";
         String familyName = "Satish";
         String fullName = givenName + " " + familyName;
@@ -22,7 +23,7 @@ public class ModelPatternMatcher {
                         .addProperty(VCARD.Given, givenName)
                         .addProperty(VCARD.Family, familyName));
 
-        personURI = "john-smith-uri";
+        personURI = "http://somewhere/john-smith-uri";
         givenName = "John";
         familyName = "Smith";
         fullName = givenName + " " + familyName;
@@ -32,7 +33,7 @@ public class ModelPatternMatcher {
                         .addProperty(VCARD.Given, givenName)
                         .addProperty(VCARD.Family, familyName));
 
-        personURI = "adarsh-satish-uri";
+        personURI = "http://somewhere/adarsh-satish-uri";
         givenName = "Adarsh";
         familyName = "Satish";
         fullName = givenName + " " + familyName;
@@ -58,6 +59,8 @@ public class ModelPatternMatcher {
 
             System.out.println(" .");
         }
+
+        model.write(System.out);
 
         String queryString = "SELECT ?givenName" +
                 " WHERE { ?y <http://www.w3.org/2001/vcard-rdf/3.0#Family> \"Satish\" . " +
