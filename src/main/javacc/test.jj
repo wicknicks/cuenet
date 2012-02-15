@@ -1,5 +1,5 @@
 PARSER_BEGIN( Parser_1 )
-package esl.cuenet.bridges.parser;
+package esl.cuenet.mapper.simpleparser;
 public class Parser_1 {}
 PARSER_END( Parser_1 )
 
