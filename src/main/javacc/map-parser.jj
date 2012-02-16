@@ -3,10 +3,10 @@ options {
 }
 
 
-PARSER_BEGIN( LispParser_1 )
-package esl.cuenet.mapper.lispparser;
-public class LispParser_1 {}
-PARSER_END( LispParser_1 )
+PARSER_BEGIN( MappingParser )
+package esl.cuenet.mapper.parser;
+public class MappingParser {}
+PARSER_END( MappingParser )
 
 
 void document() : {} { (sexpr())* <EOF> }
