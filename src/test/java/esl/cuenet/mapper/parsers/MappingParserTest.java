@@ -1,13 +1,14 @@
 package esl.cuenet.mapper.parsers;
 
-import esl.cuenet.mapper.lispparser.*;
+import esl.cuenet.mapper.parser.MappingParser;
+import esl.cuenet.mapper.parser.ParseException;
 import org.junit.Test;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
 
-public class LispParser {
+public class MappingParserTest {
 
     @Test
     public void doTest() throws ParseException {
@@ -33,9 +34,9 @@ public class LispParser {
     
     private void test(String example) throws ParseException {
 
-        LispParser_1 parser = null;
+        MappingParser parser = null;
 
-        parser = new LispParser_1( new StringReader(example));
+        parser = new MappingParser( new StringReader(example));
         parser.document();
 
         System.out.println("");
@@ -46,7 +47,7 @@ public class LispParser {
 
 
         try {
-            LispParser_1 parser = new LispParser_1( new FileInputStream(filename));
+            MappingParser parser = new MappingParser( new FileInputStream(filename));
             parser.document();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
