@@ -1,3 +1,8 @@
+options {
+  STATIC = false ;
+}
+
+
 PARSER_BEGIN( LispParser_1 )
 package esl.cuenet.mapper.lispparser;
 public class LispParser_1 {}
@@ -6,21 +11,24 @@ PARSER_END( LispParser_1 )
 
 void document() : {} { (sexpr())* <EOF> }
 
+
 void sexpr() : {}  { start_s_expr() operator() (operand())+ end_s_expr() }
 
+
 void start_s_expr(): {Token t;}    { t=<START_S_EXPR> }
+
 void end_s_expr() : {Token t;}    { t=<END_S_EXPR> }
 
-String word() : {Token t;} { t=<WORD> { return t.image; }}
 
-void operator(): {String operator;} { operator = word() { System.out.println("Op -> " + operator); } }
 
-void operand(): {} { (word() | sexpr()) }
+void operator(): {Token operator;} { operator = <OPERATOR_NAME> { System.out.println("Op -> " + operator.image); } }
 
+void operand(): {Token t=null;} { (t=<OPERAND_NAME> | sexpr()) { if (t!=null) System.out.println("Op -> " + t.image); } }
+
+
+SKIP    : {  <"//" (~["\n"])* "\n"> }
 SKIP 	: { " " | "\t" | "\n" | "\r" }
-TOKEN	: { < WORD : (":" | "@")? (["a" - "z"]) (["a" - "z"] | "-" | "." | "_" )+ > }
 TOKEN   : { < START_S_EXPR : "(" > }
 TOKEN   : { < END_S_EXPR : ")" > }
-
-
-
+TOKEN   : { <OPERATOR_NAME : ":" (["a" - "z"]|["A" - "Z"])+ > }
+TOKEN   : { <OPERAND_NAME  : (["a" - "z"]|["A" - "Z"]| ["0"-"9"] | "\"" | "-" | "_" | "/" | "@" | ":" | "." | "]" | "[")+ > }
