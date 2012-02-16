@@ -1,0 +1,11 @@
+// this is my example mapping
+
+(:define (:domain yale_bib-ont)
+  (:extends
+     (:uri http://www.w3.org/2000/01/rdf-schema prefix rdfs))     // some random comment
+  (:requirement existential-preconditions conditional-effects)
+
+  // following statements make no sense!
+
+  (:types Publication Obj Article Book Techreport Incollection Inproceedings - Publication Literal @rdfs:Literal)
+  (:predicates (:author p - Publication a - Literal)))

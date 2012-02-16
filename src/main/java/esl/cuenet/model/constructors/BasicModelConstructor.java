@@ -14,10 +14,11 @@ public class BasicModelConstructor {
 
     public BasicModelConstructor() {
     }
-
+    
     public void constructOntModel() throws FileNotFoundException {
+
         OntModel model = ModelFactory.createOntologyModel();
-        //model.read("http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl");
+
         model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
                 "http://www.semanticweb.org/arjun/cuenet-main.owl");
 
@@ -29,8 +30,6 @@ public class BasicModelConstructor {
 
         ResultSet results = queryExecutor.execSelect();
         ResultSetFormatter.out(System.out, results, query);
-
-        //model.write(System.out);
 
         queryExecutor.close();
 

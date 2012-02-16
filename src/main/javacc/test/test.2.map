@@ -1,0 +1,23 @@
+(:ns http://www.semanticweb.org/arjun/cuenet-main.owl this)
+(:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl d)
+
+(:source google-geocoder lat lon address
+   (:io network)
+   (:type public)
+   (:axioms
+      (:map coordinates
+         (:prop geo-lat lat)
+         (:prop geo-lon lon) F [EQUALS])
+      (:map address.street-address address F)))
+
+
+//good old places database (from simplegeo)
+(:source places-db lat lon address
+   (:io disk (:db mongodb))
+   (:type public)
+   (:axioms
+      (:map coordinates
+         (:prop geo-lat lat)
+         (:prop geo-lon lon) F [NEARBY])
+      (:map address.street-address address F)))
+
