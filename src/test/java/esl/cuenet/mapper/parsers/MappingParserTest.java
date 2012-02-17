@@ -2,6 +2,8 @@ package esl.cuenet.mapper.parsers;
 
 import esl.cuenet.mapper.parser.MappingParser;
 import esl.cuenet.mapper.parser.ParseException;
+import esl.cuenet.mapper.tree.IParseTree;
+import esl.cuenet.mapper.tree.IParseTreeCreator;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -10,6 +12,40 @@ import java.io.StringReader;
 
 public class MappingParserTest {
 
+    public class ParseTreeCreatorTest implements IParseTreeCreator {
+
+        @Override
+        public void addOperator(String label) {
+            System.out.println("Operator: " + label);
+        }
+
+        @Override
+        public void addOperand(String operandValue) {
+            System.out.println("Operand: " + operandValue);
+        }
+
+        @Override
+        public void startSExpression() {
+
+        }
+
+        @Override
+        public void endSExpression() {
+
+        }
+
+        @Override
+        public void eof() {
+
+        }
+
+        @Override
+        public IParseTree getTree() {
+            return null;
+        }
+
+    }
+
     @Test
     public void doTest() throws ParseException {
 
@@ -17,14 +53,13 @@ public class MappingParserTest {
             "  (:map @yale_bib:book book)\n" +
             "  (:map @cmu_bib:book book))";
 
-
         String example2 = "(:axioms\n" +
             "  (:map @yale_bib:Book Book)\n" +
             "  (:map @cmu_bib:Book Book))";
 
         String example3 = "(:name (:lookup first-name) (:lookup last-name))";
 
-        parseFile("/home/arjun/Sandbox/emme90-workspace/ept-collator/src/main/javacc/test/test.2.map");
+        parseFile("./src/main/javacc/test/test.2.map");
 
         test(example1);
         test(example2);
@@ -37,7 +72,8 @@ public class MappingParserTest {
         MappingParser parser = null;
 
         parser = new MappingParser( new StringReader(example));
-        parser.document();
+        parser.setIParseTreeCreator(new ParseTreeCreatorTest());
+        parser.parse_document();
 
         System.out.println("");
 
@@ -48,7 +84,8 @@ public class MappingParserTest {
 
         try {
             MappingParser parser = new MappingParser( new FileInputStream(filename));
-            parser.document();
+            parser.setIParseTreeCreator(new ParseTreeCreatorTest());
+            parser.parse_document();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
