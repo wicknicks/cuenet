@@ -5,25 +5,38 @@ options {
 
 PARSER_BEGIN( MappingParser )
 package esl.cuenet.mapper.parser;
-public class MappingParser {}
+
+import esl.cuenet.mapper.tree.IParseTree;
+import esl.cuenet.mapper.tree.IParseTreeCreator;
+
+public class MappingParser {
+  IParseTreeCreator creator;
+  public void setIParseTreeCreator(IParseTreeCreator creator) {
+    this.creator = creator;
+  }
+
+  public IParseTreeCreator getIParseTreeCreator() {
+    return this.creator;
+  }
+
+}
 PARSER_END( MappingParser )
 
 
-void document() : {} { (sexpr())* <EOF> }
+IParseTree parse_document() : {} { (sexpr())* <EOF> { creator.eof(); return creator.getTree(); } }
 
 
 void sexpr() : {}  { start_s_expr() operator() (operand())+ end_s_expr() }
 
 
-void start_s_expr(): {Token t;}    { t=<START_S_EXPR> }
+void start_s_expr(): {Token t;}    { t=<START_S_EXPR> {creator.startSExpression();} }
 
-void end_s_expr() : {Token t;}    { t=<END_S_EXPR> }
+void end_s_expr() : {Token t;}    { t=<END_S_EXPR> {creator.endSExpression();} }
 
 
+void operator(): {Token operator;} { operator = <OPERATOR_NAME> { {creator.addOperator(operator.image);} } }
 
-void operator(): {Token operator;} { operator = <OPERATOR_NAME> { System.out.println("Op -> " + operator.image); } }
-
-void operand(): {Token t=null;} { (t=<OPERAND_NAME> | sexpr()) { if (t!=null) System.out.println("Op -> " + t.image); } }
+void operand(): {Token t=null;} { (t=<OPERAND_NAME> | sexpr()) { if (t!=null) creator.addOperand(t.image); } }
 
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }
