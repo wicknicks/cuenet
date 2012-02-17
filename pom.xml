@@ -32,6 +32,9 @@
                             <outputDirectory>
                                 ${project.basedir}/src/main/java/
                             </outputDirectory>
+                            <excludes>
+                                <exclude>test.*</exclude>
+                            </excludes>
                         </configuration>
                   </execution>
                 </executions>
