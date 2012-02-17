@@ -1,10 +1,7 @@
 package esl.cuenet.model.constructors;
 
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.ontology.OntModelSpec;
-import com.hp.hpl.jena.ontology.ProfileRegistry;
 import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import java.io.FileNotFoundException;
