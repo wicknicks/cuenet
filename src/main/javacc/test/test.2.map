@@ -1,7 +1,8 @@
 (:ns http://www.semanticweb.org/arjun/cuenet-main.owl this)
 (:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl d)
 
-(:source google-geocoder lat lon address
+(:source google-geocoder
+   (:attrs lat lon address)
    (:io network)
    (:type public)
    (:axioms
@@ -12,7 +13,8 @@
 
 
 //good old places database (from simplegeo)
-(:source places-db lat lon address
+(:source places-db
+   (:attrs lat lon address)
    (:io disk (:db mongodb))
    (:type public)
    (:axioms
@@ -20,4 +22,15 @@
          (:prop geo-lat lat)
          (:prop geo-lon lon) F [NEARBY])
       (:map address.street-address address F)))
+
+
+(:source google-calendar
+   (:attrs email title description participants[])
+   (:io disk (:db mongodb))
+   (:type personal)
+   (:axioms
+      (:map person.email email)
+      (:map event.title title)
+      (:map event.description description)
+      (:map event.participant participant)))
 

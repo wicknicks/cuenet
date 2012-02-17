@@ -1,0 +1,3 @@
+(:axioms
+    (:map @yale_bib:book book)
+    (:map @cmu_bib:book book))
