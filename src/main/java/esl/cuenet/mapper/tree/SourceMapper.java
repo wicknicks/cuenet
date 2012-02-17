@@ -1,6 +1,6 @@
 package esl.cuenet.mapper.tree;
 
-import esl.cuenet.mapper.Source;
+import esl.cuenet.source.Source;
 
 import java.util.HashMap;
 

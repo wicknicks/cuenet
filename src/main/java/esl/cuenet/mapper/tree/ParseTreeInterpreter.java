@@ -1,7 +1,7 @@
 package esl.cuenet.mapper.tree;
 
 import com.hp.hpl.jena.ontology.OntModel;
-import esl.cuenet.mapper.Source;
+import esl.cuenet.source.Source;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;

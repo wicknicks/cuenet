@@ -1,4 +1,4 @@
-package esl.cuenet.mapper;
+package esl.cuenet.source;
 
 public class QueryOperator {
 
