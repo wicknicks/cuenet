@@ -1,6 +1,6 @@
 package esl.cuenet.source;
 
-public enum Adornments {
+public enum Adornment {
 
     FREE,
     BOUND,

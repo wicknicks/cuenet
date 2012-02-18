@@ -8,6 +8,20 @@ public class Source {
 
     public Source(String name) {
         this.name = name;
+        associateAccessor();
+    }
+
+    private void associateAccessor() {
+        Class t = AccessorFactory.INSTANCE.getClassForSource(name);
+        if (t==null) throw new RuntimeException("Unknown source type");
+
+        try {
+            t.newInstance();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     public String getName() {
@@ -31,6 +45,14 @@ public class Source {
 
     public void setType (TYPE type) {
         this.type = type;
+    }
+    
+    public TYPE getType() {
+        return this.type;
+    }
+    
+    public IO getIo() {
+        return this.io;
     }
     
 }
