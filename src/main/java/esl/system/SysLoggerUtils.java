@@ -2,7 +2,7 @@ package esl.system;
 
 import org.apache.log4j.BasicConfigurator;
 
-public class Logger {
+public class SysLoggerUtils {
 
     private static boolean isLoggerInitialized = false;
 
