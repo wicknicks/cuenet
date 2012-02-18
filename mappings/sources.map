@@ -1,7 +1,7 @@
 (:ns http://www.semanticweb.org/arjun/cuenet-main.owl this)
 (:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl d)
 
-(:source google-geocoder lat lon address
+(:source yahoo-geocoder lat lon address
    (:io network)
    (:type public)
    (:axioms
