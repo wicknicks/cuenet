@@ -1,24 +1,22 @@
-package source;
+package esl.cuenet.source;
 
-import com.hp.hpl.jena.rdf.model.Literal;
-
-public interface TIMapper {
+public interface IMapper {
 
     /*
          Maps a path to a node in the tree mapper to an attribute in the source.
          Also associates the adornment, operatory type to this node.
      */
-    void map (String pathExpression, TIAdornment adornment, TQueryOperator operator, TIAttribute attribute);
+    void map (String pathExpression, Adornment adornment, QueryOperator operator, Attribute attribute);
 
     /*
          Overloaded methods to map patterns
      */
 
-    void map (String pathExpression, TIAdornment adornment);
+    void map (String pathExpression, Adornment adornment);
 
-    void map (String pathExpression, TQueryOperator operator);
+    void map (String pathExpression, QueryOperator operator);
 
-    void map (String pathExpression, TIAttribute attribute);
+    void map (String pathExpression, Attribute attribute);
 
     /*
         Returns true if the input pattern maps to some source attribute in the tree mapper.

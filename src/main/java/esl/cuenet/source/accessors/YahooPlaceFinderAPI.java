@@ -1,4 +1,4 @@
-package source;
+package esl.cuenet.source.accessors;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -9,9 +9,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class TYahooPlaceFinderAPI {
+public class YahooPlaceFinderAPI {
 
-    private Logger logger = Logger.getLogger(TYahooPlaceFinderAPI.class);
+    private Logger logger = Logger.getLogger(YahooPlaceFinderAPI.class);
 
     public BasicDBObject findAddress(double lat, double lon) throws IOException {
         StringBuilder urlBuilder = new StringBuilder("http://where.yahooapis.com/geocode?q=");

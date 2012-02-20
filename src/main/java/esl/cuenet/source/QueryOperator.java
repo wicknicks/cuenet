@@ -1,6 +1,6 @@
-package source;
+package esl.cuenet.source;
 
-public class TQueryOperator {
+public class QueryOperator {
 
     // TEMPORAL
 

@@ -14,8 +14,11 @@ public class YahooPlaceFinderTest {
     @Test
     public void runTest() throws IOException {
 
-        YahooPlaceFinder placeFinder = new YahooPlaceFinder();
-        BasicDBObject o = placeFinder.queryPlaceFinder(30.2669,-97.7428);
+        YahooPlaceFinderAPI placeFinder = new YahooPlaceFinderAPI();
+        BasicDBObject o = placeFinder.findAddress(30.2669,-97.7428);
+        if (o != null) logger.info(o.toString());
+
+        o = placeFinder.findLatLon("Eiffel Tower, Paris, France");
         if (o != null) logger.info(o.toString());
 
     }
