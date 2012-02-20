@@ -22,7 +22,7 @@ public class QueryOperator {
 
     // STRING MATCHING
 
-    public enum String {
+    public enum StringType {
         EQUALS,
         CONTAINS,
         FUZZY
