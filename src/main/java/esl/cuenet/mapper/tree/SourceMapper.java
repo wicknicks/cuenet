@@ -1,13 +1,13 @@
 package esl.cuenet.mapper.tree;
 
-import esl.cuenet.source.Source;
+import esl.cuenet.source.ISource;
 
 import java.util.HashMap;
 
 public class SourceMapper {
 
     private HashMap<String, String> shorthandNamespaceMap = new HashMap<String, String>();
-    private HashMap<String, Source> sourceMap = new HashMap<String, Source>();
+    private HashMap<String, ISource> sourceMap = new HashMap<String, ISource>();
 
     protected SourceMapper() {
 
@@ -26,9 +26,8 @@ public class SourceMapper {
         shorthandNamespaceMap.put(shorthand, uri);
     }
     
-    public Source createSource (String name) {
-        Source source = new Source(name);
-        sourceMap.put(name, source);
+    public ISource createSource (String name) {
+        ISource source = null;
         return source;
     }
 
