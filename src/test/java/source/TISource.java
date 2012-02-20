@@ -1,11 +1,16 @@
 package source;
 
+import com.hp.hpl.jena.rdf.model.Statement;
+import esl.cuenet.source.Source;
+
 public interface TISource {
 
-    void getType();
+    Source.TYPE getType();
 
-    void getIO();
+    Source.IO getIO();
 
-    TIAttribute[] getAllAttribute();
+    TIAttribute[] getAllAttributes();
+
+    void query(Statement[] statements);
 
 }
