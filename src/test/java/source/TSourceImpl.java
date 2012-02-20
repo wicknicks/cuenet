@@ -1,9 +1,10 @@
 package source;
 
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Statement;
 import esl.cuenet.source.Source;
 
-public class TSourceImpl implements TISource, TIMapper {
+public class TSourceImpl implements TISource {
 
     private Source.TYPE type;
     private Source.IO io;
@@ -24,27 +25,8 @@ public class TSourceImpl implements TISource, TIMapper {
     }
 
     @Override
-    public TIAttribute[] getAllAttributes() {
+    public TIResultSet query(String[] pathExpression, Literal[] literals) throws TSourceQueryException {
         return null;
     }
 
-    @Override
-    public void query(Statement[] statements) {
-
-    }
-
-    @Override
-    public void map(String pattern, String attribute) {
-
-    }
-
-    @Override
-    public void map(String pattern, int attribute) {
-
-    }
-
-    @Override
-    public void map(String pattern, Statement[] statements) {
-
-    }
 }

@@ -4,7 +4,12 @@ import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.sparql.lib.iterator.Iter;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
+import esl.cuenet.query.QueryOperator;
 import org.junit.Test;
+
+import java.util.Iterator;
 
 public class Tests {
 
@@ -25,16 +30,23 @@ public class Tests {
 
         model.write(System.out);
 
-        String queryString = "SELECT ?x ?y ?z" +
-                " WHERE { ?x <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://cuenet/coordinate> . } ";
+        String queryString = "SELECT distinct ?y ?z" +
+                " WHERE { _:b0 <http://cuenet/longitude> ?z . } ";
 
         Query query = QueryFactory.create(queryString);
         QueryExecution queryExecutor = QueryExecutionFactory.create(query, model);
 
         ResultSet results = queryExecutor.execSelect();
+
+        while (results.hasNext()) {
+            QuerySolution qs = results.next();
+            Literal l = qs.getLiteral("?z");
+            System.out.println(l.getValue());
+            System.out.println(qs.getLiteral("?z"));
+        }
+
         ResultSetFormatter.out(System.out, results, query);
 
-
-
     }
+
 }

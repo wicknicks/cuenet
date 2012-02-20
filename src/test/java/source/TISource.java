@@ -1,6 +1,6 @@
 package source;
 
-import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.Literal;
 import esl.cuenet.source.Source;
 
 public interface TISource {
@@ -9,8 +9,6 @@ public interface TISource {
 
     Source.IO getIO();
 
-    TIAttribute[] getAllAttributes();
-
-    void query(Statement[] statements);
+    TIResultSet query(String[] pathExpression, Literal[] literals) throws TSourceQueryException;
 
 }

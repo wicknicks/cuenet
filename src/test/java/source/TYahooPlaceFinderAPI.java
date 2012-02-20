@@ -5,6 +5,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import esl.cuenet.query.drivers.webjson.HttpDownloader;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -61,5 +62,13 @@ public class TYahooPlaceFinderAPI {
         if (results.size() == 0) return null;
 
         return (BasicDBObject) results.get(0);
+    }
+
+    @Test
+    public void testYahooPlaceFinderAPI() throws IOException {
+
+        logger.info(findAddress(48.858885,2.293373));
+        logger.info(findLatLon("Verano Pl, Irvine, CA"));
+
     }
 }
