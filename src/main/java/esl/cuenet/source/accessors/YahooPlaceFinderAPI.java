@@ -3,17 +3,26 @@ package esl.cuenet.source.accessors;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.drivers.webjson.HttpDownloader;
+import esl.cuenet.source.AccesorInitializationException;
+import esl.cuenet.source.Attribute;
+import esl.cuenet.source.IAccessor;
+import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
 import java.io.IOException;
 
-public class YahooPlaceFinderAPI {
+public class YahooPlaceFinderAPI implements IAccessor {
 
     private Logger logger = Logger.getLogger(YahooPlaceFinderAPI.class);
+    private Attribute[] attributes = null;
+    private boolean[] setFlags = new boolean[3];
 
-    public BasicDBObject findAddress(double lat, double lon) throws IOException {
+    Double lat, lon;
+    String address;
+
+    public BasicDBObject findAddress() throws IOException {
         StringBuilder urlBuilder = new StringBuilder("http://where.yahooapis.com/geocode?q=");
         urlBuilder.append(lat).append(',').append(lon);
         urlBuilder.append("&gflags=R&flags=J&appid=UmMtXR7c");
@@ -39,7 +48,7 @@ public class YahooPlaceFinderAPI {
     }
 
 
-    public BasicDBObject findLatLon(String address) throws IOException {
+    public BasicDBObject findLatLon() throws IOException {
         StringBuilder urlBuilder = new StringBuilder("http://where.yahooapis.com/geocode?q=");
         urlBuilder.append(address.replaceAll(" ", "+"));
         urlBuilder.append("&flags=J&appid=UmMtXR7c");
@@ -64,11 +73,86 @@ public class YahooPlaceFinderAPI {
         return (BasicDBObject) results.get(0);
     }
 
-    @Test
-    public void testYahooPlaceFinderAPI() throws IOException {
+    @Override
+    public void setAttributeNames(Attribute[] attributes) throws AccesorInitializationException {
+        if (attributes.length != 3) throw
+                new AccesorInitializationException("Invalid number of attributes for "
+                        + YahooPlaceFinderAPI.class.getName());
 
-        logger.info(findAddress(48.858885,2.293373));
-        logger.info(findLatLon("Verano Pl, Irvine, CA"));
-
+        this.attributes = attributes;
     }
+
+    @Override
+    public void start() {
+        for (int i=0; i<setFlags.length; i++) setFlags[i] = false;
+    }
+
+    @Override
+    public void associateInt(Attribute attribute, int value) throws AccesorInitializationException {
+        throw new AccesorInitializationException("No integer attributes allowed for wrong attribute "
+                        + YahooPlaceFinderAPI.class.getName());
+    }
+
+    @Override
+    public void associateString(Attribute attribute, String value) throws AccesorInitializationException {
+
+        if (attribute.compareTo(attributes[2]) != 0) throw
+                new AccesorInitializationException("String value being initialized for wrong attribute "
+                        + YahooPlaceFinderAPI.class.getName());
+
+        address = value;
+        setFlags[2] = true;
+    }
+
+    @Override
+    public void associateDouble(Attribute attribute, double value) throws AccesorInitializationException {
+        if (attribute.compareTo(attributes[0]) == 0) {
+            setFlags[0] = true;
+            this.lat = value;
+        }
+        else if (attribute.compareTo(attributes[1])==0) {
+            setFlags[1] = true;
+            this.lon = value;
+        }
+
+        else throw new AccesorInitializationException("Double value being initialized for wrong attribute "
+                        + YahooPlaceFinderAPI.class.getName());
+    }
+
+    @Override
+    public IResultSet executeQuery() throws SourceQueryException {
+        boolean areParamsAvailable = false;
+        for (boolean b: setFlags) if (b) areParamsAvailable = true;
+        if ( !areParamsAvailable )  throw new SourceQueryException("No parameters set");
+
+        if (setFlags[0] && setFlags[1] && !setFlags[2])
+            try {
+                findAddress();
+            } catch (IOException e) {
+                throw new SourceQueryException("Internal IOException: " + e.getMessage());
+            }
+
+        else if (!setFlags[0] && !setFlags[1] && setFlags[2])
+            try {
+                findLatLon();
+            } catch (IOException e) {
+                throw new SourceQueryException("Internal IOException: " + e.getMessage());
+            }
+
+        else throw new SourceQueryException("Invalid Combination of Parameters");
+
+        return null;
+    }
+
+    public BasicDBObject findAddress(double lat, double lon) throws IOException {
+        this.lat = lat;
+        this.lon = lon;
+        return findAddress();
+    }
+
+    public BasicDBObject findLatLon(String address) throws IOException {
+        this.address = address;
+        return findLatLon();
+    }
+
 }

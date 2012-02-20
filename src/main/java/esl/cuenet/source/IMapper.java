@@ -1,5 +1,7 @@
 package esl.cuenet.source;
 
+import esl.cuenet.query.QueryOperator;
+
 public interface IMapper {
 
     /*

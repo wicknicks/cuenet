@@ -1,9 +1,12 @@
 package esl.cuenet.source;
 
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-
-public class Attribute {
+public class Attribute implements Comparable<Attribute> {
 
     public String name;
+
+    @Override
+    public int compareTo(Attribute o) {
+        return this.name.compareTo(o.name);
+    }
 
 }
