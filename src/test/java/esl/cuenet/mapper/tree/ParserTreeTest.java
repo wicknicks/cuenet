@@ -44,6 +44,8 @@ public class ParserTreeTest {
 
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } catch (SourceParseException e) {
+            e.printStackTrace();
         }
 
     }
