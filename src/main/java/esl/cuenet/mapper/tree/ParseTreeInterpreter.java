@@ -27,7 +27,7 @@ public class ParseTreeInterpreter {
 
     }
 
-    public void interpret() {
+    public void interpret() throws SourceParseException {
 
         //process namespace mappings
         IParseTreeNode document = parseTree.getDocument();
@@ -47,7 +47,7 @@ public class ParseTreeInterpreter {
 
     }
 
-    private void interpretSourceDeclaration(IParseTreeNode sourceNode) {
+    private void interpretSourceDeclaration(IParseTreeNode sourceNode) throws SourceParseException {
         ISource source = null;
         for (IParseTreeNode child: sourceNode.children()) {
             if (child.getType() == IParseTreeNode.Type.OPERAND) {
@@ -70,12 +70,12 @@ public class ParseTreeInterpreter {
 
     }
 
-    private void associateType(ISource source, IParseTreeNode type) {
+    private void associateType(ISource source, IParseTreeNode type) throws SourceParseException {
         IParseTreeNode node = type.children().get(0);
         if (node.getLabel().equalsIgnoreCase("personal")) source.setType(ISource.TYPE.PERSONAL);
         else if (node.getLabel().equalsIgnoreCase("social")) source.setType(ISource.TYPE.SOCIAL);
         else if (node.getLabel().equalsIgnoreCase("public")) source.setType(ISource.TYPE.PUBLIC);
-        else throw new RuntimeException("Unknown Source type associated with source " + source.getName());
+        else throw new SourceParseException("Unknown Source type associated with source " + source.getName());
     }
 
     private void associateIO(ISource source, IParseTreeNode io) {
