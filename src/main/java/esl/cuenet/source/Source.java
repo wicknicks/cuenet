@@ -10,25 +10,16 @@ public class Source implements ISource {
     private Attribute[] attributes = null;
     private TYPE type;
     private IO io;
+    private IAccessor accessor;
 
     public Source(String name) {
         this.name = name;
     }
 
-    public Source(String name, TYPE type) {
+    public Source(String name, IAccessor accessor, IMapper mapper) {
         this.name = name;
-        this.type = type;
-    }
-
-    public Source(String name, IO io) {
-        this.name = name;
-        this.io = io;
-    }
-
-    public Source(String name, TYPE type, IO io) {
-        this.name = name;
-        this.type = type;
-        this.io = io;
+        this.mapper = mapper;
+        this.accessor = accessor;
     }
 
     @Override
@@ -59,6 +50,11 @@ public class Source implements ISource {
     @Override
     public IMapper getMapper() {
         return mapper;
+    }
+
+    @Override
+    public IAccessor getAccessor() {
+        return accessor;
     }
 
     @Override

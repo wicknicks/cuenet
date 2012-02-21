@@ -22,7 +22,9 @@ public interface ISource {
     TYPE getType();
     IO getIO();
     String getName();
+
     IMapper getMapper();
+    IAccessor getAccessor();
 
     void setAttributes(Attribute[] attributes);
     Attribute[] getAttributes();

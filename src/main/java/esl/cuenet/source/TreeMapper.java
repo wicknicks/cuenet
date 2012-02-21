@@ -54,6 +54,11 @@ public class TreeMapper implements IMapper {
         return exp.compareTo(pathExpression) == 0;
     }
 
+    @Override
+    public Attribute get(String pathExpression) {
+        return null;
+    }
+
     private TreeMapperNode completeExpression(String pathExpression) {
 
         TreeMapperNode[] partialExpressionNodes = findSubExpressionNode(pathExpression);

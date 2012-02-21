@@ -27,4 +27,9 @@ public interface IMapper {
 
     boolean containsPattern(String pathExpression);
 
+    /*
+         Get attribute for a given pathExpression
+     */
+
+    Attribute get(String pathExpression);
 }
