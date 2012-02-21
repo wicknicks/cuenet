@@ -12,10 +12,6 @@ public class Source implements ISource {
     private IO io;
     private IAccessor accessor;
 
-    public Source(String name) {
-        this.name = name;
-    }
-
     public Source(String name, IAccessor accessor, IMapper mapper) {
         this.name = name;
         this.mapper = mapper;
@@ -60,6 +56,11 @@ public class Source implements ISource {
     @Override
     public void setAttributes(Attribute[] attributes) {
         this.attributes = attributes;
+        try {
+            accessor.setAttributeNames(this.attributes);
+        } catch (AccesorInitializationException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -68,7 +69,25 @@ public class Source implements ISource {
     }
 
     @Override
-    public IResultSet query(String[] pathExpression, Literal[] literals) throws SourceQueryException {
-        return null;
+    public IResultSet query(String[] pathExpressions, Literal[] literals) throws SourceQueryException {
+        //TODO: Check adornments and query operators during query time.
+
+        accessor.start();
+
+        for (int i = 0; i < pathExpressions.length; i++) {
+            Attribute attr = mapper.get(pathExpressions[i]);
+            try {
+                if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") == 0)
+                    accessor.associateString(attr, literals[i].getString());
+                else if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#double") == 0)
+                    accessor.associateDouble(attr, literals[i].getDouble());
+                else if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#long") == 0)
+                    accessor.associateInt(attr, literals[i].getInt());
+            } catch (AccesorInitializationException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return accessor.executeQuery();
     }
 }

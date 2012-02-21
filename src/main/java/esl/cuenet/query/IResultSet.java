@@ -4,6 +4,6 @@ import com.mongodb.BasicDBObject;
 
 public interface IResultSet {
 
-    BasicDBObject getResults();
+    String printResults();
 
 }

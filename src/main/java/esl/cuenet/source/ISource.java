@@ -29,6 +29,6 @@ public interface ISource {
     void setAttributes(Attribute[] attributes);
     Attribute[] getAttributes();
 
-    IResultSet query(String[] pathExpression, Literal[] literals) throws SourceQueryException;
+    IResultSet query(String[] pathExpression, Literal[] literals) throws SourceQueryException, AccesorInitializationException;
 
 }

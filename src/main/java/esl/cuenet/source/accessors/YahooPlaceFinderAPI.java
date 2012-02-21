@@ -124,24 +124,25 @@ public class YahooPlaceFinderAPI implements IAccessor {
         boolean areParamsAvailable = false;
         for (boolean b: setFlags) if (b) areParamsAvailable = true;
         if ( !areParamsAvailable )  throw new SourceQueryException("No parameters set");
+        BasicDBObject result = null;
 
         if (setFlags[0] && setFlags[1] && !setFlags[2])
             try {
-                findAddress();
+                result = findAddress();
             } catch (IOException e) {
                 throw new SourceQueryException("Internal IOException: " + e.getMessage());
             }
 
         else if (!setFlags[0] && !setFlags[1] && setFlags[2])
             try {
-                findLatLon();
+                result = findLatLon();
             } catch (IOException e) {
                 throw new SourceQueryException("Internal IOException: " + e.getMessage());
             }
 
         else throw new SourceQueryException("Invalid Combination of Parameters");
 
-        return null;
+        return new ResultSetImpl(result.toString());
     }
 
     public BasicDBObject findAddress(double lat, double lon) throws IOException {
@@ -153,6 +154,15 @@ public class YahooPlaceFinderAPI implements IAccessor {
     public BasicDBObject findLatLon(String address) throws IOException {
         this.address = address;
         return findLatLon();
+    }
+
+    private class ResultSetImpl implements IResultSet {
+        private String result;
+        public ResultSetImpl (String result) {this.result = result;}
+        @Override
+        public String printResults() {
+            return result;
+        }
     }
 
 }

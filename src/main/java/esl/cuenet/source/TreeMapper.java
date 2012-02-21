@@ -28,24 +28,40 @@ public class TreeMapper implements IMapper {
         if (pathExpression == null) throw new NullPointerException("Null Path Expression");
 
         if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
-        else completeExpression(pathExpression);
+        else {
+            TreeMapperNode node = completeExpression(pathExpression);
+            node.adornment = adornment;
+            node.operator = operator;
+            node.attribute = attribute;
+        }
 
-        logger.info("Done. " + root.toString());
     }
 
     @Override
     public void map(String pathExpression, Adornment adornment) {
-
+         if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
+        else {
+            TreeMapperNode node = completeExpression(pathExpression);
+            node.adornment = adornment;
+        }
     }
 
     @Override
     public void map(String pathExpression, QueryOperator operator) {
-
+        if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
+        else {
+            TreeMapperNode node = completeExpression(pathExpression);
+            node.operator = operator;
+        }
     }
 
     @Override
     public void map(String pathExpression, Attribute attribute) {
-
+        if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
+        else {
+            TreeMapperNode node = completeExpression(pathExpression);
+            node.attribute = attribute;
+        }
     }
 
     @Override
@@ -56,7 +72,10 @@ public class TreeMapper implements IMapper {
 
     @Override
     public Attribute get(String pathExpression) {
-        return null;
+        if (!containsPattern(pathExpression)) throw new NullPointerException("Path Expression not found");
+
+        TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
+        return nodes[nodes.length-1].attribute;
     }
 
     private TreeMapperNode completeExpression(String pathExpression) {

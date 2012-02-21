@@ -31,7 +31,7 @@ public class Tests {
         model.write(System.out);
 
         String queryString = "SELECT distinct ?y ?z" +
-                " WHERE { _:b0 <http://cuenet/longitude> ?z . } ";
+                " WHERE { _:b0 <http://cuenet/address> ?z . } ";
 
         Query query = QueryFactory.create(queryString);
         QueryExecution queryExecutor = QueryExecutionFactory.create(query, model);
@@ -41,7 +41,7 @@ public class Tests {
         while (results.hasNext()) {
             QuerySolution qs = results.next();
             Literal l = qs.getLiteral("?z");
-            System.out.println(l.getValue());
+            System.out.println(l.getDatatypeURI());
             System.out.println(qs.getLiteral("?z"));
         }
 
