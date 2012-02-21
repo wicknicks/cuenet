@@ -39,29 +39,46 @@ public class TreeMapper implements IMapper {
 
     @Override
     public void map(String pathExpression, Adornment adornment) {
-         if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
-        else {
-            TreeMapperNode node = completeExpression(pathExpression);
-            node.adornment = adornment;
+        TreeMapperNode node = null;
+        if (containsPattern(pathExpression)) {
+            logger.info("[map-adornment] Path already in tree: " + pathExpression);
+            TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
+            node = exp[exp.length-1];
         }
+        else {
+            node = completeExpression(pathExpression);
+        }
+        node.adornment = adornment;
     }
 
     @Override
     public void map(String pathExpression, QueryOperator operator) {
-        if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
-        else {
-            TreeMapperNode node = completeExpression(pathExpression);
-            node.operator = operator;
+        TreeMapperNode node = null;
+        if (containsPattern(pathExpression)) {
+            logger.info("[map-operator] Path already in tree: " + pathExpression);
+            TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
+            node = exp[exp.length-1];
         }
+        else {
+            node = completeExpression(pathExpression);
+        }
+
+        node.operator = operator;
     }
 
     @Override
     public void map(String pathExpression, Attribute attribute) {
-        if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
-        else {
-            TreeMapperNode node = completeExpression(pathExpression);
-            node.attribute = attribute;
+        TreeMapperNode node = null;
+        if (containsPattern(pathExpression)) {
+            logger.info("[map-attribute] Path already in tree: " + pathExpression);
+            TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
+            node = exp[exp.length-1];
         }
+        else {
+            node = completeExpression(pathExpression);
+        }
+
+        node.attribute = attribute;
     }
 
     @Override

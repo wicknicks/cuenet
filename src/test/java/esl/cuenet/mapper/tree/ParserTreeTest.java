@@ -25,10 +25,12 @@ public class ParserTreeTest {
             }
         });
 
-        for (File filename: files) {
-            logger.info("Parsing " + filename.getAbsolutePath());
-            parseFile(filename.getAbsolutePath());
-        }
+        parseFile("./mappings/sources.map");
+        
+//        for (File filename: files) {
+//            logger.info("Parsing " + filename.getAbsolutePath());
+//            parseFile(filename.getAbsolutePath());
+//        }
 
     }
 

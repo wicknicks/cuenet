@@ -3,9 +3,14 @@ package esl.cuenet.source.accessors;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
+import esl.cuenet.source.AccesorInitializationException;
+import esl.cuenet.source.Attribute;
+import esl.cuenet.source.IAccessor;
+import esl.cuenet.source.SourceQueryException;
 
-public class LocalSimpleGeoPlaceDB extends MongoDB {
+public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
     public LocalSimpleGeoPlaceDB() {
         super("test");
@@ -52,4 +57,39 @@ public class LocalSimpleGeoPlaceDB extends MongoDB {
 
     }
 
+    @Override
+    public void setAttributeNames(Attribute[] attributes) throws AccesorInitializationException {
+        //todo: implement method
+
+    }
+
+    @Override
+    public void start() {
+        //todo: implement method
+
+    }
+
+    @Override
+    public void associateInt(Attribute attribute, int value) throws AccesorInitializationException {
+        //todo: implement method
+
+    }
+
+    @Override
+    public void associateString(Attribute attribute, String value) throws AccesorInitializationException {
+        //todo: implement method
+
+    }
+
+    @Override
+    public void associateDouble(Attribute attribute, double value) throws AccesorInitializationException {
+        //todo: implement method
+
+    }
+
+    @Override
+    public IResultSet executeQuery() throws SourceQueryException {
+        //todo: implement method
+        return null;
+    }
 }

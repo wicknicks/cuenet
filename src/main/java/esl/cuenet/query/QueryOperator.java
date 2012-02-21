@@ -2,30 +2,28 @@ package esl.cuenet.query;
 
 public class QueryOperator {
 
-    // TEMPORAL
+    private Operators operators = null;
 
-    public enum Temporal {
+    public enum Operators {
         EQUALS,
-        STARTS,
-        FINISHES,
-        INTERSECTS
+
+        TEMPORAL_STARTS,
+        TEMPORAL_FINISHES,
+        TEMPORAL_INTERSECTS,
+
+        SPATIAL_OVERLAPS,
+        SPATIAL_NEARBY,
+
+        STRING_CONTAINS,
+        STRING_FUZZY
     }
 
-
-    // SPATIAL
-
-    public enum Spatial {
-        EQUALS,
-        OVERLAPS,
-        NEARBY
+    public QueryOperator(Operators operators) {
+        this.operators = operators;
     }
 
-    // STRING MATCHING
-
-    public enum StringType {
-        EQUALS,
-        CONTAINS,
-        FUZZY
+    public Operators get() {
+        return this.operators;
     }
 
 }

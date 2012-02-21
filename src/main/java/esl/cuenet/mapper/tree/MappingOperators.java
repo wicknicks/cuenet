@@ -11,4 +11,10 @@ public class MappingOperators {
     public static final String SOURCE_TYPE  = ":type";
 
     public static final String AXIOM = ":axioms";
+    
+    public static final String ATTRIBUTES = ":attrs";
+
+    public static final String MAP = ":map";
+
+    public static final String PROP = ":prop";
 }
