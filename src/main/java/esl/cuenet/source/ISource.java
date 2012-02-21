@@ -18,7 +18,6 @@ public interface ISource {
 
     void setType (TYPE type);
     void setIO (IO type);
-    void setName (String name);
 
     TYPE getType();
     IO getIO();
