@@ -2,11 +2,8 @@ package esl.cuenet.source;
 
 import esl.cuenet.query.QueryOperator;
 import org.apache.log4j.Logger;
-import sun.reflect.generics.tree.Tree;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 public class TreeMapper implements IMapper {

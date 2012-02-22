@@ -8,7 +8,6 @@ import esl.cuenet.source.ISource;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class ParseTreeInterpreter {
 

@@ -16,10 +16,8 @@ import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 
 public class ParserTreeTest {
 

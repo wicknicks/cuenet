@@ -2,7 +2,6 @@ package esl.cuenet.source.accessors;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -52,7 +51,7 @@ public class UpcomingEventsAPITest {
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(l);
         logger.info(String.format("%d-%02d-%02d", calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH)+1, calendar.get(Calendar.DAY_OF_MONTH)));
+                calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DAY_OF_MONTH)));
     }
 
 }

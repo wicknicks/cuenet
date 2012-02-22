@@ -1,7 +1,6 @@
 package esl.cuenet.source.accessors;
 
 import com.mongodb.BasicDBObject;
-import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
@@ -15,7 +14,7 @@ public class YahooPlaceFinderTest {
     public void runTest() throws IOException {
 
         YahooPlaceFinderAPI placeFinder = new YahooPlaceFinderAPI();
-        BasicDBObject o = placeFinder.findAddress(30.2669,-97.7428);
+        BasicDBObject o = placeFinder.findAddress(30.2669, -97.7428);
         if (o != null) logger.info(o.toString());
 
         o = placeFinder.findLatLon("Eiffel Tower, Paris, France");

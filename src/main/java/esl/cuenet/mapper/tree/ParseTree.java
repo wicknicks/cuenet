@@ -2,7 +2,9 @@ package esl.cuenet.mapper.tree;
 
 import org.apache.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 public class ParseTree implements IParseTree, IParseTreeCreator {
 

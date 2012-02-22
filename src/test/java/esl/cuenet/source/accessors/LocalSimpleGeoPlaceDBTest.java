@@ -2,7 +2,6 @@ package esl.cuenet.source.accessors;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
