@@ -1,5 +1,5 @@
-(:ns http://www.semanticweb.org/arjun/cuenet-main.owl this)
-(:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl d)
+(:ns http://www.semanticweb.org/arjun/cuenet-main.owl# this)
+(:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl# d)
 
 (:source yahoo-geocoder 
    (:attrs lat lon address)
