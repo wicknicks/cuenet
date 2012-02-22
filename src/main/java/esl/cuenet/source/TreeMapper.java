@@ -89,8 +89,6 @@ public class TreeMapper implements IMapper {
         if (!containsPattern(pathExpression))
             throw new NullPointerException("Path Expression not found: " + pathExpression);
 
-        logger.info("DEBUG: " + pathExpression);
-
         TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
         return nodes[nodes.length - 1].attribute;
     }
