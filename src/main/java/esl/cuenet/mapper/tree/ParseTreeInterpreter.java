@@ -128,16 +128,16 @@ public class ParseTreeInterpreter {
             }
 
             //process operators
-            for (IParseTreeNode child : mapNode.children())
+            for (IParseTreeNode child : mapNode.children()) {
                 if (child.getType() == IParseTreeNode.Type.OPERATOR) {
                     if (child.getLabel().compareTo(MappingOperators.PROP) == 0) {
                         source.getMapper().map(operands[0] + "." + child.children().get(0).getLabel(),
                                 new Attribute(child.children().get(1).getLabel()));
                     }
                 }
+            }
         }
 
-        logger.info("Done.");
     }
 
     private void associateAdornment(ISource source, String pathExpression, String adornmentLabel) {
@@ -183,7 +183,7 @@ public class ParseTreeInterpreter {
         Attribute[] srcAttributes = new Attribute[attributeNode.children().size()];
         int ix = 0;
         for (IParseTreeNode child : attributeNode.children()) {
-            srcAttributes[ix] = new Attribute(child.getLabel());
+            srcAttributes[ix++] = new Attribute(child.getLabel());
         }
 
         source.setAttributes(srcAttributes);
@@ -213,6 +213,10 @@ public class ParseTreeInterpreter {
         IParseTreeNode shortHandNode = children.next();   // get the shorthand
 
         sourceMapper.addNamespaceMapping(uriNode.getLabel(), shortHandNode.getLabel());
+    }
+
+    public SourceMapper getSourceMapper() {
+        return sourceMapper;
     }
 
 }

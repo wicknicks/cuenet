@@ -88,8 +88,8 @@ public class YahooPlaceFinderAPI implements IAccessor {
     }
 
     @Override
-    public void associateInt(Attribute attribute, int value) throws AccesorInitializationException {
-        throw new AccesorInitializationException("No integer attributes allowed for wrong attribute "
+    public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
+        throw new AccesorInitializationException("Incorrect Assignment: No integer attributes in "
                         + YahooPlaceFinderAPI.class.getName());
     }
 

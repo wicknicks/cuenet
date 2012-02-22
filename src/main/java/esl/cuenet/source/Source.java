@@ -82,7 +82,7 @@ public class Source implements ISource {
                 else if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#double") == 0)
                     accessor.associateDouble(attr, literals[i].getDouble());
                 else if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#long") == 0)
-                    accessor.associateInt(attr, literals[i].getInt());
+                    accessor.associateLong(attr, literals[i].getLong());
             } catch (AccesorInitializationException e) {
                 e.printStackTrace();
             }

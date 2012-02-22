@@ -70,7 +70,7 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
     }
 
     @Override
-    public void associateInt(Attribute attribute, int value) throws AccesorInitializationException {
+    public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         //todo: implement method
 
     }

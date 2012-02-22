@@ -43,9 +43,8 @@ public class TreeMapper implements IMapper {
         if (containsPattern(pathExpression)) {
             logger.info("[map-adornment] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
-            node = exp[exp.length-1];
-        }
-        else {
+            node = exp[exp.length - 1];
+        } else {
             node = completeExpression(pathExpression);
         }
         node.adornment = adornment;
@@ -57,9 +56,8 @@ public class TreeMapper implements IMapper {
         if (containsPattern(pathExpression)) {
             logger.info("[map-operator] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
-            node = exp[exp.length-1];
-        }
-        else {
+            node = exp[exp.length - 1];
+        } else {
             node = completeExpression(pathExpression);
         }
 
@@ -72,9 +70,8 @@ public class TreeMapper implements IMapper {
         if (containsPattern(pathExpression)) {
             logger.info("[map-attribute] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
-            node = exp[exp.length-1];
-        }
-        else {
+            node = exp[exp.length - 1];
+        } else {
             node = completeExpression(pathExpression);
         }
 
@@ -89,10 +86,13 @@ public class TreeMapper implements IMapper {
 
     @Override
     public Attribute get(String pathExpression) {
-        if (!containsPattern(pathExpression)) throw new NullPointerException("Path Expression not found");
+        if (!containsPattern(pathExpression))
+            throw new NullPointerException("Path Expression not found: " + pathExpression);
+
+        logger.info("DEBUG: " + pathExpression);
 
         TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
-        return nodes[nodes.length-1].attribute;
+        return nodes[nodes.length - 1].attribute;
     }
 
     private TreeMapperNode completeExpression(String pathExpression) {
@@ -111,7 +111,7 @@ public class TreeMapper implements IMapper {
                 }
         }
 
-        for (int i=ix; i<names.length; i++) {
+        for (int i = ix; i < names.length; i++) {
             TreeMapperNode node = new TreeMapperNode();
             node.name = names[i];
             start.children.add(node);
@@ -171,7 +171,7 @@ public class TreeMapper implements IMapper {
 
             StringBuilder builder = new StringBuilder();
             builder.append('(').append(name).append(" -> ");
-            for (TreeMapperNode c: children) builder.append(c.toString()).append("  ");
+            for (TreeMapperNode c : children) builder.append(c.toString()).append("  ");
             builder.append(')');
             return builder.substring(0);
         }

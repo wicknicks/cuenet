@@ -13,6 +13,8 @@ import org.apache.log4j.Logger;
 public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
     private Logger logger = Logger.getLogger(GoogleCalendarCollection.class);
+    private Attribute[] attributes = null;
+    private boolean[] setFlags = new boolean[6];
 
     public GoogleCalendarCollection() {
         super("test");
@@ -36,18 +38,16 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
     @Override
     public void setAttributeNames(Attribute[] attributes) throws AccesorInitializationException {
-        //todo: implement method
-
+        this.attributes = attributes;
     }
 
     @Override
     public void start() {
-        //todo: implement method
-
+        for (int i=0; i<setFlags.length; i++) setFlags[i] = false;
     }
 
     @Override
-    public void associateInt(Attribute attribute, int value) throws AccesorInitializationException {
+    public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         //todo: implement method
 
     }

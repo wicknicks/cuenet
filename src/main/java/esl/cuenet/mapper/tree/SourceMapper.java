@@ -42,5 +42,9 @@ public class SourceMapper {
         return source;
 
     }
+    
+    public ISource get (String sourceName) {
+        return sourceMap.get(sourceName);
+    }
 
 }
