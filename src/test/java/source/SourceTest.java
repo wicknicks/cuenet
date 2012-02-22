@@ -61,16 +61,16 @@ public class SourceTest {
         geocoderSource.setAttributes(new Attribute[]{
                 new Attribute("latitude"),
                 new Attribute("longitude"),
-                new Attribute("start"),
-                new Attribute("end"),
+                new Attribute("start-date"),
+                new Attribute("end-date"),
                 new Attribute("name"),
                 new Attribute("description"),
         });
 
         geocoderSource.getMapper().map("coordinate.latitude", new Attribute("latitude"));
         geocoderSource.getMapper().map("coordinate.longitude", new Attribute("longitude"));
-        geocoderSource.getMapper().map("interval.start", new Attribute("start"));
-        geocoderSource.getMapper().map("interval.end", new Attribute("end"));
+        geocoderSource.getMapper().map("time-interval.start-date", new Attribute("start-date"));
+        geocoderSource.getMapper().map("time-interval.end-date", new Attribute("end-date"));
 
         Calendar c1 = Calendar.getInstance();
         c1.set(Calendar.YEAR, 2012);
@@ -84,7 +84,7 @@ public class SourceTest {
 
         try {
             IResultSet result = geocoderSource.query(new String[]{"coordinate.latitude",
-                    "coordinate.longitude", "interval.start", "interval.end"}, new Literal[]{ model.createTypedLiteral(33.642795),
+                    "coordinate.longitude", "time-interval.start-date", "time-interval.end-date"}, new Literal[]{model.createTypedLiteral(33.642795),
                     model.createTypedLiteral(-117.845196), model.createTypedLiteral(c1.getTimeInMillis()),
                     model.createTypedLiteral(c2.getTimeInMillis())
             });
