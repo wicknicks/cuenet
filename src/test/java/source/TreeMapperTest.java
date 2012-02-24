@@ -11,13 +11,13 @@ public class TreeMapperTest {
     @Test
     public void simpleMapTest() {
 
-        TreeMapper mapper = new TreeMapper();
+        TreeMapper mapper = new TreeMapper(null);
 
         mapper.map("", null, null, null);
         try {
         mapper.map(null, null, null, null);
         } catch (Exception e) {
-            logger.info("Caught NullPointerException: " + e.getLocalizedMessage());
+            logger.info("Caught NullPointerException: " + e.getLocalizedMessage() + " [TEST PASS]");
         }
 
         mapper.map("a", null, null, null);

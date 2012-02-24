@@ -1,6 +1,8 @@
 package source;
 
+import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Literal;
@@ -8,6 +10,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import org.junit.Test;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.Iterator;
 
 public class Tests {
 
@@ -45,6 +51,26 @@ public class Tests {
 
         ResultSetFormatter.out(System.out, results, query);
 
+    }
+
+    @Test
+    public void listClassTest() throws FileNotFoundException {
+        OntModel model = ModelFactory.createOntologyModel();
+
+        model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
+                "http://www.semanticweb.org/arjun/cuenet-main.owl");
+
+        OntClass c = model.getOntClass("http://www.semanticweb.org/arjun/cuenet-main.owl#coordinates");
+        System.out.println(c == null);
+
+        DatatypeProperty dp = model.getDatatypeProperty("http://www.semanticweb.org/arjun/cuenet-main.owl#latitude");
+        System.out.println(dp == null);
+
+        Iterator<OntClass> it = model.listClasses();
+        while (it.hasNext()) {
+            OntClass i = it.next();
+            System.out.println("Logger: " + i.getURI());
+        }
     }
 
 }
