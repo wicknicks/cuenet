@@ -1,5 +1,6 @@
 package esl.cuenet.source;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.query.QueryOperator;
 
 public interface IMapper {
@@ -32,4 +33,12 @@ public interface IMapper {
      */
 
     Attribute get(String pathExpression);
+
+    /*
+         Set/Get ontology models
+     */
+
+    void setOntologyModel(OntModel model);
+
+    OntModel getOntologyModel();
 }

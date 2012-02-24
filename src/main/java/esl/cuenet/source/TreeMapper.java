@@ -1,21 +1,33 @@
 package esl.cuenet.source;
 
+import com.hp.hpl.jena.ontology.EnumeratedClass;
+import com.hp.hpl.jena.ontology.OntClass;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.util.iterator.ExtendedIterator;
 import esl.cuenet.query.QueryOperator;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class TreeMapper implements IMapper {
 
     private TreeMapperNode root = new TreeMapperNode();
     private Logger logger = Logger.getLogger(TreeMapper.class);
+    private OntModel model = null;
+    private HashMap<String, String> namespaceMap;
 
-    public TreeMapper() {
+    public TreeMapper(HashMap<String, String> namespaceMap) {
         root.name = "//";
         root.adornment = null;
         root.attribute = null;
         root.operator = null;
+
+        if (namespaceMap == null) this.namespaceMap = new HashMap<String, String>();
+        else this.namespaceMap = namespaceMap;
     }
 
     @Override
@@ -24,34 +36,37 @@ public class TreeMapper implements IMapper {
 
         if (pathExpression == null) throw new NullPointerException("Null Path Expression");
 
-        if (containsPattern(pathExpression)) logger.info("Path already in tree: " + pathExpression);
+        if (containsPattern(pathExpression)) logger.debug("Path already in tree: " + pathExpression);
         else {
             TreeMapperNode node = completeExpression(pathExpression);
             node.adornment = adornment;
             node.operator = operator;
             node.attribute = attribute;
+            if (node.resourcePath == null) node.resourcePath = nsEval(pathExpression);
         }
-
     }
 
     @Override
     public void map(String pathExpression, Adornment adornment) {
-        TreeMapperNode node = null;
+
+        TreeMapperNode node;
         if (containsPattern(pathExpression)) {
-            logger.info("[map-adornment] Path already in tree: " + pathExpression);
+            logger.debug("[map-adornment] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
             node = exp[exp.length - 1];
         } else {
             node = completeExpression(pathExpression);
         }
         node.adornment = adornment;
+        if (node.resourcePath == null) node.resourcePath = nsEval(pathExpression);
     }
 
     @Override
     public void map(String pathExpression, QueryOperator operator) {
-        TreeMapperNode node = null;
+
+        TreeMapperNode node;
         if (containsPattern(pathExpression)) {
-            logger.info("[map-operator] Path already in tree: " + pathExpression);
+            logger.debug("[map-operator] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
             node = exp[exp.length - 1];
         } else {
@@ -59,13 +74,15 @@ public class TreeMapper implements IMapper {
         }
 
         node.operator = operator;
+        if (node.resourcePath == null) node.resourcePath = nsEval(pathExpression);
     }
 
     @Override
     public void map(String pathExpression, Attribute attribute) {
-        TreeMapperNode node = null;
+
+        TreeMapperNode node;
         if (containsPattern(pathExpression)) {
-            logger.info("[map-attribute] Path already in tree: " + pathExpression);
+            logger.debug("[map-attribute] Path already in tree: " + pathExpression);
             TreeMapperNode[] exp = findSubExpressionNode(pathExpression);
             node = exp[exp.length - 1];
         } else {
@@ -73,6 +90,34 @@ public class TreeMapper implements IMapper {
         }
 
         node.attribute = attribute;
+        if (node.resourcePath == null) node.resourcePath = nsEval(pathExpression);
+    }
+
+    private Resource[] nsEval(String pathExpression) {
+        if (namespaceMap.size() == 0) return new Resource[0];
+
+        String[] classnames = pathExpression.split("\\.");
+        Resource[] resourcePath = new Resource[classnames.length];
+
+        String uri;
+        for (int i = 0; i < classnames.length - 1; i++) {
+            uri = namespaceMap.get("this") + classnames[i];
+            resourcePath[i] = model.getOntClass(uri);
+            if (resourcePath[i] == null) logger.error("Class not found: " + uri + " " + pathExpression);
+        }
+
+        int last = classnames.length - 1;
+
+        uri = namespaceMap.get("this") + classnames[last];
+
+        if (model.getOntClass(uri) != null)
+            resourcePath[last] = model.getOntClass(uri);
+        else if (model.getDatatypeProperty(uri) != null)
+            resourcePath[last] = model.getDatatypeProperty(uri);
+        else
+            logger.error("Class not found: " + uri + " " + pathExpression);
+
+        return resourcePath;
     }
 
     @Override
@@ -88,6 +133,16 @@ public class TreeMapper implements IMapper {
 
         TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
         return nodes[nodes.length - 1].attribute;
+    }
+
+    @Override
+    public void setOntologyModel(OntModel model) {
+        this.model = model;
+    }
+
+    @Override
+    public OntModel getOntologyModel() {
+        return this.model;
     }
 
     private TreeMapperNode completeExpression(String pathExpression) {
@@ -160,6 +215,7 @@ public class TreeMapper implements IMapper {
         public Adornment adornment;
         public QueryOperator operator;
         public Attribute attribute;
+        public Resource[] resourcePath = null;
         public List<TreeMapperNode> children = new ArrayList<TreeMapperNode>();
 
         public String toString() {

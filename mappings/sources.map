@@ -19,8 +19,8 @@
    (:type public)
    (:axioms
       (:map coordinates
-         (:prop geo-lat lat)
-         (:prop geo-lon lon) F [S_NEARBY])
+         (:prop latitude lat)
+         (:prop longitude lon) F [S_NEARBY])
       (:map address.street-address address F)))
 
 

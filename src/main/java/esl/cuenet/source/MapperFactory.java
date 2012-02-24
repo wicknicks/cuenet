@@ -1,5 +1,7 @@
 package esl.cuenet.source;
 
+import java.util.HashMap;
+
 public class MapperFactory {
 
     private static MapperFactory factoryInstance = new MapperFactory();
@@ -12,7 +14,7 @@ public class MapperFactory {
         return factoryInstance;
     }
 
-    public IMapper get() {
-        return new TreeMapper();
+    public IMapper get(HashMap<String, String> namespaceMap) {
+        return new TreeMapper(namespaceMap);
     }
 }

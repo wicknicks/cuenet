@@ -6,7 +6,7 @@ import esl.cuenet.query.IResultSet;
 public class Source implements ISource {
 
     private String name;
-    private IMapper mapper = new TreeMapper();
+    private IMapper mapper = null;
     private Attribute[] attributes = null;
     private TYPE type;
     private IO io;

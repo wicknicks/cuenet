@@ -14,20 +14,9 @@ public class ParseTreeInterpreter {
     private IParseTree parseTree = null;
     private Logger logger = Logger.getLogger(ParseTreeInterpreter.class);
     private SourceMapper sourceMapper = new SourceMapper();
-    private OntModel model = null;
 
     public ParseTreeInterpreter(IParseTree parseTree) {
         this.parseTree = parseTree;
-
-//        logger.info("Loading Ontology Models");
-//        model = ModelFactory.createOntologyModel();
-//        try {
-//            model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
-//                    "http://www.semanticweb.org/arjun/cuenet-main.owl");
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
     }
 
     public void interpret() throws SourceParseException {
@@ -48,6 +37,10 @@ public class ParseTreeInterpreter {
                 interpretSourceDeclaration(child);
         }
 
+    }
+
+    public void setOntologyModel(OntModel model) {
+        sourceMapper.setOntologyModel(model);
     }
 
     private void interpretSourceDeclaration(IParseTreeNode sourceNode) throws SourceParseException {
