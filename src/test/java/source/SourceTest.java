@@ -23,7 +23,7 @@ public class SourceTest {
     @Test
     public void geocoderSourceTest() {
 
-        IMapper mapper = new TreeMapper();
+        IMapper mapper = new TreeMapper(null);
         IAccessor accessor = new YahooPlaceFinderAPI();
 
         Source geocoderSource = new Source("geocoder", accessor, mapper);
@@ -53,7 +53,7 @@ public class SourceTest {
     @Test
     public void upcomingSourceTest() {
 
-        IMapper mapper = new TreeMapper();
+        IMapper mapper = new TreeMapper(null);
         IAccessor accessor = new UpcomingEventsAPI();
         OntModel model = ModelFactory.createOntologyModel();
 
