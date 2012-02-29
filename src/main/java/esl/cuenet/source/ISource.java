@@ -3,6 +3,8 @@ package esl.cuenet.source;
 import com.hp.hpl.jena.rdf.model.Literal;
 import esl.cuenet.query.IResultSet;
 
+import java.util.List;
+
 public interface ISource {
 
     public enum IO {
@@ -30,5 +32,7 @@ public interface ISource {
     Attribute[] getAttributes();
 
     IResultSet query(String[] pathExpression, Literal[] literals) throws SourceQueryException, AccesorInitializationException;
+
+    IResultSet query(List<String> pathExpressions, List<Literal> literals) throws SourceQueryException, AccesorInitializationException;
 
 }

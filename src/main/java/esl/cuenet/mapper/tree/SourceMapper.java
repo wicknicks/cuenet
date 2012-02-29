@@ -4,6 +4,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.source.*;
 
 import java.util.HashMap;
+import java.util.Set;
 
 public class SourceMapper {
 
@@ -34,6 +35,17 @@ public class SourceMapper {
         shorthandNamespaceMap.put(shorthand, uri);
     }
     
+    public String getNamespaceShorthand(String uri) {
+        Set<String> keys = shorthandNamespaceMap.keySet();
+        for (String key: keys) {
+            if (shorthandNamespaceMap.get(key).compareTo(uri) == 0) {
+                return key;
+            }
+        }
+
+        return null;
+    }
+    
     public ISource createSource (String name) {
 
         IAccessor accessor = accessorFactory.getAccessor(name);
@@ -52,6 +64,22 @@ public class SourceMapper {
     
     public ISource get (String sourceName) {
         return sourceMap.get(sourceName);
+    }
+
+    public ISource[] getSources() {
+        int sz = sourceMap.values().size();
+        ISource[] sourceNames = new ISource[sz];
+        return sourceMap.values().toArray(sourceNames);
+    }
+
+    public String[] getSourceNames() {
+        int sz = sourceMap.keySet().size();
+        String[] sourceNames = new String[sz];
+        return sourceMap.keySet().toArray(sourceNames);
+    }
+    
+    public int count() {
+       return sourceMap.size();
     }
 
 }

@@ -3,6 +3,8 @@ package esl.cuenet.source;
 import com.hp.hpl.jena.rdf.model.Literal;
 import esl.cuenet.query.IResultSet;
 
+import java.util.List;
+
 public class Source implements ISource {
 
     private String name;
@@ -89,5 +91,17 @@ public class Source implements ISource {
         }
 
         return accessor.executeQuery();
+    }
+    
+    @Override
+    public IResultSet query(List<String> pathExpressions, List<Literal> literals) throws SourceQueryException {
+        int sz = pathExpressions.size();
+        String[] pathExps = new String[sz];
+        Literal[] lits = new  Literal[sz];
+
+        pathExps = pathExpressions.toArray(pathExps);
+        lits = literals.toArray(lits);
+
+        return query(pathExps, lits);
     }
 }
