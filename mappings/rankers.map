@@ -1,0 +1,10 @@
+(:ranker face-ranker
+   (:data person[] media)
+   (:cx person[])
+   (:rank person[])
+   (:nested location-ranker)))
+
+(:ranker location-ranker
+   (:data person[])
+   (:cx person[])
+   (:rank person[])))

@@ -1,7 +1,8 @@
 (:ns http://www.semanticweb.org/arjun/cuenet-main.owl# this)
 (:ns http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl# d)
 
-(:source yahoo-geocoder 
+(:source yahoo-geocoder
+   (:rel person works-at named-place)
    (:attrs lat lon address)
    (:io network)
    (:type public)
@@ -13,7 +14,8 @@
 
 
 //good old places database (from simplegeo)
-(:source places-db 
+(:source places-db
+   (:rel person works-at named-place)
    (:attrs lat lon address)
    (:io disk (:db mongodb))
    (:type public)
@@ -26,6 +28,7 @@
 
 (:source google-calendar 
    (:attrs email title description participant[])
+   (:rel person works-at named-place)
    (:io disk (:db mongodb))
    (:type personal)
    (:axioms
@@ -35,3 +38,14 @@
       (:map event.participant participant)))
       
       
+(:source fb-user
+   (:attrs id dob name location work[] email)
+   (:rel person works-at named-place)
+   (:io disk (:db mongodb))
+   (:type personal)
+   (:axioms
+      (:map person.name name)
+      (:map person.dob birthday)
+      (:map person.location location)
+      (:map person.gender gender)
+      (:map named-place.name work[].name)))
