@@ -4,6 +4,8 @@ public class MappingOperators {
 
     public static final String NAMESPACE = ":ns";
 
+    public static final String RELATION = ":rel";
+
     public static final String SOURCE = ":source";
 
     public static final String SOURCE_IO  = ":io";
@@ -17,4 +19,6 @@ public class MappingOperators {
     public static final String MAP = ":map";
 
     public static final String PROP = ":prop";
+
+
 }

@@ -1,8 +1,6 @@
 package esl.cuenet.source;
 
-import esl.cuenet.source.accessors.GoogleCalendarCollection;
-import esl.cuenet.source.accessors.LocalSimpleGeoPlaceDB;
-import esl.cuenet.source.accessors.YahooPlaceFinderAPI;
+import esl.cuenet.source.accessors.*;
 import org.apache.log4j.Logger;
 
 public class AccessorFactory {
@@ -32,6 +30,16 @@ public class AccessorFactory {
         else if (name.compareTo("google-calendar") == 0) {
             logger.info("Initializing GoogleCalendarCollection Accessor");
             return new GoogleCalendarCollection();
+        }
+
+        else if (name.compareTo("fb-user") == 0) {
+            logger.info("Initializing FacebookUser Accessor");
+            return new FacebookUserAccessor();
+        }
+
+        else if (name.compareTo("fb-relation") == 0) {
+            logger.info("Initializing FacebookRelation Accessor");
+            return new FacebookRelationAccessor();
         }
 
         return null;
