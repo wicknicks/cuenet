@@ -4,12 +4,18 @@ import com.mongodb.BasicDBList;
 import com.mongodb.util.JSON;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.source.SourceQueryException;
+import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import test.TestBase;
 
-public class FacebookRelationAccessorTest {
+public class FacebookRelationAccessorTest extends TestBase {
 
     Logger logger = Logger.getLogger(FacebookRelationAccessorTest.class);
+
+    public FacebookRelationAccessorTest() {
+        super();
+    }
     
     @Test
     public void doTest() throws SourceQueryException {

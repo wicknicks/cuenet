@@ -10,6 +10,10 @@ public class GoogleCalendarCollectionTest {
 
     private Logger logger = Logger.getLogger(YahooPlaceFinderTest.class);
 
+    public GoogleCalendarCollectionTest() {
+        super();
+    }
+
     @Test
     public void runTest() throws IOException {
 

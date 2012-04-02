@@ -11,6 +11,10 @@ public class LocalSimpleGeoPlaceDBTest {
 
     private Logger logger = Logger.getLogger(LocalSimpleGeoPlaceDBTest.class);
 
+    public LocalSimpleGeoPlaceDBTest() {
+        super();
+    }
+
     @Test
     public void runTest() throws IOException {
 

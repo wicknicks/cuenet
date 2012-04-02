@@ -10,6 +10,10 @@ public class YahooPlaceFinderTest {
 
     private Logger logger = Logger.getLogger(YahooPlaceFinderTest.class);
 
+    public YahooPlaceFinderTest() {
+        super();
+    }
+
     @Test
     public void runTest() throws IOException {
 

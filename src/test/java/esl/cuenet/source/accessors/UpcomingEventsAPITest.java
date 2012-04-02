@@ -12,6 +12,10 @@ public class UpcomingEventsAPITest {
 
     private Logger logger = Logger.getLogger(UpcomingEventsAPITest.class);
 
+    public UpcomingEventsAPITest() {
+        super();
+    }
+
     @Test
     public void runTest() throws IOException {
         UpcomingEventsAPI eventsAPI = new UpcomingEventsAPI();
