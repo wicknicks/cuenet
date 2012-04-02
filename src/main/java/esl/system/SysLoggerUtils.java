@@ -1,6 +1,8 @@
 package esl.system;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 public class SysLoggerUtils {
 
@@ -9,6 +11,7 @@ public class SysLoggerUtils {
     public static void initLogger() {
         if ( !isLoggerInitialized ) {
             BasicConfigurator.configure();
+            Logger.getRootLogger().setLevel(Level.INFO);
             isLoggerInitialized = true;
         }
     }
