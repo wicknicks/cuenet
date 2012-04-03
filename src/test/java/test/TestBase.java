@@ -2,7 +2,7 @@ package test;
 
 import esl.system.SysLoggerUtils;
 
-public class TestBase  {
+public abstract class TestBase  {
 
     public TestBase() {
         SysLoggerUtils.initLogger();
