@@ -33,14 +33,14 @@ public class DAGTraverserTest extends TestBase {
         Node f = graph.createNode("F");
         Node g = graph.createNode("G");
 
-        graph.createEdge(a, b);
-        graph.createEdge(a, c);
-        graph.createEdge(a, e);
-        graph.createEdge(b, d);
-        graph.createEdge(b, f);
-        graph.createEdge(c, g);
-        graph.createEdge(c, f);
-        graph.createEdge(e, f);
+        graph.createEdge("l1", a, b);
+        graph.createEdge("l2", a, c);
+        graph.createEdge("l3", a, e);
+        graph.createEdge("l4", b, d);
+        graph.createEdge("l5", b, f);
+        graph.createEdge("l6", c, g);
+        graph.createEdge("l7", c, f);
+        graph.createEdge("l8", e, f);
 
         DAGTraverser traverser = new DAGTraverser();
         traverser.setNodeVisitorCallback(new NodeVisitor() {
@@ -52,6 +52,7 @@ public class DAGTraverserTest extends TestBase {
         traverser.setEdgeVisitorCallback(new EdgeVisitor() {
             @Override
             public void visit(Edge edge) {
+                if (edge.label() != null) logger.info("[Traversing] " + edge.label());
                 logger.info("[Traversing] Edge from " + edge.getOrigin().name() + " to " + edge.getDestination().name());
             }
         });

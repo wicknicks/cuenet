@@ -15,24 +15,20 @@ import esl.cuenet.source.ISource;
 import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
+import test.TestBase;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.*;
 
-public class ParserTreeTest {
+public class ParserTreeTest extends TestBase {
+
+    public ParserTreeTest() {
+        super();
+    }
 
     private Logger logger = Logger.getLogger(ParserTreeTest.class);
 
     @Test
     public void runParserTreeTests() throws ParseException, SourceQueryException, AccesorInitializationException {
-
-//        File file = new File("./src/main/javacc/test/");
-//        File[] files = file.listFiles(new FilenameFilter() {
-//            @Override
-//            public boolean accept(File dir, String name) {
-//                return (name.contains("test"));
-//            }
-//        });
 
         SourceMapper mapper = parseFileToSourceMapper("./mappings/sources.map");
 
@@ -43,23 +39,43 @@ public class ParserTreeTest {
 //                    prepareAddressLiterals());
         logger.info(result.printResults());
 
-//        for (File filename: files) {
-//            logger.info("Parsing " + filename.getAbsolutePath());
-//            parseFile(filename.getAbsolutePath());
-//        }
+    }
 
+    public void parseMultiFiles() throws ParseException {
+
+        File file = new File("./src/main/javacc/test/");
+        File[] files = file.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return (name.contains("test"));
+            }
+        });
+
+        for (File filename: files) {
+            logger.info("Parsing " + filename.getAbsolutePath());
+            parseFileToSourceMapper(filename.getAbsolutePath());
+        }
     }
 
     public SourceMapper parseFileToSourceMapper(String filename) throws ParseException {
 
         SourceMapper m = null;
-        
+        OntModel model = ModelFactory.createOntologyModel();
+
+        try {
+            model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
+                    "http://www.semanticweb.org/arjun/cuenet-main.owl");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
         try {
             MappingParser parser = new MappingParser(new FileInputStream(filename));
             parser.setIParseTreeCreator(new ParseTree(filename));
             IParseTree tree = parser.parse_document();
 
             ParseTreeInterpreter interpreter = new ParseTreeInterpreter(tree);
+            interpreter.setOntologyModel(model);
             interpreter.interpret();
 
             m = interpreter.getSourceMapper();

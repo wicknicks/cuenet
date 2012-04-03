@@ -21,6 +21,6 @@ public interface Graph {
 
     public List<Edge> getOutgoingEdges(Node node);
 
-    public Edge createEdge(Node n1, Node n2);
+    public Edge createEdge(String label, Node n1, Node n2);
 
 }

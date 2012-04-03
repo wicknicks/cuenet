@@ -27,6 +27,8 @@ public interface ISource {
 
     IMapper getMapper();
     IAccessor getAccessor();
+    IRelationGraph getRelationGraph();
+
 
     void setAttributes(Attribute[] attributes);
     Attribute[] getAttributes();

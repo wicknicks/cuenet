@@ -11,7 +11,6 @@ public class DAG implements Graph {
 
     private DAGNode start = null;
     private List<DAGNode> nodes = new ArrayList<DAGNode>();
-    private final static String labelName = "";
 
     public DAG() {
         start = new DAGNode("_root");
@@ -48,11 +47,11 @@ public class DAG implements Graph {
     }
 
     @Override
-    public Edge createEdge(Node n1, Node n2) {
+    public Edge createEdge(String label, Node n1, Node n2) {
         assert (n1 instanceof DAGNode);
         assert (n2 instanceof DAGNode);
 
-        Edge edge = new DAGEdge(labelName, n1, n2);
+        Edge edge = new DAGEdge(label, n1, n2);
 
         ((DAGNode)n1).addEdge(edge);
 

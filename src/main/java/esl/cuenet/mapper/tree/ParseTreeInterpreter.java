@@ -4,7 +4,10 @@ import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.query.QueryOperator;
 import esl.cuenet.source.Adornment;
 import esl.cuenet.source.Attribute;
+import esl.cuenet.source.IRelationGraph;
 import esl.cuenet.source.ISource;
+import esl.datastructures.graph.Edge;
+import esl.datastructures.graph.Node;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;
@@ -54,6 +57,9 @@ public class ParseTreeInterpreter {
         for (IParseTreeNode child : sourceNode.children()) {
             if (child.getType() != IParseTreeNode.Type.OPERATOR) continue;
 
+            if (child.getLabel().equalsIgnoreCase(MappingOperators.RELATION))
+                associateRelations(source, child);
+
             if (child.getLabel().equalsIgnoreCase(MappingOperators.SOURCE_IO))
                 associateIO(source, child);
 
@@ -67,6 +73,37 @@ public class ParseTreeInterpreter {
                 associateAttributes(source, child);
         }
 
+    }
+
+    private void associateRelations(ISource source, IParseTreeNode relationNode) {
+        IRelationGraph relGraph = source.getRelationGraph();
+        if (relationNode.children().size() != 3)
+            throw new RuntimeException("Relation node must contain exactly 3 children");
+
+        IParseTreeNode sub = relationNode.children().get(0);
+        IParseTreeNode pred = relationNode.children().get(1);
+        IParseTreeNode obj = relationNode.children().get(2);
+
+        boolean flag = false;
+        Node subNode = relGraph.getNodeByName(sub.getLabel());
+        if (subNode != null) {
+            for (Edge edge : relGraph.getOutgoingEdges(subNode)) {
+                if (edge.getDestination().name().compareTo(obj.getLabel()) == 0)
+                    flag = true;
+            }
+        }
+        if (flag) {
+            throw new RuntimeException("Multiple Edges between same node pairs : "
+                    + sub.getLabel() + " -> " + obj.getLabel());
+        }
+
+        if (subNode == null) subNode = relGraph.createNode(sub.getLabel());
+
+        Node objNode;
+        if (relGraph.containsClass(obj.getLabel())) objNode = relGraph.getNodeByName(obj.getLabel());
+        else objNode = relGraph.createNode(obj.getLabel());
+
+        relGraph.createEdge(pred.getLabel(), subNode, objNode);
     }
 
     private void associateAxioms(ISource source, IParseTreeNode axiomNode) {
@@ -100,7 +137,6 @@ public class ParseTreeInterpreter {
                 if (operands[i].charAt(0) == '[') associateOperators(source, operands[0], operands[i]);
                 else associateAdornment(source, operands[0], operands[i]);
             }
-
         }
 
         if (fContainsOperatorChildren) {

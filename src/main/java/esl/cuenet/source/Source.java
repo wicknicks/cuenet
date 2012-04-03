@@ -13,6 +13,7 @@ public class Source implements ISource {
     private TYPE type;
     private IO io;
     private IAccessor accessor;
+    private IRelationGraph relationGraph = new RelationGraph();
 
     public Source(String name, IAccessor accessor, IMapper mapper) {
         this.name = name;
@@ -53,6 +54,11 @@ public class Source implements ISource {
     @Override
     public IAccessor getAccessor() {
         return accessor;
+    }
+
+    @Override
+    public IRelationGraph getRelationGraph() {
+        return relationGraph;
     }
 
     @Override
