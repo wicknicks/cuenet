@@ -36,16 +36,32 @@
       (:map event.title title)
       (:map event.description description)
       (:map event.participant participant)))
-      
-      
+
+
 (:source fb-user
-   (:attrs id dob name location work[] email)
+   (:attrs id name birthday location work email)
+   (:rel person type-of http://cn/person)
+   (:rel named-place type-of http://cn/named-place)
+   (:rel address type-of http://cn/address)
    (:rel person works-at named-place)
+   (:rel person lives-at address)
    (:io disk (:db mongodb))
    (:type personal)
    (:axioms
       (:map person.name name)
       (:map person.dob birthday)
-      (:map person.location location)
-      (:map person.gender gender)
-      (:map named-place.name work[].name)))
+      (:map address.street-address location.name)
+      (:map named-place.name work.name)))
+
+
+//(:source fb-user-old
+//        (:attrs id dob name location work[] email)
+//        (:rel person works-at named-place)
+//        (:io disk (:db mongodb))
+//        (:type personal)
+//        (:axioms
+//        (:map person.name name)
+//        (:map person.dob birthday)
+//        (:map person.location location)
+//        (:map person.gender gender)
+//        (:map named-place.name work[].name)))
