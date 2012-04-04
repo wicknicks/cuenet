@@ -2,8 +2,6 @@ package esl.cuenet.algorithms.collation;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.mapper.tree.SourceParseException;
 import org.apache.log4j.Logger;
