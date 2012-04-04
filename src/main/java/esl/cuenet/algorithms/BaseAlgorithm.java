@@ -1,7 +1,5 @@
 package esl.cuenet.algorithms;
 
-import com.hp.hpl.jena.ontology.DatatypeProperty;
-import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import esl.cuenet.mapper.parser.MappingParser;
@@ -11,7 +9,6 @@ import esl.cuenet.mapper.tree.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Iterator;
 
 public abstract class BaseAlgorithm implements IAlgorithm {
 

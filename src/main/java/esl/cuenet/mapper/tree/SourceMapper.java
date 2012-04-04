@@ -45,6 +45,11 @@ public class SourceMapper {
 
         return null;
     }
+
+    public void accept(SourceMapVisitor visitor) {
+        for (ISource source: sourceMap.values())
+            visitor.visit(source);
+    }
     
     public ISource createSource (String name) {
 

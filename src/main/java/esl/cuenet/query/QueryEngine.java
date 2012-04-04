@@ -9,9 +9,12 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.syntax.*;
 import esl.cuenet.mapper.tree.SourceMapper;
+import esl.cuenet.source.ISource;
+import esl.cuenet.source.SourceMapVisitor;
 import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
 
+import javax.xml.transform.Source;
 import java.util.List;
 
 public class QueryEngine {
@@ -30,17 +33,27 @@ public class QueryEngine {
     public void execute(String sparqlQuery) {
         Query query = QueryFactory.create(sparqlQuery);
         query.getQueryPattern().visit(new ElementVisitorImpl(queryGraph));
-        for (Var var: query.getProjectVars()) {
-            logger.info("Project Var: " + var.getVarName());
-        }
         projectVars = query.getProjectVars();
         logger.info("Finished parsing query");
+        eval();
+    }
 
-     }
+    private void eval() {
+        for (Var var: projectVars) {
+            logger.info("Project Var: " + var.getVarName());
+        }
+        sourceMapper.accept(new SourceVisitor());
+    }
+
+    public class SourceVisitor implements SourceMapVisitor {
+        @Override
+        public void visit(ISource source) {
+            logger.info("Visiting " + source.getName());
+        }
+    }
 
     public class ElementVisitorImpl implements ElementVisitor {
 
-        Logger logger = Logger.getLogger(ElementVisitorImpl.class);
         private QueryGraph graph = null;
 
         public ElementVisitorImpl(QueryGraph graph) {
