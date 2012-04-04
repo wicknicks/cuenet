@@ -9,6 +9,8 @@ public interface Traverser <N extends Node, E extends Edge> {
         Random
     }
 
+    public void setTraversalContext (TraversalContext context);
+
     public void setNodeVisitorCallback(NodeVisitor visitorCallback);
 
     public void setEdgeVisitorCallback(EdgeVisitor visitorCallback);

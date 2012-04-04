@@ -12,6 +12,11 @@ public class DFSTraverser<N extends Node, E extends Edge> implements Traverser<N
     private Logger logger = Logger.getLogger(DFSTraverser.class);
     private NodeVisitor nodeVisitor = null;
     private EdgeVisitor edgeVisitor = null;
+    private TraversalContext traversalContext = null;
+
+    public void setTraversalContext (TraversalContext object) {
+        this.traversalContext = object;
+    }
 
     private void traverseDFS(Graph<N, E> graph) {
 
@@ -31,8 +36,8 @@ public class DFSTraverser<N extends Node, E extends Edge> implements Traverser<N
                 continue;
             }
 
-            if (entry.getValue() != null) edgeVisitor.visit(entry.getValue());
-            nodeVisitor.visit(n);
+            if (entry.getValue() != null) edgeVisitor.visit(entry.getValue(), traversalContext);
+            nodeVisitor.visit(n, traversalContext);
             seenMap.put(n.name(), 1);
 
             if (graph.getOutgoingEdges(n) == null || graph.getOutgoingEdges(n).size() == 0) {

@@ -2,7 +2,6 @@ package esl.datastructures.graph;
 
 public abstract class NodeVisitor {
 
-    //TODO: add context
-    public abstract void visit(Node node);
+    public abstract void visit(Node node, TraversalContext traversalContext);
 
 }
