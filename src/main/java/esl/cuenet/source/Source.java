@@ -2,6 +2,8 @@ package esl.cuenet.source;
 
 import com.hp.hpl.jena.rdf.model.Literal;
 import esl.cuenet.query.IResultSet;
+import esl.datastructures.graph.relationgraph.IRelationGraph;
+import esl.datastructures.graph.relationgraph.RelationGraph;
 
 import java.util.List;
 

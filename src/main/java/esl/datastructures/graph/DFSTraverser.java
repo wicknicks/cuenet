@@ -7,22 +7,22 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
-public class DAGTraverser implements Traverser {
+public class DFSTraverser<N extends Node, E extends Edge> implements Traverser<N, E> {
 
-    private Logger logger = Logger.getLogger(DAGTraverser.class);
+    private Logger logger = Logger.getLogger(DFSTraverser.class);
     private NodeVisitor nodeVisitor = null;
     private EdgeVisitor edgeVisitor = null;
 
-    private void traverseDFS(Graph graph) {
+    private void traverseDFS(Graph<N, E> graph) {
 
         HashMap<String, Integer> seenMap = new HashMap<String, Integer>();
-        Stack<Map.Entry<Node, Edge>> nodeStack = new Stack<Map.Entry<Node, Edge>>();
-        nodeStack.add(new AbstractMap.SimpleEntry<Node, Edge>(graph.getStartNode(), null));
+        Stack<Map.Entry<N, E>> nodeStack = new Stack<Map.Entry<N, E>>();
+        nodeStack.add(new AbstractMap.SimpleEntry<N, E>(graph.getStartNode(), null));
 
         boolean allSeen;
         while( !nodeStack.empty() ) {
-            Map.Entry<Node, Edge> entry = nodeStack.peek();
-            Node n = entry.getKey();
+            Map.Entry<N, E> entry = nodeStack.peek();
+            N n = entry.getKey();
 
             if (seenMap.get(n.name()) == null) seenMap.put(n.name(), 0);
 
@@ -41,10 +41,10 @@ public class DAGTraverser implements Traverser {
             }
 
             allSeen = true;
-            for (Edge e: graph.getOutgoingEdges(n)) {
-                Node dest = e.getDestination();
+            for (E e: graph.getOutgoingEdges(n)) {
+                N dest = graph.getDestinationNode(e);
                 if ( seenMap.get(dest.name()) == null || seenMap.get(dest.name()) == 0 ) {
-                    nodeStack.push(new AbstractMap.SimpleEntry<Node, Edge>(dest, e));
+                    nodeStack.push(new AbstractMap.SimpleEntry<N, E>(dest, e));
                     allSeen = false;
                 }
             }
@@ -64,10 +64,11 @@ public class DAGTraverser implements Traverser {
     }
 
     @Override
-    public void start(Graph graph) {
+    public void start(Graph<N, E> graph) {
         if (edgeVisitor == null || nodeVisitor == null)
             throw new RuntimeException("Edge and Node Visitors not set before traversal");
 
         traverseDFS(graph);
     }
+
 }

@@ -4,8 +4,6 @@ public interface Edge {
 
     public String label();
 
-    public Node getOrigin();
-
-    public Node getDestination();
+    public String name();
 
 }

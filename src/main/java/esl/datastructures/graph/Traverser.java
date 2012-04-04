@@ -1,6 +1,6 @@
 package esl.datastructures.graph;
 
-public interface Traverser {
+public interface Traverser <N extends Node, E extends Edge> {
 
     public enum Type {
         Depth_First_Search,
@@ -13,7 +13,6 @@ public interface Traverser {
 
     public void setEdgeVisitorCallback(EdgeVisitor visitorCallback);
 
-    public void start(Graph graph);
-
+    public void start(Graph<N, E> graph);
 
 }

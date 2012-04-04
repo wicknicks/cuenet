@@ -1,16 +1,12 @@
 package datastructures.graph;
 
-import esl.datastructures.graph.Edge;
-import esl.datastructures.graph.EdgeVisitor;
-import esl.datastructures.graph.Node;
-import esl.datastructures.graph.NodeVisitor;
+import esl.datastructures.graph.*;
 import esl.datastructures.graph.sample.DAG;
-import esl.datastructures.graph.DAGTraverser;
+import esl.datastructures.graph.sample.DAGEdge;
+import esl.datastructures.graph.sample.DAGNode;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 import test.TestBase;
-
-import java.util.HashMap;
 
 public class DAGTraverserTest extends TestBase {
 
@@ -22,27 +18,26 @@ public class DAGTraverserTest extends TestBase {
 
     @Test
     public void createGraphAndDFSTraverseTest() {
-        DAG graph = new DAG();
-        HashMap<String, Node> nodeMap = new HashMap<String, Node>();
+        final Graph<DAGNode, DAGEdge> graph = new DAG();
 
-        Node a = graph.getStartNode();
-        Node b = graph.createNode("B");
-        Node c = graph.createNode("C");
-        Node d = graph.createNode("D");
-        Node e = graph.createNode("E");
-        Node f = graph.createNode("F");
-        Node g = graph.createNode("G");
+        DAGNode a = graph.getStartNode();
+        DAGNode b = graph.createNode("B");
+        DAGNode c = graph.createNode("C");
+        DAGNode d = graph.createNode("D");
+        DAGNode e = graph.createNode("E");
+        DAGNode f = graph.createNode("F");
+        DAGNode g = graph.createNode("G");
 
-        graph.createEdge("l1", a, b);
-        graph.createEdge("l2", a, c);
-        graph.createEdge("l3", a, e);
-        graph.createEdge("l4", b, d);
-        graph.createEdge("l5", b, f);
-        graph.createEdge("l6", c, g);
-        graph.createEdge("l7", c, f);
-        graph.createEdge("l8", e, f);
+        graph.createEdge("l1", null,  a, b);
+        graph.createEdge("l2", null, a, c);
+        graph.createEdge("l3", null, a, e);
+        graph.createEdge("l4", null, b, d);
+        graph.createEdge("l5", null, b, f);
+        graph.createEdge("l6", null, c, g);
+        graph.createEdge("l7", null, c, f);
+        graph.createEdge("l8", null, e, f);
 
-        DAGTraverser traverser = new DAGTraverser();
+        DFSTraverser<DAGNode, DAGEdge> traverser = new DFSTraverser<DAGNode, DAGEdge>();
         traverser.setNodeVisitorCallback(new NodeVisitor() {
             @Override
             public void visit(Node node) {
@@ -53,9 +48,10 @@ public class DAGTraverserTest extends TestBase {
             @Override
             public void visit(Edge edge) {
                 if (edge.label() != null) logger.info("[Traversing] " + edge.label());
-                logger.info("[Traversing] Edge from " + edge.getOrigin().name() + " to " + edge.getDestination().name());
+                logger.info("[Traversing] Edge from " + graph.getOriginNode((DAGEdge)edge).name() + " to " + graph.getDestinationNode((DAGEdge)edge).name());
             }
         });
+
         traverser.start(graph);
 
         logger.info("Done");

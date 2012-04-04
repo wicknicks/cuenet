@@ -4,10 +4,10 @@ import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.query.QueryOperator;
 import esl.cuenet.source.Adornment;
 import esl.cuenet.source.Attribute;
-import esl.cuenet.source.IRelationGraph;
 import esl.cuenet.source.ISource;
-import esl.datastructures.graph.Edge;
-import esl.datastructures.graph.Node;
+import esl.datastructures.graph.relationgraph.IRelationGraph;
+import esl.datastructures.graph.relationgraph.RelationGraphEdge;
+import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
 
 import java.util.Iterator;
@@ -85,10 +85,10 @@ public class ParseTreeInterpreter {
         IParseTreeNode obj = relationNode.children().get(2);
 
         boolean flag = false;
-        Node subNode = relGraph.getNodeByName(sub.getLabel());
+        RelationGraphNode subNode = relGraph.getNodeByName(sub.getLabel());
         if (subNode != null) {
-            for (Edge edge : relGraph.getOutgoingEdges(subNode)) {
-                if (edge.getDestination().name().compareTo(obj.getLabel()) == 0)
+            for (RelationGraphEdge edge : relGraph.getOutgoingEdges(subNode)) {
+                if (relGraph.getDestinationNode(edge).name().compareTo(obj.getLabel()) == 0)
                     flag = true;
             }
         }
@@ -99,7 +99,7 @@ public class ParseTreeInterpreter {
 
         if (subNode == null) subNode = relGraph.createNode(sub.getLabel());
 
-        Node objNode;
+        RelationGraphNode objNode;
         if (relGraph.containsClass(obj.getLabel())) objNode = relGraph.getNodeByName(obj.getLabel());
         else objNode = relGraph.createNode(obj.getLabel());
 

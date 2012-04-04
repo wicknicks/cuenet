@@ -1,37 +1,49 @@
 package esl.datastructures.graph.sample;
 
-import esl.datastructures.graph.Edge;
 import esl.datastructures.graph.Graph;
-import esl.datastructures.graph.Node;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
-public class DAG implements Graph {
+public class DAG implements Graph<DAGNode, DAGEdge> {
 
     private DAGNode start = null;
     private List<DAGNode> nodes = new ArrayList<DAGNode>();
+    private HashMap<DAGNode, List<DAGEdge>> nodeEdgeMap = new HashMap<DAGNode, List<DAGEdge>>();
+    private HashMap<DAGEdge, DAGNode> edgeDestinationMap = new HashMap<DAGEdge, DAGNode>();
+    private HashMap<DAGEdge, DAGNode> edgeOriginMap = new HashMap<DAGEdge, DAGNode>();
 
     public DAG() {
         start = new DAGNode("_root");
+        List<DAGEdge> edges = new ArrayList<DAGEdge>();
+        nodeEdgeMap.put(start, edges);
         nodes.add(start);
     }
 
     @Override
-    public Node getStartNode() {
+    public DAGNode getStartNode() {
         return start;
     }
 
     @Override
-    public Node createNode(String nodeName) {
+    public DAGNode createNode(String nodeName) {
         DAGNode node = new DAGNode(nodeName);
+        List<DAGEdge> edges = new ArrayList<DAGEdge>();
+        nodeEdgeMap.put(node, edges);
         nodes.add(node);
         return node;
     }
 
     @Override
-    public Node getNodeByName(String name) {
-        Node n = null;
+    public DAGEdge createEdge(String lbl, DAGNode n1, DAGNode n2) {
+        return createEdge(lbl, UUID.randomUUID().toString(), n1, n2);
+    }
+
+    @Override
+    public DAGNode getNodeByName(String name) {
+        DAGNode n = null;
         for (DAGNode node: nodes) {
             if (node.compareName(name) == 0) n = node;
         }
@@ -39,77 +51,39 @@ public class DAG implements Graph {
     }
 
     @Override
-    public List<Edge> getOutgoingEdges(Node node) {
-        for (DAGNode n: nodes) {
-            if (n.equals(node)) return n.edges;
-        }
-        return null;
+    public List<DAGEdge> getOutgoingEdges(DAGNode node) {
+        if ( !nodeEdgeMap.containsKey(node) ) return null;
+        return nodeEdgeMap.get(node);
     }
 
     @Override
-    public Edge createEdge(String label, Node n1, Node n2) {
-        assert (n1 instanceof DAGNode);
-        assert (n2 instanceof DAGNode);
+    public DAGNode getDestinationNode(DAGEdge edge) {
+        return edgeDestinationMap.get(edge);
+    }
 
-        Edge edge = new DAGEdge(label, n1, n2);
+    @Override
+    public DAGNode getOriginNode(DAGEdge edge) {
+        return edgeOriginMap.get(edge);
+    }
 
-        ((DAGNode)n1).addEdge(edge);
+    @Override
+    public DAGEdge createEdge(String label, String name, DAGNode n1, DAGNode n2) {
+        if (n1 == null) throw new RuntimeException("Null Node (n1)");
+        if (n2 == null) throw new RuntimeException("Null Node (n2)");
+        if (label == null) throw new RuntimeException("Null label");
+        if (name == null) throw new RuntimeException("Null name");
+        if ( !nodeEdgeMap.containsKey(n1) ) throw new RuntimeException("Node not found: " + n1.name());
+        if ( !nodeEdgeMap.containsKey(n2) ) throw new RuntimeException("Node not found: " + n2.name());
+
+        DAGEdge edge = new DAGEdge(label, name);
+        if ( edgeDestinationMap.containsKey(edge) ) { throw new RuntimeException("Duplicate Edges"); }
+
+        List<DAGEdge> edges = nodeEdgeMap.get(n1);
+        edges.add(edge);
+        edgeDestinationMap.put(edge, n2);
+        edgeOriginMap.put(edge, n1);
 
         return edge;
     }
 
-    private class DAGNode implements Node {
-
-        private String name;
-        private List<Edge> edges = new ArrayList<Edge>();
-
-        public DAGNode(String name) {
-            this.name = name;
-        }
-
-        public void addEdge(Edge edge) {
-            edges.add(edge);
-        }
-
-        public List<Edge> getEdges() {
-            return edges;
-        }
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        public int compareName(String n) {
-            return name.compareTo(n);
-        }
-    }
-
-    private class DAGEdge implements Edge {
-
-        private Node destination;
-        private Node origin;
-        private String label;
-
-        public DAGEdge(String label, Node n1, Node n2) {
-            this.label = label;
-            this.origin = n1;
-            this.destination = n2;
-        }
-
-        @Override
-        public String label() {
-            return label;
-        }
-
-        @Override
-        public Node getOrigin() {
-            return origin;
-        }
-
-        @Override
-        public Node getDestination() {
-            return destination;
-        }
-    }
 }
