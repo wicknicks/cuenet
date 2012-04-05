@@ -23,11 +23,12 @@ public class QueryEngine {
 
     private OntModel model = null;
     private QueryGraph queryGraph = new QueryGraph();
-    private SourceMapper sourceMapper = SourceMapper.constructSourceMapper();
+    private SourceMapper sourceMapper = null;
     private List<Var> projectVars = null;
 
-    public QueryEngine(OntModel model) {
+    public QueryEngine(OntModel model, SourceMapper sourceMapper) {
         this.model = model;
+        this.sourceMapper = sourceMapper;
     }
 
     public void execute(String sparqlQuery) {
@@ -39,16 +40,29 @@ public class QueryEngine {
     }
 
     private void eval() {
-        for (Var var: projectVars) {
-            logger.info("Project Var: " + var.getVarName());
+        if (sourceMapper == null) {
+            logger.info("No sources added. Returning");
+            return;
         }
-        sourceMapper.accept(new SourceVisitor());
+
+        sourceMapper.accept(new SourceVisitor(queryGraph));
     }
 
     public class SourceVisitor implements SourceMapVisitor {
+        private QueryGraph graph;
+
+        public SourceVisitor(QueryGraph graph) {
+            this.graph = graph;
+        }
+
         @Override
         public void visit(ISource source) {
             logger.info("Visiting " + source.getName());
+            List<RelationGraphNode> nodes = graph.getAllNodes();
+            for (RelationGraphNode node: nodes) {
+                if (source.getRelationGraph().containsClass(node.name()))
+                    logger.info("Found! " + node.name());
+            }
         }
     }
 
@@ -64,7 +78,6 @@ public class QueryEngine {
         public void visit(ElementPathBlock el) {
             logger.info("Visit: Element Path Block");
             for (TriplePath tp: el.getPattern().getList()) {
-                logger.info("Visit Element Path Block: " + tp.toString());
                 Node sub = tp.getSubject();
                 Node pre = tp.getPredicate();
                 Node obj = tp.getObject();
