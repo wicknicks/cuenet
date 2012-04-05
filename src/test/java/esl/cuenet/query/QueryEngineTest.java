@@ -51,7 +51,7 @@ public class QueryEngineTest extends TestBase {
                 "?name <http://www.w3.org/2001/vcard-rdf/3.0#Given> ?givenName . " +
                 " FILTER (?x!=<http://somewhere/arjun-satish-uri> && ?givenName!=\"Nujre\") }";
 
-        QueryEngine engine = new QueryEngine(model);
+        QueryEngine engine = new QueryEngine(model, null);
         engine.execute(queryString);
 
 
