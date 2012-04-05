@@ -16,6 +16,10 @@ public class RelationGraph implements IRelationGraph {
         super();
     }
 
+    protected List<RelationGraphNode> getNodes() {
+        return nodes;
+    }
+
     @Override
     public boolean containsClass(String name) {
         for (RelationGraphNode node: nodes)
