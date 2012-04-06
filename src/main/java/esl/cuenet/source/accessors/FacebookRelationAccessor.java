@@ -16,7 +16,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     private Logger logger = Logger.getLogger(FacebookRelationAccessor.class);
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[1];
-    private long id;
+    private String id;
 
     public FacebookRelationAccessor() {
         super("test");
@@ -36,7 +36,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         if (attribute.compareTo(attributes[0])==0) {       /* name */
             setFlags[0] = true;
-            this.id = value;
+            this.id = "" + value;
         }
         else
             throw new AccesorInitializationException("Long value being initialized for wrong attribute "
@@ -45,15 +45,20 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
 
     @Override
     public void associateString(Attribute attribute, String value) throws AccesorInitializationException {
-        throw new AccesorInitializationException("String value being initialized for wrong attribute "
-                + FacebookUserAccessor.class.getName());
+        if (attribute.compareTo(attributes[0])==0) {       /* name */
+            setFlags[0] = true;
+            this.id = "" + getIDFromName(value);
+            logger.info("Associated ID from name: " + id);
+        }
+        else
+            throw new AccesorInitializationException("Long value being initialized for wrong attribute "
+                    + FacebookUserAccessor.class.getName());
     }
 
     @Override
     public void associateDouble(Attribute attribute, double value) throws AccesorInitializationException {
         throw new AccesorInitializationException("Double value being initialized for wrong attribute "
                 + FacebookUserAccessor.class.getName());
-
     }
 
     @Override
@@ -67,18 +72,62 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
             return new ResultSetImpl("");
         }
 
-        clauses.add(new BasicDBObject("id", "" + id));
-        clauses.add(new BasicDBObject("relation", "" + id));
+        clauses.add(new BasicDBObject("id", id));
+        clauses.add(new BasicDBObject("relation", id));
         BasicDBObject query = new BasicDBObject("$or", clauses);
 
         reader.query(query);
         BasicDBList result = new BasicDBList();
+        String tmpID, tmpName;
         while (reader.hasNext()) {
-            DBObject o = reader.next();
-            result.add(o);
+            DBObject rel = reader.next();
+            BasicDBObject normalizedRelation = new BasicDBObject(rel.toMap());
+
+            /* normalize if the first entry is not the requested ID*/
+            if ( ((String)normalizedRelation.get("id")).compareTo(id) != 0 ) {
+                tmpID = (String) normalizedRelation.get("relation");
+                tmpName = getNameFromFB(normalizedRelation.getString("relation"));
+                normalizedRelation.put("relation", normalizedRelation.get("id"));
+                normalizedRelation.put("relation_name", getNameFromFB((String)normalizedRelation.get("id")));
+                normalizedRelation.put("id",  tmpID);
+                normalizedRelation.put("name",  tmpName);
+            }
+
+            result.add(normalizedRelation);
         }
 
-        return new ResultSetImpl(result.toString());
+        if (result.size() > 3)
+            return new ResultSetImpl(id + " has " + result.size() + " relationships");
+        else
+            return new ResultSetImpl(result.toString());
+    }
+
+    private String getIDFromName(String name) {
+        DBReader reader = this.startReader("fb_users");
+
+        BasicDBObject query = new BasicDBObject("name", name);
+        reader.query(query);
+        String result = null;
+        while(reader.hasNext()) {
+            DBObject o = reader.next();
+            if (o.containsField("id")) result = (String) o.get("id");
+        }
+
+        return result;
+    }
+
+    private String getNameFromFB(String userID) {
+        DBReader reader = this.startReader("fb_users");
+
+        BasicDBObject query = new BasicDBObject("id", userID);
+        reader.query(query);
+        String result = null;
+        while(reader.hasNext()) {
+            DBObject o = reader.next();
+            if (o.containsField("name")) result = (String) o.get("name");
+        }
+
+        return result;
     }
 
     private class ResultSetImpl implements IResultSet {
@@ -91,7 +140,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     }
 
     public IResultSet executeQuery (long id) throws SourceQueryException {
-        this.id = id;
+        this.id = "" + id;
         setFlags[0] = true;
         return executeQuery();
     }

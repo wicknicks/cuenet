@@ -32,7 +32,12 @@ public interface IMapper {
          Get attribute for a given pathExpression
      */
 
-    Attribute get(String pathExpression);
+    Attribute getAttribute(String pathExpression);
+
+    /*
+    Get adornment for a given pathExpression
+     */
+    Adornment getAdornment(String pathExpression);
 
     /*
          Set/Get ontology models

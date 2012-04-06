@@ -127,12 +127,21 @@ public class TreeMapper implements IMapper {
     }
 
     @Override
-    public Attribute get(String pathExpression) {
+    public Attribute getAttribute(String pathExpression) {
         if (!containsPattern(pathExpression))
             throw new NullPointerException("Path Expression not found: " + pathExpression);
 
         TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
         return nodes[nodes.length - 1].attribute;
+    }
+
+    @Override
+    public Adornment getAdornment(String pathExpression) {
+        if (!containsPattern(pathExpression))
+            throw new NullPointerException("Path Expression not found: " + pathExpression);
+
+        TreeMapperNode[] nodes = findSubExpressionNode(pathExpression);
+        return nodes[nodes.length - 1].adornment;
     }
 
     @Override

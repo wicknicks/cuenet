@@ -13,7 +13,7 @@ public class Adornment {
         Free,
 
         /* The attribute cannot be specified in the query */
-        Unspecified,
+        Unspecifiable,
 
         /* The attribute must be specified in the query */
         Bound,
@@ -28,6 +28,10 @@ public class Adornment {
 
     public Adornment(AdornmentType type) {
         this.type = type;
+    }
+
+    public AdornmentType type() {
+        return type;
     }
 
     public void setOptions(Literal[] literals) {

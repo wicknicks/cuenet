@@ -85,7 +85,8 @@ public class Source implements ISource {
         accessor.start();
 
         for (int i = 0; i < pathExpressions.length; i++) {
-            Attribute attr = mapper.get(pathExpressions[i]);
+            Attribute attr = mapper.getAttribute(pathExpressions[i]);
+
             try {
                 if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") == 0)
                     accessor.associateString(attr, literals[i].getString());
