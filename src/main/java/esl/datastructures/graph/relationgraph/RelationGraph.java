@@ -67,6 +67,21 @@ public class RelationGraph implements IRelationGraph {
         return edge;
     }
 
+    public List<RelationGraphNode> getNodesOfType(String type) {
+        List<RelationGraphNode> objs = new ArrayList<RelationGraphNode>();
+        for (RelationGraphNode n: nodes) {
+            List<RelationGraphEdge> edges = edgeMap.get(n);
+            for (RelationGraphEdge edge: edges) {
+                if ( !edge.label().equalsIgnoreCase("type-of") ) continue;
+                if (edgeDestinationMap.containsKey(edge)) {
+                    RelationGraphNode dest = edgeDestinationMap.get(edge);
+                    if (dest.name().compareTo(type)==0) objs.add(n);
+                }
+            }
+        }
+        return objs;
+    }
+
     @Override
     public RelationGraphNode getNodeByName(String name) {
         for (RelationGraphNode node: nodes)
