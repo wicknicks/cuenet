@@ -1,0 +1,28 @@
+Connection to DB established 
+[90mGET /thala.jps [33m404 [90m0ms[0m
+{}
+{}
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+{ data: '{"status":"failure","error_code":206,"error_message":"MAX_NUMBERS_OF_UIDS_TRAINED_IN_NAMESPACE_EXCEEDED - Private namespace uids allocation for arjun.satish@gmail.com is 1832\\/1000. Only -832 more uids can be trained, but 0 was requested."}' }
+[90mGET /me/ [33m404 [90m0ms[0m
+{}
+{}
+[90mGET /logs2.js [33m404 [90m1ms[0m
+[90mGET /logs2.js [33m404 [90m0ms[0m
+[90mGET /logs2.js [33m404 [90m0ms[0m
+[90mGET /logs2.js [33m404 [90m0ms[0m
+going down

@@ -1,0 +1,38 @@
+<html>
+<title> Show Face </title>
+<head>
+<script src='jquery-1.6.2.js'></script>
+<script type = 'text/javascript'>
+  var data = [[279, 137, 309, 168],
+              [352, 149, 384, 180], 
+              [442, 157, 470, 185],
+              [520, 153, 548, 181]];
+
+  
+  function draw() {  
+    var ctx = document.getElementById('pecan').getContext('2d');  
+    var img = new Image();  
+    img.onload = function(){  
+      ctx.drawImage(img,0,0);  
+      var i=0;
+      for (; i<data.length; i++)
+      { 
+        var l = data[i][0]; var t = data[i][1]; var r = data[i][2]; var b = data[i][3];
+        ctx.fillStyle = "rgba(0, 0, 200, 0.33)";
+        ctx.fillRect (l, t, r-l, b-t);  
+      }
+    };  
+    img.src = 'http://sphotos.xx.fbcdn.net/hphotos-ash4/s720x720/387260_273504269375815_100001487322372_721143_2127183749_n.jpg';  
+  }
+  
+  $(document).ready( function() {
+    draw();
+  });
+  
+</script>
+</head>
+<body>
+  <canvas id="pecan" width="640" height="480"></canvas> 
+</body>
+</html>
+

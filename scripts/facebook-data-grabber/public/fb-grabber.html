@@ -1,0 +1,348 @@
+<html>
+<title>Emme</title>
+<head>
+<link type="text/css" href = "style.css" rel="stylesheet" />
+<script src='jquery-1.6.2.js'></script>
+<script src='urlparams.js'></script>
+<script type = 'text/javascript'>
+  var eresp = null;
+  var prev_until = 0;
+  
+  var events = [];     /* user events */
+  var profile = null;  /* user profile */
+  var photos = [];     /* user photos */
+  var friends_photos = [];  /* friends photos */
+  var friends = [];    /* user friends */
+  
+  var fb_permissions = ["email", "user_about_me", "friends_about_me",
+                        "user_relationships", "friends_relationships",
+                        "user_status", "friends_status",
+                        "user_events", "friends_events",
+                        "user_education_history", "friends_education_history",
+                        "user_work_history", "friends_work_history",
+                        "user_location", "friends_location",
+                        "user_interests", "friends_interests",
+                        "user_likes", "friends_likes",
+                        "user_photos", "friends_photos",
+                        "user_checkins", "friends_checkins",
+                        "user_birthday", "friends_birthday"
+                       ];
+  
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '155907141107201', // App ID
+      channelURL : 'http://tracker.ics.uci.edu/channel.html', // Channel File
+      status     : true, // check login status
+      cookie     : true, // enable cookies to allow the server to access the session
+      oauth      : true, // enable OAuth 2.0
+      xfbml      : true  // parse XFBML
+    });
+    
+    FB.getLoginStatus(function(response) {
+      if (response.authResponse) {
+        console.log('Welcome!');
+      } else {
+        console.log('User cancelled login or did not fully authorize.');
+        FB.login(function (response) {
+          console.log('Welcome!  Fetching your information.... after login ');
+        }, {scope: fb_permissions.join(',')});
+      }
+    }, {scope: fb_permissions.join(',')});
+  };
+  
+  ( function(d) {
+     var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+     js = d.createElement('script'); js.id = id; js.async = true;
+     js.src = "http://connect.facebook.net/en_US/all.js";
+     d.getElementsByTagName('head')[0].appendChild(js);
+  } (document));
+  
+  function fetchData() {
+     //FB.api('/me/events/not_replied?since=0', eventResponseHandler);
+     FB.api('/me', function(response) {
+        console.log('Good to see you, ' + response.name + '.');
+        if (response.name) {
+          profile = response;
+          $('#fb-user').html("<font color=RED>Acquired Personal Data for: </font>" + response.name);
+        }
+     });
+     FB.api('/me/friends', friendsListResponseHandler);
+     //FB.api('/me/likes', userLikesResponseHandler);
+     FB.api('/me/photos?limit=100', photoResponseHandler);
+  }
+  
+  function photoResponseHandler(response) {
+     if (!response || !response.data) return;
+     
+     console.log('Retrieved ' + response.data.length + ' photos of user.');
+     
+     for (var i=0; i<response.data.length; i++) {
+       $('#fb-pic-results').append('<img src="' + response.data[i].picture + '"></img> ');
+     }
+     
+     photos = response.data;
+  }
+  
+  function userLikesResponseHandler(response) {
+     if (!response || !response.data) return;
+     console.log('Likes: ' + response.data.length);
+  }
+  
+  function friendsListResponseHandler(response) {
+     if (!response || !response.data) return;
+     
+     initPersonResponseHandler(function() {
+       return friends.length == response.data.length;
+     });   
+     
+     console.log ('User has: ' + response.data.length + ' friends.');
+     for (var i=0; i<response.data.length; i++) {
+       var friend = response.data[i];
+       FB.api('/' + response.data[i].id, personInfoResponseHandler);
+     }
+     
+     //save friend relationships
+     
+  }
+  
+  var verifyCompletionOfPersonResponses = null;
+  function initPersonResponseHandler(v) {
+     friends = [];
+     verifyCompletionOfPersonResponses = v;
+  }
+  
+  function personInfoResponseHandler(person) {
+     friends.push(person);
+     if (verifyCompletionOfPersonResponses()) flushPersonResponseHandler();
+  }
+  
+  function flushPersonResponseHandler() {
+     console.log('Found information about ' + friends.length + ' people.');
+     
+     //save all friends information
+     startFriendsPhotoGrabber();
+  }
+  
+  function startFriendsPhotoGrabber() {
+     console.log('Getting Photos of ' + friends.length + ' Friends');
+     if (friends.length > 0)
+       FB.api('/' + friends[0].id + '/photos?limit=100', grabFriendsPhotos);
+  }
+  
+  function grabFriendsPhotos(rsp) {
+    var friend = friends[friends_photos.length];
+    if (!rsp) rsp = new Object();
+    rsp.friend_id = friend.id;
+    rsp.user_id = profile.id;
+    
+    friends_photos.push(rsp);
+    grabFriendsPhotosNext();
+  }
+  
+  function grabFriendsPhotosNext() {
+    if (friends_photos.length % 20 === 0) 
+       console.log('Grabbed photos from: ' + friends_photos.length + ' friends.');
+    if (friends_photos.length == friends.length) grabFriendsPhotosComplete();
+    else {
+      var ix = friends_photos.length;
+      FB.api('/' + friends[ix].id + '/photos?limit=100', grabFriendsPhotos);
+    }
+  }
+  
+  function grabFriendsPhotosComplete() {
+    var count=0;
+    for (var i=0; i<friends_photos.length; i++) {
+      count += friends_photos[i];
+    }
+    console.log('Finished friends photos sync: ' +  friends_photos.length);
+  }
+  
+
+  function eventResponseHandler(response) {
+    console.log('[EventResponseHandler]: Got ' + response.data.length + ' records.');
+    $('#fb-events').html("<font color=RED>Found: " + events.length +  " events so far</font>");
+    eresp = response;
+    
+    if (typeof eresp.paging == "undefined") return;
+    
+    var until = getParams(eresp.paging.next)["until"];
+    if (until == prev_until) {
+      $('#fb-events').html("<font color=RED>Events downloaded: </font>" + events.length);
+      console.log("Events Found: " + events.length);
+      $('#fb-submit').html('<a class="button" href="#" onclick="javascript:postFB();">' + 
+          "<span> Submit </span> </a>");
+      
+      prev_until = 0
+      FB.api('/me/events?since=0', attendingUnsureEventResponseHandler);
+      return ;
+    }
+    
+    for (var i=0; i<eresp.data.length; i++) {
+      events.push(eresp.data[i]);
+    }
+    
+    var ev_url = '/me/events/not_replied?since=0&until=' + until;
+    FB.api(ev_url, eventResponseHandler);
+    prev_until = until;
+  }
+  
+  function attendingUnsureEventResponseHandler(response) {
+    console.log('[EventResponseHandler]: Got ' + response.data.length + ' records.');
+    $('#fb-events').html("<font color=RED>Found: " + events.length +  " events so far</font>");
+    eresp = response;
+    
+    if (typeof eresp.paging == "undefined") return;
+    
+    var until = getParams(eresp.paging.next)["until"];
+    if (until == prev_until) {
+      $('#fb-events').html("<font color=RED>Events downloaded: </font>" + events.length);
+      console.log("Events Found: " + events.length);
+      $('#fb-submit').html("<a class='button' href='#' onclick=\"javascript:postFB();\"> <span> Submit </span> </a>");
+      return ;
+    }
+    
+    for (var i=0; i<eresp.data.length; i++) {
+      events.push(eresp.data[i]);
+    }
+    
+    var ev_url = '/me/events?since=0&until=' + until;
+    FB.api(ev_url, attendingUnsureEventResponseHandler);
+    prev_until = until;
+
+  }
+  
+  function doSend(type) {
+    if (type === 'gc') {
+      postGC ();
+      return false;
+    }
+  }
+  
+  function postGC() {
+    var sourceInfo = new Object();
+    sourceInfo.type = "gc";
+    sourceInfo.username = $('#gc_username').val();
+    sourceInfo.password = $('#gc_pass').val();
+    sourceInfo.month = $('#month').val();
+    sourceInfo.year = $('#year').val();
+    $.post('/psources', sourceInfo, function (data) {
+      $('#loading').hide();
+      if (data.rsp == 'ERROR')
+        alert (data.message);
+      else if (data.rsp == 'OK')
+        $('#gResult').html('Records synced for ' + $('#month').val() + ', ' + $('#year').val() + ': ' + data.count);
+    });
+    $('#loading').show();
+  }
+  
+  $(document).ready (function () {
+    $('#loading').hide();
+  });
+  
+  function postFB() {
+    var sourceInfo = new Object();
+    sourceInfo.type = "fb";
+    sourceInfo.events = JSON.stringify(events);
+    sourceInfo.profile = profile;
+    $.post('/psources', sourceInfo, function(data) {
+      console.log ('posted');
+    });
+  }
+  
+  //$.post('/profile', profile)
+  //friends.map(function(fr) { $.post('/profile', fr) })
+  
+  /*
+    var a = new Object()
+    a.user_id = profile.id
+    a.friends = friends;
+    $.post('/relationships', a);
+  */
+  
+  //var a = new Object(); a.photos = photos; a.user_id = profile.id;
+  //$.post('/photos', a);
+  
+  /*
+    var aa = []; 
+    for (var i=0; i<friends.length; i++) { 
+      var a = new Object(); 
+      a.photos=friends_photos[i].data; 
+      a.user_id=friends[i].id; 
+      aa.push(a); 
+    }
+    for (var i=0; i<aa.length; i++) if (aa[i].photos.length > 0) $.post('/photos', aa[i]);
+  */
+   
+</script>
+</head>
+<body>
+<p><font color="green">Please Enter your Google Username and Password</font></p>
+<form name='gcForm' onSubmit="return doSend('gc');">
+<table>
+<tr>
+<td>Username: </td>
+<td><input id="gc_username" type="text" name="user" /></td>
+</tr>
+<tr>
+<td>Password: </td>
+<td><input id="gc_pass" type="password" name="pwd" /></td>
+</tr>
+<tr>
+<td>Month: </td>
+<td>
+<select id="month" name="months">
+<option value="January">January</option>
+<option value="February">February</option>
+<option value="March">March</option>
+<option value="April">April</option>
+<option value="May">May</option>
+<option value="June">June</option>
+<option value="July">July</option>
+<option value="August">August</option>
+<option value="September">September</option>
+<option value="October">October</option>
+<option value="November">November</option>
+<option value="December">December</option>
+</select>
+</td>
+</tr>
+<tr>
+<td> Year: </td> 
+<td>
+<select id="year" name="year">
+<option value="2010">2010</option>
+<option value="2011">2011</option>
+</select>
+</tr>
+<tr>
+<td>
+<a class='button' href='#' onclick="javascript:doSend('gc');"> <span> Submit </span> </a>
+</td>
+</tr>
+</table>
+</form>
+<div id='gResult'></div>
+<img id="loading" style="position:absolute;right:5px;top:5px;" src="img/loading.gif"></img>
+
+<div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div>
+
+<p><font color="green">Connect to Facebook</font></p>
+
+<div id="fb-root">
+<div class="fb-login-button" onclick="fetchData();">Sync Personal Data from Facebook </div>
+</div>
+
+<div style="margin-top:10px;margin-bottom:10px;"></div>
+<div id="fb-user"></div>
+<div id="fb-events"></div>
+
+<div id="fb-submit" style="margin-top:20px"></div>
+
+<div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div>
+
+<div id="fb-pic-results"></div>
+
+</body>
+</html>
+
+

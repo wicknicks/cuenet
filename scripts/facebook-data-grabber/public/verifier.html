@@ -1,0 +1,149 @@
+<html>
+<title>Emme</title>
+<head>
+<style>
+  .result { width: 380px; height: 100px; 
+            padding: 30px; margin: 10px; 
+            border: 1px solid #000; 
+            background: #eee; color: #333; }
+</style>
+<link type="text/css" href = "style.css" rel="stylesheet" />
+<style type="text/css" media="all">@import "annotate/css/annotation.css";</style>
+<link type="text/css" href="jquery-ui/css/smoothness/jquery-ui-1.8.18.custom.css" rel="Stylesheet" />	
+<script type="text/javascript" src="jquery-ui/js/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="jquery-ui/js/jquery-ui-1.8.18.custom.min.js"></script>
+<script type="text/javascript" src="annotate/js/jquery.annotate.js"></script>
+<script src='logs2.js'></script>
+<script src='urlparams.js'></script>
+<script type = 'text/javascript'>
+  function getNotes(photo, label) {
+    var tags = photo.tags; 
+    var width = photo.width; 
+    var height = photo.height;
+   
+    var notes = [];
+    if (tags == null) return;
+    for (var i=0; i<tags.length; i++) {
+      var note = new Object();
+     
+      var tag = tags[i];
+
+      var fWidth = tag.width * width / 100;
+      var fHeight = tag.height * height / 100;
+      var cx = tag.center.x * width / 100;
+      var cy = tag.center.y * height / 100;
+
+      var left = cx - fWidth / 2;
+      var right = cx + fWidth / 2;
+
+      var top = cy - fHeight / 2;
+      var bottom = cy + fHeight / 2;
+      
+      note.top = top;
+      note.left = left;
+      note.height = bottom - top;
+      note.width = right - left;
+      
+      note.text = "";
+      for (var j=0; j<tag.uids.length; j++) {
+        for each (lo in logs) 
+          if (tag.uids[j].uid.indexOf(lo.id) > 0)
+            note.text += lo.label + ' ' ; // + "_(" + tag.uids[j].confidence + "/" + tag.threshold + ") ";
+      }
+      if (note.text.length < 1) note.text = "Unverified";
+      
+      note.editable = false;
+      notes.push(note);
+    }
+    return notes;
+  }
+ 
+$(function() {
+	var persons = [];
+	for each(lo in logs) persons.push(lo.name);
+	
+	$(document).ready( function() {
+  	$('#loading-icon').hide();
+	  var img = new Image();	
+	  img.id = 'solo';
+	  img.onload = function() {
+  	  console.log("Width: " + img.width);
+	    // if (img.width > 400) img.width = 400;
+	  }
+	  params = getURLParams(window.location.href);
+	  if (!params['i']) 
+	    img.src = 'me/upload.png';
+	  else
+  	  img.src = 'me/' + params['i']
+  	  
+	  $('#img-content').append(img);
+	});
+  
+	$("#tags").autocomplete ({
+		source: logs,
+		minLength: 1,
+		select: function(event, ui) {
+		  var msg = new Object();
+		  msg['url'] = window.location.protocol + "//" + window.location.host + '/me/' + getURLParams(window.location.href)['i'];
+		  msg['uid'] = 'fb_' + ui.item.id + '@wicknicks'
+		  $.post('/verify', msg, function(rsp) {
+		    $('#loading-icon').hide();
+		    if (typeof rsp == 'string') rsp = JSON.parse(rsp)
+		    $('#solo').annotateImage({
+           editable: false,
+           useAjax: false,
+           notes: getNotes(rsp)
+         });
+		    var results = 'Did not find <b>' + ui.item.label + '</b>';
+		    for each (tag in rsp.tags) {
+		      for each (uid in tag.uids) {
+		        if (uid.uid === msg['uid']) {
+		          results = 'Found <b>' + ui.item.label + '</b> with confidence <b>' + uid.confidence + '%</b> ';
+		        }
+		      }
+		    }
+		    $('#verification').html(results);
+		    $('#verification').show();
+		    console.log('Done.');
+		  });
+		  
+		  $('#loading-icon').show();
+		}
+	});
+	
+	$('#verification').hide();
+	
+});
+</script>
+</head>
+<body>
+
+<div id='loading-icon' style="position:absolute; top: 10px; right: 10px"> <img src = 'img/loading.gif'> </img> </div>
+
+<div id='content' style="margin-left:50px; margin-right: 50px; text-align:center">
+
+<h1> Face Verifier </h1>
+
+<div class="ui-widget">
+  <form action="/uploader" method="post" enctype="multipart/form-data">
+  <p>Upload Photo: 
+  <input type="file" name="image" size=50/></p>
+  <p><input type="submit" value="Upload" /></p>
+</div>
+</form>
+
+<table width = 100% border = 0 style="padding-top:20px">
+<td valign = top align = center> <div id='img-content'> </div> </img> </td>
+<td valign = top align = center>
+<div class="ui-widget" style="padding-top:20px">
+ <label for="tags">Is </label>
+ <input id="tags"> <label for="tags"> present in the photo? </label>
+ <div id='verification' class="result ui-corner-all">  </div>
+</div>
+</td>
+
+</div>
+
+</body>
+</html>
+
