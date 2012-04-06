@@ -1,6 +1,7 @@
 package esl.cuenet.mapper.tree;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.query.QueryOperator;
 import esl.cuenet.source.Adornment;
 import esl.cuenet.source.Attribute;
@@ -103,7 +104,10 @@ public class ParseTreeInterpreter {
         if (relGraph.containsClass(obj.getLabel())) objNode = relGraph.getNodeByName(obj.getLabel());
         else objNode = relGraph.createNode(obj.getLabel());
 
-        relGraph.createEdge(pred.getLabel(), subNode, objNode);
+        if (pred.getLabel().compareTo("type")==0)
+            relGraph.createEdge(RDF.type.getURI(), subNode, objNode);
+        else
+            relGraph.createEdge(pred.getLabel(), subNode, objNode);
     }
 
     private void associateAxioms(ISource source, IParseTreeNode axiomNode) {
@@ -172,7 +176,7 @@ public class ParseTreeInterpreter {
         Adornment adornment;
 
         if (adornmentLabel.compareTo("F") == 0) adornment = new Adornment(Adornment.AdornmentType.Free);
-        else if (adornmentLabel.compareTo("U") == 0) adornment = new Adornment(Adornment.AdornmentType.Unspecified);
+        else if (adornmentLabel.compareTo("U") == 0) adornment = new Adornment(Adornment.AdornmentType.Unspecifiable);
         else if (adornmentLabel.compareTo("B") == 0) adornment = new Adornment(Adornment.AdornmentType.Bound);
         else if (adornmentLabel.compareTo("C") == 0) adornment = new Adornment(Adornment.AdornmentType.Constant);
         else if (adornmentLabel.compareTo("O") == 0) adornment = new Adornment(Adornment.AdornmentType.Optional);
