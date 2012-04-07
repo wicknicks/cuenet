@@ -17,8 +17,8 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[6];
     private String ownerEmail = null;
-    private long startTime = 0;
-    private long endTime = 0;
+    private long startTime = -1;
+    private long endTime = -1;
     private int errorMargin = 5;
 
     public GoogleCalendarCollection() {
@@ -41,14 +41,14 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         while (cursor.hasNext()) result.add(cursor.next());
 
         if (result.size() > 3)
-            return new ResultSetImpl("Found " + result.size() + " entires for the result set.");
+            return new ResultSetImpl("Found " + result.size() + " entires in google_calendar.");
         else return new ResultSetImpl(result.toString());
     }
 
     public BasicDBObject search(String username, long timestamp) {
         String queryTemplate = String.format("{\"username\": \"%s\", \"start-time\": {\"$lt\": %d}, " +
                 "\"end-time\": {\"$gt\": %d}}", username,
-                timestamp+(errorMargin *60*1000), timestamp-(errorMargin *60*1000));
+                timestamp+(errorMargin *60*1000), timestamp-(errorMargin * 60 * 1000));
 
         DBReader cursor = startReader("google_calendar");
         BasicDBObject query = (BasicDBObject)JSON.parse(queryTemplate);
@@ -70,13 +70,17 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     @Override
     public void start() {
         for (int i=0; i<setFlags.length; i++) setFlags[i] = false;
+
+        /* re-init for next query */
+        startTime = -1;
+        endTime = -1;
     }
 
     @Override
     public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         if (attribute.compareTo(attributes[2])==0) {       /* name */
             setFlags[2] = true;
-            if (this.startTime > 0) endTime = value;
+            if (this.startTime != -1) endTime = value;
             else startTime = value;
         }
         else
