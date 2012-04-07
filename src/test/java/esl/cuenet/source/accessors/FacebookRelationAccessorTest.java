@@ -91,6 +91,8 @@ public class FacebookRelationAccessorTest extends TestBase {
                         String p = removeNamespace(st.getPredicate().getURI());
 
                         pathExpr = queryNode.name()  + "." + p;
+                        if (!mapper.containsPattern(pathExpr)) continue;
+
                         Adornment a = mapper.getAdornment(pathExpr);
 
                         if (a != null && a.type() == Adornment.AdornmentType.Unspecifiable) continue;

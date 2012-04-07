@@ -27,22 +27,29 @@
 
 
 (:source google-calendar 
-   (:attrs email title description participant[])
-   (:rel person works-at named-place)
+   (:attrs event email time location title description attendee)
+   (:rel ev type-of event)
+   (:rel owner type-of person)
+   (:rel participant type-of person)
+   (:rel owner participant-of ev)
+   (:rel participant participant-of ev)
    (:io disk (:db mongodb))
    (:type personal)
    (:axioms
-      (:map person.email email F [EQUALS])
-      (:map event.title title)
-      (:map event.description description)
-      (:map event.participant participant)))
+      (:map ev event)
+      (:map owner.email email B)
+      (:map ev.occurs-during time)
+      (:map ev.occurs-at location)
+      (:map participant attendee)
+      (:map ev.title title U)
+      (:map ev.description description U)))
 
 
 (:source fb-user
    (:attrs id name birthday location work email)
-   (:rel person type-of http://cn/person)
-   (:rel named-place type-of http://cn/named-place)
-   (:rel address type-of http://cn/address)
+   (:rel person type-of person)
+   (:rel named-place type-of named-place)
+   (:rel address type-of address)
    (:rel person works-at named-place)
    (:rel person lives-at address)
    (:io disk (:db mongodb))
@@ -53,6 +60,17 @@
       (:map address.street-address location.name)
       (:map named-place.name work.name)))
 
+
+(:source fb-relation
+   (:attrs name1 name2)
+   (:rel p1 type-of person)
+   (:rel p2 type-of person)
+   (:rel p1 knows p2)
+   (:io disk (:db mongodb))
+   (:type personal)
+   (:axioms
+      (:map p1.name name1 F)
+      (:map p2.name name2 U)))
 
 //(:source fb-user-old
 //        (:attrs id dob name location work[] email)

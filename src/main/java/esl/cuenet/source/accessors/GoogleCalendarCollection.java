@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import esl.cuenet.query.IResultSet;
@@ -15,19 +16,44 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private Logger logger = Logger.getLogger(GoogleCalendarCollection.class);
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[6];
+    private String ownerEmail = null;
+    private long startTime = 0;
+    private long endTime = 0;
+    private int errorMargin = 5;
 
     public GoogleCalendarCollection() {
         super("test");
     }
 
+    public IResultSet query() {
+        DBReader cursor = startReader("google_calendar");
+        BasicDBObject query = new BasicDBObject();
+        if (setFlags[1]) {
+            query.put("email", ownerEmail);
+        }
+        if (setFlags[2]) {
+            query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
+            query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
+        }
+        cursor.query(query);
+
+        BasicDBList result = new BasicDBList();
+        while (cursor.hasNext()) result.add(cursor.next());
+
+        if (result.size() > 3)
+            return new ResultSetImpl("Found " + result.size() + " entires for the result set.");
+        else return new ResultSetImpl(result.toString());
+    }
+
     public BasicDBObject search(String username, long timestamp) {
-        int errorMargin = 5;
-        String query = String.format("{\"username\": \"%s\", \"start-time\": {\"$lt\": %d}, " +
+        String queryTemplate = String.format("{\"username\": \"%s\", \"start-time\": {\"$lt\": %d}, " +
                 "\"end-time\": {\"$gt\": %d}}", username,
                 timestamp+(errorMargin *60*1000), timestamp-(errorMargin *60*1000));
 
         DBReader cursor = startReader("google_calendar");
-        cursor.query((BasicDBObject)JSON.parse(query));
+        BasicDBObject query = (BasicDBObject)JSON.parse(queryTemplate);
+
+        cursor.query(query);
         logger.info("Found " + cursor.count() + " records");
 
         BasicDBObject tRecord = null;
@@ -48,26 +74,46 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
     @Override
     public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
-        //todo: implement method
-
+        if (attribute.compareTo(attributes[2])==0) {       /* name */
+            setFlags[2] = true;
+            if (this.startTime > 0) endTime = value;
+            else startTime = value;
+        }
+        else
+            throw new AccesorInitializationException("Long value being initialized for wrong attribute "
+                    + FacebookUserAccessor.class.getName());
     }
 
     @Override
     public void associateString(Attribute attribute, String value) throws AccesorInitializationException {
-        //todo: implement method
-
+        if (attribute.compareTo(attributes[1])==0) {       /* name */
+            setFlags[1] = true;
+            this.ownerEmail = value;
+        }
+        else
+            throw new AccesorInitializationException("String value being initialized for wrong attribute "
+                    + FacebookUserAccessor.class.getName());
     }
 
     @Override
     public void associateDouble(Attribute attribute, double value) throws AccesorInitializationException {
-        //todo: implement method
-
+        throw new AccesorInitializationException("Double value being initialized for wrong attribute "
+                + FacebookUserAccessor.class.getName());
     }
 
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
-        //todo: implement method
-        return null;
+        return query();
     }
+
+    private class ResultSetImpl implements IResultSet {
+        private String result;
+        public ResultSetImpl (String result) {this.result = result;}
+        @Override
+        public String printResults() {
+            return result;
+        }
+    }
+
 }
 
