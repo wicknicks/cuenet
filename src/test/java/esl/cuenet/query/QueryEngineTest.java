@@ -3,6 +3,7 @@ package esl.cuenet.query;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.ProfileRegistry;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.VCARD;
 import org.junit.Test;
 import test.TestBase;
@@ -43,13 +44,21 @@ public class QueryEngineTest extends TestBase {
                         .addProperty(VCARD.Given, givenName)
                         .addProperty(VCARD.Family, familyName));
 
-        String queryString = "SELECT ?x ?givenName ?name" +
+//        String queryString = "SELECT ?x ?givenName ?name" +
+//                " WHERE { " +
+//                "?x <http://www.w3.org/2001/vcard-rdf/3.0#FN> ?fullname . " +
+//                "?x <http://www.w3.org/2001/vcard-rdf/3.0#N> ?name . " +
+//                "?x <http://www.w3.org/2001/vcard-rdf/3.0#AGE> 40 . " +
+//                "?name <http://www.w3.org/2001/vcard-rdf/3.0#Given> ?givenName . " +
+//                " FILTER (?x!=<http://somewhere/arjun-satish-uri> && ?givenName!=\"Nujre\") }";
+
+        String queryString = "SELECT ?x " +
                 " WHERE { " +
-                "?x <http://www.w3.org/2001/vcard-rdf/3.0#FN> ?fullname . " +
-                "?x <http://www.w3.org/2001/vcard-rdf/3.0#N> ?name . " +
-                "?x <http://www.w3.org/2001/vcard-rdf/3.0#AGE> 40 . " +
-                "?name <http://www.w3.org/2001/vcard-rdf/3.0#Given> ?givenName . " +
-                " FILTER (?x!=<http://somewhere/arjun-satish-uri> && ?givenName!=\"Nujre\") }";
+                "?x <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#event> . " +
+                "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#participant-of> ?x ." +
+                "?p <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#person> ." +
+                "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#name> \"Arjun Satish\" }";
+        System.out.println(queryString);
 
         QueryEngine engine = new QueryEngine(model, null);
         engine.execute(queryString);

@@ -15,6 +15,7 @@ import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
 
 import javax.xml.transform.Source;
+import java.util.ArrayList;
 import java.util.List;
 
 public class QueryEngine {
@@ -36,6 +37,17 @@ public class QueryEngine {
         query.getQueryPattern().visit(new ElementVisitorImpl(queryGraph));
         projectVars = query.getProjectVars();
         logger.info("Finished parsing query");
+
+        // convert query triples to individuals and their attributes
+        List<RelationGraphNode> allTypedNodes = queryGraph.getAllTypedNodes();
+        List<RelationGraphNode> attributeNodes = new ArrayList<RelationGraphNode>();
+        for (RelationGraphNode node: allTypedNodes) {
+            boolean flag = false;
+            for (Var projectVar: projectVars)
+            if (node.name().equalsIgnoreCase(projectVar.toString())) flag = true;
+            if (flag) attributeNodes.add(node);
+        }
+
         eval();
     }
 
