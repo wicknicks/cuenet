@@ -9,15 +9,39 @@ import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
+import com.mongodb.BasicDBObject;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.Calendar;
 import java.util.Iterator;
 
 public class Tests {
 
     @Test
+    public void createConferenceRecord() {
+        /*BasicDBObject obj = new BasicDBObject();
+
+        obj.put("title", "ACM International Conference on Multimedia 2009");
+        obj.put("short", "ACM MM 2009");
+        obj.put("start-date", getDate(2009, Calendar.OCTOBER, 19));
+        obj.put("end-date", getDate(2009, Calendar.OCTOBER, 23));
+        obj.put("location", "Beijing Hotel, Beijing, China");
+        obj.put("url", "http://www.sigmm.org/archive/MM/mm09/index.htm");
+
+        */
+        System.out.println(getDate(2011, Calendar.AUGUST, 29));
+        System.out.println(getDate(2011, Calendar.SEPTEMBER, 3));
+    }
+
+    public long getDate(int year, int month, int date) {
+        Calendar c = Calendar.getInstance();
+        c.set(year, month-1, date);
+        return c.getTimeInMillis();
+    }
+
+    //@Test
     public void statementTest() {
 
         OntModel model = ModelFactory.createOntologyModel();
@@ -53,7 +77,7 @@ public class Tests {
 
     }
 
-    @Test
+    //@Test
     public void listClassTest() throws FileNotFoundException {
         OntModel model = ModelFactory.createOntologyModel();
 
