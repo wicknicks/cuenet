@@ -38,6 +38,11 @@ public class Tests {
     public long getDate(int year, int month, int date) {
         Calendar c = Calendar.getInstance();
         c.set(year, month-1, date);
+
+        (new Object() {
+            public void foo() { System.out.println("Java takes static typing too seriously."); }
+        }).foo();
+
         return c.getTimeInMillis();
     }
 
