@@ -1,6 +1,8 @@
 package esl.cuenet.mapper.tree;
 
-public class SourceParseException extends Throwable {
+import esl.cuenet.mapper.parser.ParseException;
+
+public class SourceParseException extends ParseException {
 
     public SourceParseException(String msg) {
         super(msg);
