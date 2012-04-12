@@ -11,7 +11,7 @@ public class EventGraphEdgeFactory {
     }
 
     public static EventGraphEdge createParticipatesInEdge(OntModel model) throws EventGraphException {
-        return createObjectPropertyEdge(model, "participantes-in");
+        return createObjectPropertyEdge(model, "participates-in");
     }
 
     public static EventGraphEdge createLiteralEdge(OntModel model, String literalLabel) throws EventGraphException {
@@ -26,7 +26,7 @@ public class EventGraphEdgeFactory {
         throw new EventGraphException("Model does not contain " + literalLabel + " property");
     }
 
-    private static EventGraphEdge createObjectPropertyEdge(OntModel model, String edgeLabel) throws EventGraphException {
+    public static EventGraphEdge createObjectPropertyEdge(OntModel model, String edgeLabel) throws EventGraphException {
         ObjectProperty property = model.getObjectProperty(model.getNsPrefixMap().get("") + edgeLabel);
         if (property == null) throw new EventGraphException("Model does not contain " + edgeLabel + " property");
         return new ConcreteEventGraphEdge(property.getURI());
