@@ -6,18 +6,14 @@ import java.util.*;
 
 public class RelationGraph implements IRelationGraph {
 
-    private List<RelationGraphNode> nodes = new ArrayList<RelationGraphNode>();
+    protected List<RelationGraphNode> nodes = new ArrayList<RelationGraphNode>();
     private HashMap<RelationGraphNode, List<RelationGraphEdge>> edgeMap = new HashMap<RelationGraphNode, List<RelationGraphEdge>>();
     private HashMap<RelationGraphEdge, RelationGraphNode> edgeDestinationMap = new HashMap<RelationGraphEdge, RelationGraphNode>();
-    private Logger logger = Logger.getLogger(RelationGraph.class);
     private HashMap<RelationGraphEdge, RelationGraphNode> edgeOriginMap = new HashMap<RelationGraphEdge, RelationGraphNode>();
+    private Logger logger = Logger.getLogger(RelationGraph.class);
 
     public RelationGraph() {
         super();
-    }
-
-    protected List<RelationGraphNode> getNodes() {
-        return nodes;
     }
 
     @Override

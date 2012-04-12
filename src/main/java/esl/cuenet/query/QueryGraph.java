@@ -10,13 +10,8 @@ import java.util.List;
 
 public class QueryGraph extends RelationGraph {
 
-    public List<RelationGraphNode> getAllNodes() {
-        return getNodes();
-    }
-
     public List<RelationGraphNode> getAllTypedNodes() {
         List<RelationGraphNode> typedNodes = new ArrayList<RelationGraphNode>();
-        List<RelationGraphNode> nodes = getNodes();
         for (RelationGraphNode node: nodes) {
             List<RelationGraphEdge> edges = getOutgoingEdges(node);
             for (RelationGraphEdge edge: edges) {
