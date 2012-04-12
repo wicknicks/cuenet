@@ -3,17 +3,10 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.Individual;
 import esl.datastructures.graph.relationgraph.RelationGraphNode;
 
-public class Entity extends RelationGraphNode implements Comparable<Entity> {
-
-    private Individual individual = null;
-
-    public Entity(String name) {
-        super(name);
-    }
+public class Entity extends EventGraphNode implements Comparable<Entity> {
 
     public Entity (Individual individual) {
-        super(individual.getURI());
-        this.individual = individual;
+        super(individual, EventGraph.NodeType.ENTITY);
     }
 
     public Individual getIndividual() {
@@ -24,7 +17,5 @@ public class Entity extends RelationGraphNode implements Comparable<Entity> {
     public int compareTo(Entity o) {
         return 0;
     }
-
-
 
 }

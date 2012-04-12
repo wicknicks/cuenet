@@ -5,31 +5,21 @@ import esl.datastructures.graph.relationgraph.RelationGraphNode;
 
 import java.util.List;
 
-public class Event extends RelationGraphNode implements Comparable<Event> {
-
-    private Individual individual = null;
-
-    public Event(String name) {
-        super(name);
-    }
+public class Event extends EventGraphNode implements Comparable<Event> {
 
     public Event (Individual individual) {
-        super(individual.getURI());
-        this.individual = individual;
+        super(individual, EventGraph.NodeType.EVENT);
     }
 
     public Individual getIndividual() {
         return individual;
     }
 
-    public List<Event> getSubEvents() {
-        return null;
-    }
-
     @Override
     public int compareTo(Event o) {
         return 0;
     }
+
 }
 
 
