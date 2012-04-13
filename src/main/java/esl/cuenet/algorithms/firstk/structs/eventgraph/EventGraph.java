@@ -113,18 +113,12 @@ public class EventGraph extends RelationGraph {
         if (event == null) throw new RuntimeException("Event is null");
         if (entity == null) throw new RuntimeException("Entity is null");
 
-
-
         EventGraphEdge partsIn = EventGraphEdgeFactory.createParticipatesInEdge(model);
         createEdge(entity, partsIn, event);
     }
 
     public void updateParticipantRole(Event event, Entity entity, String roleURI) throws EventGraphException {
-        if (entity == null) throw new RuntimeException("Entity is null");
-        if (event == null) throw new RuntimeException("Event is null");
-
-        dropParticipantEdge(event, entity);
-        createEdge(entity, EventGraphEdgeFactory.createObjectPropertyEdge(model, roleURI), event);
+        updateEdge(event, entity, roleURI);
     }
 
     public void removeEvent(Event event) {
@@ -154,8 +148,12 @@ public class EventGraph extends RelationGraph {
         if (subeventEdge != null) dropEdge(subeventEdge);
     }
 
-    public void updateEdge(Event event, Entity entity, String roleURI) {
-        throw new UnsupportedOperationException("updateRole() Not implemented");
+    public void updateEdge(Event event, Entity entity, String roleURI) throws EventGraphException {
+        if (entity == null) throw new RuntimeException("Entity is null");
+        if (event == null) throw new RuntimeException("Event is null");
+
+        dropParticipantEdge(event, entity);
+        createEdge(entity, EventGraphEdgeFactory.createObjectPropertyEdge(model, roleURI), event);
     }
 
     public List<Event> getSubevents(Event event) {
