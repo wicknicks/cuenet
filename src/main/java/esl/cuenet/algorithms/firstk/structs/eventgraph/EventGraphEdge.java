@@ -14,4 +14,9 @@ public abstract class EventGraphEdge extends RelationGraphEdge implements Compar
     public int compareTo(EventGraphEdge o) {
         return this.label().compareTo(o.label());
     }
+
+    public String uri() {
+        return label();
+    }
+
 }

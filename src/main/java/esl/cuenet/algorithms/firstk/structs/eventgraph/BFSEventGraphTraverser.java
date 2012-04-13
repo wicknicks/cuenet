@@ -1,21 +1,18 @@
 package esl.cuenet.algorithms.firstk.structs.eventgraph;
 
 import esl.datastructures.graph.*;
-import esl.datastructures.graph.relationgraph.RelationGraph;
-import esl.datastructures.graph.relationgraph.RelationGraphEdge;
-import esl.datastructures.graph.relationgraph.RelationGraphNode;
 
 import java.util.*;
 
-public class BFSEventGraphTraverser implements Traverser<RelationGraphNode, RelationGraphEdge> {
+public class BFSEventGraphTraverser implements Traverser<EventGraphNode, EventGraphEdge> {
 
-    private RelationGraph relationGraph = null;
+    private EventGraph relationGraph = null;
     private NodeVisitor nodeVisitor = null;
     private EdgeVisitor edgeVisitor = null;
     private TraversalContext traversalContext = null;
 
 
-    public BFSEventGraphTraverser(RelationGraph relationGraph) {
+    public BFSEventGraphTraverser(EventGraph relationGraph) {
         this.relationGraph = relationGraph;
     }
 
@@ -25,17 +22,19 @@ public class BFSEventGraphTraverser implements Traverser<RelationGraphNode, Rela
         traverseDFS(relationGraph);
     }
 
-    private void traverseDFS(RelationGraph relationGraph) {
+    private void traverseDFS(EventGraph eventGraph) {
 
         HashMap<String, Integer> seenMap = new HashMap<String, Integer>();
-        Queue<Map.Entry<RelationGraphNode, RelationGraphEdge>> nodeQueue =
-                new LinkedList<Map.Entry<RelationGraphNode, esl.datastructures.graph.relationgraph.RelationGraphEdge>>();
-        nodeQueue.add(new AbstractMap.SimpleEntry<RelationGraphNode, RelationGraphEdge>(relationGraph.getStartNode(), null));
+        Queue<Map.Entry<EventGraphNode, EventGraphEdge>> nodeQueue =
+                new LinkedList<Map.Entry<EventGraphNode, EventGraphEdge>>();
+
+        for (EventGraphNode node: eventGraph.getStartNodes())
+            nodeQueue.add(new AbstractMap.SimpleEntry<EventGraphNode, EventGraphEdge>(node, null));
 
         boolean allSeen;
         while( nodeQueue.size() > 0) {
-            Map.Entry<RelationGraphNode, RelationGraphEdge> entry = nodeQueue.peek();
-            RelationGraphNode n = entry.getKey();
+            Map.Entry<EventGraphNode, EventGraphEdge> entry = nodeQueue.peek();
+            EventGraphNode n = entry.getKey();
 
             if (seenMap.get(n.name()) == null) seenMap.put(n.name(), 0);
 
@@ -48,16 +47,16 @@ public class BFSEventGraphTraverser implements Traverser<RelationGraphNode, Rela
             nodeVisitor.visit(n, traversalContext);
             seenMap.put(n.name(), 1);
 
-            if (relationGraph.getOutgoingEdges(n) == null || relationGraph.getOutgoingEdges(n).size() == 0) {
+            if (eventGraph.getEdges(n) == null || eventGraph.getEdges(n).size() == 0) {
                 nodeQueue.remove();
                 continue;
             }
 
             allSeen = true;
-            for (RelationGraphEdge e: relationGraph.getOutgoingEdges(n)) {
-                RelationGraphNode dest = relationGraph.getDestinationNode(e);
+            for (EventGraphEdge e: eventGraph.getEdges(n)) {
+                EventGraphNode dest = eventGraph.getDestination(e);
                 if ( seenMap.get(dest.name()) == null || seenMap.get(dest.name()) == 0 ) {
-                    nodeQueue.add(new AbstractMap.SimpleEntry<RelationGraphNode, RelationGraphEdge>(dest, e));
+                    nodeQueue.add(new AbstractMap.SimpleEntry<EventGraphNode, EventGraphEdge>(dest, e));
                     allSeen = false;
                 }
             }
@@ -82,7 +81,7 @@ public class BFSEventGraphTraverser implements Traverser<RelationGraphNode, Rela
     }
 
     @Override
-    public void start(Graph<RelationGraphNode, RelationGraphEdge> relationGraphNodeRelationGraphEdgeGraph) {
+    public void start(Graph<EventGraphNode, EventGraphEdge> graph) {
         throw new RuntimeException("Use start() instead.");
     }
 

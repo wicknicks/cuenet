@@ -16,7 +16,7 @@ public abstract class BaseAlgorithm implements IAlgorithm {
     protected SourceMapper sourceMapper = null;
     protected String mappingsFile = "./mappings/sources.map";
 
-    public BaseAlgorithm() throws FileNotFoundException, ParseException, SourceParseException {
+    public BaseAlgorithm() throws FileNotFoundException, ParseException {
         model = ModelFactory.createOntologyModel();
 
         model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
@@ -31,6 +31,10 @@ public abstract class BaseAlgorithm implements IAlgorithm {
         interpreter.interpret();
 
         sourceMapper = interpreter.getSourceMapper();
+    }
+
+    public OntModel getModel() {
+        return model;
     }
 
 }

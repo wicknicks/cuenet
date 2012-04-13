@@ -11,7 +11,7 @@ public class EventGraphEdgeFactory {
     }
 
     public static EventGraphEdge createParticipatesInEdge(OntModel model) throws EventGraphException {
-        return createObjectPropertyEdge(model, "participates-in");
+        return createObjectPropertyEdge(model, "participant-in");
     }
 
     public static EventGraphEdge createLiteralEdge(OntModel model, String literalLabel) throws EventGraphException {
@@ -23,13 +23,26 @@ public class EventGraphEdgeFactory {
             return new ConcreteEventGraphEdge(property.getURI());
         }
 
-        throw new EventGraphException("Model does not contain " + literalLabel + " property");
+        throw new EventGraphException("Model does not contain \"" + literalLabel + "\" property");
+    }
+
+    public static boolean isParticipantInEdge(EventGraphEdge edge) {
+        return edge.label().contains("participant-in");
+    }
+
+    public static boolean isSubeventOfEdge(EventGraphEdge edge) {
+        return edge.label().contains("subevent-of");
     }
 
     public static EventGraphEdge createObjectPropertyEdge(OntModel model, String edgeLabel) throws EventGraphException {
-        ObjectProperty property = model.getObjectProperty(model.getNsPrefixMap().get("") + edgeLabel);
-        if (property == null) throw new EventGraphException("Model does not contain " + edgeLabel + " property");
-        return new ConcreteEventGraphEdge(property.getURI());
+        ObjectProperty property = null;
+        for (String nsKey: model.getNsPrefixMap().keySet()) {
+            property = model.getObjectProperty(model.getNsPrefixMap().get(nsKey) + edgeLabel);
+            if (property == null) continue;
+            return new ConcreteEventGraphEdge(property.getURI());
+        }
+
+        throw new EventGraphException("Model does not contain \"" + edgeLabel + "\" property");
     }
 
     private static class ConcreteEventGraphEdge extends EventGraphEdge {
@@ -37,4 +50,5 @@ public class EventGraphEdgeFactory {
             super(uri);
         }
     }
+
 }
