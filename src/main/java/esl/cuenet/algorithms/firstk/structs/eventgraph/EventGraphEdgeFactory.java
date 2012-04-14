@@ -3,15 +3,16 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntModel;
+import esl.cuenet.model.Constants;
 
 public class EventGraphEdgeFactory {
 
     public static EventGraphEdge createSubeventEdge(OntModel model) throws EventGraphException {
-        return createObjectPropertyEdge(model, "subevent-of");
+        return createObjectPropertyEdge(model, Constants.SubEvent); /*"subevent-of"*/
     }
 
     public static EventGraphEdge createParticipatesInEdge(OntModel model) throws EventGraphException {
-        return createObjectPropertyEdge(model, "participant-in");
+        return createObjectPropertyEdge(model, Constants.ParticipantIn); /*"participant-in"*/
     }
 
     public static EventGraphEdge createLiteralEdge(OntModel model, String literalLabel) throws EventGraphException {
@@ -27,11 +28,11 @@ public class EventGraphEdgeFactory {
     }
 
     public static boolean isParticipantInEdge(EventGraphEdge edge) {
-        return edge.label().contains("participant-in");
+        return edge.label().contains(Constants.ParticipantIn); /*"participant-in"*/
     }
 
     public static boolean isSubeventOfEdge(EventGraphEdge edge) {
-        return edge.label().contains("subevent-of");
+        return edge.label().contains(Constants.SubEvent); /*"subevent-of"*/
     }
 
     public static EventGraphEdge createObjectPropertyEdge(OntModel model, String edgeLabel) throws EventGraphException {
@@ -50,5 +51,4 @@ public class EventGraphEdgeFactory {
             super(uri);
         }
     }
-
 }

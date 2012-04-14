@@ -147,7 +147,7 @@ public class EventGraphTest extends TestBase {
 
     }
 
-    private class ConcreteAlgorithmClass extends BaseAlgorithm {
+    public static class ConcreteAlgorithmClass extends BaseAlgorithm {
 
         public ConcreteAlgorithmClass() throws FileNotFoundException, ParseException {
             super();

@@ -1,6 +1,8 @@
 package esl.cuenet.algorithms.firstk.structs.eventgraph;
 
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Property;
 import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
 
@@ -24,4 +26,13 @@ public abstract class EventGraphNode extends RelationGraphNode {
     public EventGraph.NodeType getType() {
         return type;
     }
+
+    public void addLiteral(Property property, Literal literal) {
+        individual.addLiteral(property, literal);
+    }
+
+    public void addResource(Property property, Individual p) {
+        individual.addProperty(property, p);
+    }
+
 }

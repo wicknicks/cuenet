@@ -1,7 +1,6 @@
 package esl.cuenet.algorithms.firstk.structs.eventgraph;
 
 import com.hp.hpl.jena.ontology.Individual;
-import esl.datastructures.graph.relationgraph.RelationGraphNode;
 
 public class Entity extends EventGraphNode implements Comparable<Entity> {
 

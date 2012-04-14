@@ -7,16 +7,17 @@ import esl.cuenet.mapper.tree.SourceParseException;
 
 import java.io.FileNotFoundException;
 
-public class FirstKImpl extends FirstKAlgorithm {
+public class FirstKDiscoverer extends FirstKAlgorithm {
 
-    public FirstKImpl() throws FileNotFoundException, ParseException, SourceParseException {
+    public FirstKDiscoverer() throws FileNotFoundException, ParseException, SourceParseException {
         super();
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException {
 
-        LocalFilePreprocessor preprocessor = new LocalFilePreprocessor();
+        LocalFilePreprocessor preprocessor = new LocalFilePreprocessor(model);
         preprocessor.process(lds);
 
     }
+
 }

@@ -1,28 +1,45 @@
 package esl.cuenet.algorithms.firstk.impl;
 
-import esl.cuenet.algorithms.firstk.*;
-import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
+import com.hp.hpl.jena.enhanced.EnhGraph;
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import esl.cuenet.algorithms.firstk.CorruptDatasetException;
+import esl.cuenet.algorithms.firstk.Dataset;
+import esl.cuenet.algorithms.firstk.Preprocessing;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Event;
-import esl.datastructures.graph.relationgraph.RelationGraph;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraphException;
+import esl.cuenet.model.Constants;
+import esl.datastructures.Location;
+import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
 
 public class LocalFilePreprocessor implements Preprocessing<File> {
 
     private Logger logger = Logger.getLogger(ExifExtractor.class.getName());
     private ExifExtractor extractor = new ExifExtractor();
-    private RelationGraph graph = new RelationGraph();
+    private EventGraph graph = null;
+    private OntModel model = null;
+
+    public LocalFilePreprocessor(OntModel model) {
+        this.model = model;
+    }
 
 
     @Override
-    public RelationGraph process(Dataset<File> fileDataset) throws CorruptDatasetException {
+    public EventGraph process(Dataset<File> fileDataset) throws CorruptDatasetException {
 
         File file = fileDataset.item();
 
         if (file == null) throw new CorruptDatasetException("Dataset content = NULL");
         if (!file.exists()) throw new CorruptDatasetException("File not found: " + file.getAbsolutePath());
 
+        graph = new EventGraph(model);
         try {
             Exif exif = extractor.extractExif(file.getAbsolutePath());
             logger.info("Processing: " + file.getAbsolutePath());
@@ -31,20 +48,38 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             logger.info("GPS-Lon: " + exif.GPSLongitude);
             logger.info("Image-Width: " + exif.width);
             logger.info("Image-Height: " + exif.height);
+
+            Event io;
+            io = graph.createEvent(Constants.PhotoCaptureEvent);
+            io.addLiteral(model.createProperty(
+                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.ImageWidth),
+                    model.createTypedLiteral(exif.width));
+            io.addLiteral(model.createProperty(
+                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.ImageHeight),
+                    model.createTypedLiteral(exif.width));
+            io.addResource(model.createProperty(
+                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.TimeInterval),
+                    TimeInterval.createFromMoment(exif.timestamp, (EnhGraph) model));
+
+            if (exif.GPSLatitude != 0 && exif.GPSLongitude != 0) {
+                io.addResource(model.createProperty(
+                        model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.Location),
+                        Location.createFromGPS(exif.GPSLatitude, exif.GPSLongitude, (EnhGraph) model));
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (EventGraphException e) {
+            e.printStackTrace();
         }
-        return null;
+
+        return graph;
     }
 
     @Override
-    public void associate(Event event) {
-        graph.createNode(event.name());
-    }
-
-    @Override
-    public void associate(Entity entity) {
-        graph.createNode(entity.name());
+    public void associate(Individual individual, EventGraph.NodeType type) {
+        if (graph == null) throw new RuntimeException("individual cannot be assigned to NULL graph");
+        graph.addIndividual(individual, type);
     }
 
     class Exif {
