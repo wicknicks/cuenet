@@ -1,4 +1,4 @@
-package esl.cuenet.algorithms.firstk.structs.eventgraph;
+package esl.cuenet.algorithms.firstk.exceptions;
 
 public class EventGraphException extends Exception {
 

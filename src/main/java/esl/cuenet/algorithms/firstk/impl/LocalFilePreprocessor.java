@@ -3,12 +3,13 @@ package esl.cuenet.algorithms.firstk.impl;
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
-import esl.cuenet.algorithms.firstk.CorruptDatasetException;
+import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
 import esl.cuenet.algorithms.firstk.Dataset;
 import esl.cuenet.algorithms.firstk.Preprocessing;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Event;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
-import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraphException;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.model.Constants;
 import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
@@ -25,15 +26,22 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
     private ExifExtractor extractor = new ExifExtractor();
     private EventGraph graph = null;
     private OntModel model = null;
+    private String username = "Arjun Satish";
+    private String email = "arjun.satish@gmail.com";
+
+    public LocalFilePreprocessor(OntModel model, String username, String email) {
+        this.model = model;
+        this.username = username;
+        this.email = email;
+    }
 
     public LocalFilePreprocessor(OntModel model) {
         this.model = model;
     }
 
-
     @Override
     public EventGraph process(Dataset<File> fileDataset) throws CorruptDatasetException {
-
+        if (fileDataset == null) throw new CorruptDatasetException("Dataset = NULL");
         File file = fileDataset.item();
 
         if (file == null) throw new CorruptDatasetException("Dataset content = NULL");
@@ -48,6 +56,8 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             logger.info("GPS-Lon: " + exif.GPSLongitude);
             logger.info("Image-Width: " + exif.width);
             logger.info("Image-Height: " + exif.height);
+            logger.info("User name: " + username);
+            logger.info("Email: " + email);
 
             Event io;
             io = graph.createEvent(Constants.PhotoCaptureEvent);
@@ -60,6 +70,21 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             io.addResource(model.createProperty(
                     model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.TimeInterval),
                     TimeInterval.createFromMoment(exif.timestamp, (EnhGraph) model));
+
+            Entity author = null;
+            if (username != null || email != null) {
+                author = graph.createPerson();
+            }
+
+            if (username != null)
+                author.addLiteral(model.createProperty(
+                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.Name),
+                    model.createTypedLiteral(username));
+
+            if (email != null)
+                author.addLiteral(model.createProperty(
+                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.Email),
+                    model.createTypedLiteral(email));
 
             if (exif.GPSLatitude != 0 && exif.GPSLongitude != 0) {
                 io.addResource(model.createProperty(

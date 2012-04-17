@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntModel;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.model.Constants;
 
 public class EventGraphEdgeFactory {

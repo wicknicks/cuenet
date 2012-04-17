@@ -1,4 +1,4 @@
-package esl.cuenet.algorithms.firstk;
+package esl.cuenet.algorithms.firstk.exceptions;
 
 import java.io.IOException;
 

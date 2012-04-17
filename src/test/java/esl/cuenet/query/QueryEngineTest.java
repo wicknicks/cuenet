@@ -80,10 +80,8 @@ public class QueryEngineTest extends TestBase {
                 "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#name> \"Arjun Satish\" }";
         System.out.println(queryString);
 
-
         QueryEngine engine = new QueryEngine(model, mapper);
         engine.execute(queryString);
-
 
     }
 

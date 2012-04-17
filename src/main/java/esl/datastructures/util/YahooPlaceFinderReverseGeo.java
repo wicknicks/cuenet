@@ -15,7 +15,6 @@ import java.net.URLConnection;
 public class YahooPlaceFinderReverseGeo {
 
     private Logger logger = Logger.getLogger(YahooPlaceFinderReverseGeo.class);
-
     private static YahooPlaceFinderReverseGeo instance = new YahooPlaceFinderReverseGeo();
 
     public static BasicDBObject reverseGeoCode(double lat, double lon) throws IOException {
@@ -27,7 +26,7 @@ public class YahooPlaceFinderReverseGeo {
     }
 
     private BasicDBObject queryPlaceFinder(String addressWithSpaces) throws IOException {
-
+        logger.info("Geocoding adress");
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + addressWithSpaces.replaceAll(" ", "%20")
                 + "&flags=J&appid=UmMtXR7c");
 
@@ -54,6 +53,7 @@ public class YahooPlaceFinderReverseGeo {
     }
 
     private BasicDBObject queryPlaceFinder(double lat, double lon) throws IOException {
+        logger.info("Reverse Geocoding");
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + lat + "," + lon
                 + "&gflags=R&flags=J&appid=UmMtXR7c");
 

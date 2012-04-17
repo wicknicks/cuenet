@@ -1,6 +1,7 @@
 package esl.cuenet.algorithms.firstk.structs.eventgraph;
 
 import esl.cuenet.algorithms.BaseAlgorithm;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.datastructures.graph.*;
 import org.apache.log4j.Logger;

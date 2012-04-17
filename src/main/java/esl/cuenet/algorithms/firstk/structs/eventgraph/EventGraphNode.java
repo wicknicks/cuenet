@@ -3,8 +3,13 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
+
+import java.util.Map;
 
 public abstract class EventGraphNode extends RelationGraphNode {
 
@@ -33,6 +38,38 @@ public abstract class EventGraphNode extends RelationGraphNode {
 
     public void addResource(Property property, Individual p) {
         individual.addProperty(property, p);
+    }
+
+    public boolean containsLiteralEdge(String literalLabel) {
+        StmtIterator iter = individual.listProperties();
+        Map<String, String> nsPrefixMap = individual.getModel().getNsPrefixMap();
+
+        for (String key: nsPrefixMap.keySet()) {
+            while (iter.hasNext()) {
+                Statement statement = iter.nextStatement();
+                if (statement.getPredicate().getURI().compareTo(nsPrefixMap.get(key) + literalLabel) == 0 &&
+                        statement.getObject().isLiteral())
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public Object getLiteralValue(String literalLabel) throws EventGraphException {
+        StmtIterator iter = individual.listProperties();
+        Map<String, String> nsPrefixMap = individual.getModel().getNsPrefixMap();
+
+        for (String key: nsPrefixMap.keySet()) {
+            while (iter.hasNext()) {
+                Statement statement = iter.nextStatement();
+                if (statement.getPredicate().getURI().compareTo(nsPrefixMap.get(key) + literalLabel) == 0 &&
+                        statement.getObject().isLiteral())
+                    return statement.getObject().asLiteral().getValue();
+            }
+        }
+
+        throw new EventGraphException("No value for literal label: " + literalLabel);
     }
 
 }

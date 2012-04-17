@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.datastructures.graph.relationgraph.RelationGraph;
 import org.apache.log4j.Logger;
 

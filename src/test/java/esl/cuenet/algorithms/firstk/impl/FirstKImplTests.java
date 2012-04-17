@@ -1,6 +1,7 @@
 package esl.cuenet.algorithms.firstk.impl;
 
-import esl.cuenet.algorithms.firstk.CorruptDatasetException;
+import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.mapper.parser.ParseException;
 import org.apache.log4j.Logger;
 import org.junit.Test;
@@ -14,7 +15,7 @@ public class FirstKImplTests extends TestBase {
     private Logger logger = Logger.getLogger(FirstKImplTests.class);
 
     @Test
-    public void doSingleFileTest() throws IOException, ParseException {
+    public void doSingleFileTest() throws IOException, ParseException, EventGraphException {
 
         File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
@@ -24,7 +25,7 @@ public class FirstKImplTests extends TestBase {
 
 
     @Test
-    public void doMultipleFilesTest() throws IOException, ParseException {
+    public void doMultipleFilesTest() throws IOException, ParseException, EventGraphException {
         String[] files = new String[]{"/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG",
                 "/home/arjun/Dataset/ramesh/confs/DSCN4352.JPG",
                 "/home/arjun/Dataset/ramesh/confs/DSCN4357.JPG"};
@@ -47,6 +48,8 @@ public class FirstKImplTests extends TestBase {
             firstKDiscoverer.execute(new LocalFileDataset(file));
         } catch (CorruptDatasetException cde) {
             logger.info("CorruptDatasetException: " + cde.getLocalizedMessage());
+        } catch (EventGraphException e) {
+            e.printStackTrace();
         }
 
     }

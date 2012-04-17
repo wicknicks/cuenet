@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.algorithms.BaseAlgorithm;
+import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;

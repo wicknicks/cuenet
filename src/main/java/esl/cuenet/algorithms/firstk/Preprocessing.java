@@ -1,10 +1,8 @@
 package esl.cuenet.algorithms.firstk;
 
 import com.hp.hpl.jena.ontology.Individual;
-import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
-import esl.cuenet.algorithms.firstk.structs.eventgraph.Event;
+import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
-import esl.datastructures.graph.relationgraph.RelationGraph;
 
 public interface Preprocessing<T> {
 
