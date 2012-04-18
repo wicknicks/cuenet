@@ -34,7 +34,6 @@ public class QueryEngine {
     private OntModel model = null;
     private QueryGraph queryGraph = new QueryGraph();
     private SourceMapper sourceMapper = null;
-    private List<Var> projectVars = null;
 
     public QueryEngine(OntModel model, SourceMapper sourceMapper) {
         this.model = model;
@@ -46,7 +45,7 @@ public class QueryEngine {
         String ns = "http://www.semanticweb.org/arjun/cuenet-main.owl";
         Query query = QueryFactory.create(sparqlQuery);
         query.getQueryPattern().visit(new ElementVisitorImpl(queryGraph));
-        projectVars = query.getProjectVars();
+        List<Var> projectVars = query.getProjectVars();
         logger.info("Finished parsing query");
 
         // convert query triples to individuals and their attributes
@@ -75,7 +74,13 @@ public class QueryEngine {
             }
             individuals.add(ind);
         }
+
         eval(individuals);
+        clear();
+    }
+
+    private void clear() {
+        queryGraph = new QueryGraph();
     }
 
     private void eval(List<Individual> individuals) {

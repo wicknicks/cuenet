@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
@@ -18,6 +19,11 @@ public class YahooPlaceFinderAPI implements IAccessor {
     private Logger logger = Logger.getLogger(YahooPlaceFinderAPI.class);
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[3];
+
+    public YahooPlaceFinderAPI() {}
+    public YahooPlaceFinderAPI(OntModel model) {
+
+    }
 
     Double lat, lon;
     String address;

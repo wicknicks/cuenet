@@ -17,6 +17,14 @@ public class TimeInterval extends IndividualImpl {
         this.end = end;
     }
 
+    public long getEnd() {
+        return end;
+    }
+
+    public long getStart() {
+        return start;
+    }
+
     public static TimeInterval createFromMoment(long timestamp, EnhGraph graph) {
         return new TimeInterval(new TimeNodeURI(), graph, timestamp, timestamp);
     }

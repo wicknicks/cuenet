@@ -32,17 +32,22 @@ public class GoogleCalendarCollectionTest extends TestBase {
         super();
     }
 
-    //@Test
-    public void runTest() throws IOException {
+    @Test
+    public void runTest() throws IOException, SourceQueryException, AccesorInitializationException, ParseException {
 
-        GoogleCalendarCollection calendarCollection = new GoogleCalendarCollection();
-        BasicDBObject o = calendarCollection.search("arjun", 1296171000000L);
-        if (o != null) logger.info(o.toString());
+        QueryCalendarTest qrt = new QueryCalendarTest();
+
+        GoogleCalendarCollection calendarCollection = new GoogleCalendarCollection(qrt.getModel());
+        //BasicDBObject o = calendarCollection.search("arjun", 1296171000000L);
+        calendarCollection.setAttributeNames(new Attribute[]{null, new Attribute("owner.email"), null, null, null, null});
+        calendarCollection.associateString(new Attribute("owner.email"), "arjun.satish@gmail.com");
+        IResultSet rs = calendarCollection.executeQuery();
+        if (rs != null) logger.info(rs.printResults());
 
     }
 
-    @Test
-    public void sourceQueryTest() throws SourceParseException, FileNotFoundException, ParseException {
+
+    public void sourceQueryTest() throws FileNotFoundException, ParseException {
         QueryCalendarTest qrt = new QueryCalendarTest();
         qrt.query();
     }

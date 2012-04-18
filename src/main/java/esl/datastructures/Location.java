@@ -19,6 +19,18 @@ public class Location extends IndividualImpl {
     private String country;
     private String zipcode;
 
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
     protected Location(Node n, EnhGraph g, double lat, double lon) throws IOException {
         super(n, g);
         this.lat = lat;

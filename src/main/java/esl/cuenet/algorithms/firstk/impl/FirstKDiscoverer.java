@@ -5,7 +5,6 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -30,10 +29,12 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private QueryEngine queryEngine = null;
     private Property subeventOfProperty = null;
 
+    private final String cuenetNameSpace = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
+
     public FirstKDiscoverer() throws FileNotFoundException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
-        subeventOfProperty = model.getProperty(model.getNsPrefixURI("") + "subevent-of");
+        subeventOfProperty = model.getProperty(cuenetNameSpace + "subevent-of");
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException, EventGraphException {
@@ -47,6 +48,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         graphTraverser.setTraversalContext(traversalContext);
         graphTraverser.setNodeVisitorCallback(new NodeVisitor() {
             @Override
+            @SuppressWarnings("unchecked")
             public void visit(Node node, TraversalContext traversalContext) {
                 Queue<EventGraphNode> dQueue = (Queue<EventGraphNode>) traversalContext.getCx();
                 dQueue.add((EventGraphNode) node);
@@ -87,24 +89,20 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             email = (String) entity.getLiteralValue(Constants.Email);
         }
 
-        if (entity.containsLiteralEdge("asad"))
-            logger.info(entity.getLiteralValue("asad"));
-
         String sparqlQuery = "SELECT ?x " +
                 " WHERE { " +
                 "?x <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#event> . " +
-                "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#participant-in> ?x ." +
-                "?p <" + RDF.type + "> <http://www.semanticweb.org/arjun/cuenet-main.owl#person> .";
+                "?p <" + cuenetNameSpace + "participant-in> ?x ." +
+                "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> .";
 
         if (email != null)
-            sparqlQuery += "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#email> \"" + email + "\" .";
+            sparqlQuery += "?p <" + cuenetNameSpace + "email> \"" + email + "\" .";
         if (name != null)
-            sparqlQuery += "?p <http://www.semanticweb.org/arjun/cuenet-main.owl#name> \"" + name + "\" .";
+            sparqlQuery += "?p <" + cuenetNameSpace + "name> \"" + name + "\" .";
 
         sparqlQuery += "}";
 
         queryEngine.execute(sparqlQuery);
-
     }
 
     private void discover(Event event) throws EventGraphException {
@@ -112,6 +110,18 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
         if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
         else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
+
+        String sparqlQuery = "SELECT ?p \n" +
+                " WHERE { \n" +
+                "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
+                "?p <" + cuenetNameSpace + "participant-in> ?x .\n" +
+                "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> .\n";
+
+        sparqlQuery += "}";
+
+        logger.info("Executing Sparql Query: \n" + sparqlQuery);
+
+        queryEngine.execute(sparqlQuery);
     }
 
     private List<OntClass> getPossibleSubeventClasses(String superEventURI) {
@@ -119,8 +129,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         OntClass superEvent = model.getOntClass(superEventURI);
 
         // list all the events.
-        StmtIterator iterator = model.listStatements(null, RDFS.subClassOf,
-                model.getOntClass(model.getNsPrefixURI(Constants.DOLCE_Lite_Namespace) + "event"));
+        OntClass eventOntClass = model.getOntClass(model.getNsPrefixURI(Constants.DOLCE_Lite_Namespace_Prefix) + "event");
+        StmtIterator iterator = model.listStatements(null, RDFS.subClassOf, eventOntClass);
 
         while(iterator.hasNext()) {
             Statement stmt = iterator.nextStatement();
@@ -137,8 +147,9 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private boolean isSubeventOf(OntClass event, OntClass superEvent) {
         OntClass superClass = event.getSuperClass();
 
-        for (StmtIterator i = model.listStatements(superClass, RDF.type, OWL.Restriction); i.hasNext(); ) {
-            Statement stmt = i.nextStatement();
+        StmtIterator iter = model.listStatements(superClass, RDF.type, OWL.Restriction);
+        while(iter.hasNext()) {
+            Statement stmt = iter.nextStatement();
             Resource restriction = stmt.getSubject();
             if (isSuperEventRestriction(restriction, superEvent)) return true;
         }
@@ -160,10 +171,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         return someVal.getObject().equals(superEvent);
     }
 
-
-    private Random generator = new Random();
     private boolean terminate(EventGraph graph) {
-        return false;
+        return (!graph.equals(graph));
     }
 
 }

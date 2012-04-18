@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import esl.cuenet.query.IResultSet;
@@ -22,9 +23,15 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
     private String email;
     private String workplaceName;
     private String birthday;
+    private OntModel model = null;
 
     public FacebookUserAccessor() {
         super("test");
+    }
+
+    public FacebookUserAccessor(OntModel model) {
+        this();
+        this.model = model;
     }
 
     @Override

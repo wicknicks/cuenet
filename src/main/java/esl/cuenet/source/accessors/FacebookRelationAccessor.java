@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -17,9 +18,15 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[1];
     private String id;
+    private OntModel model = null;
 
     public FacebookRelationAccessor() {
         super("test");
+    }
+
+    public FacebookRelationAccessor(OntModel model) {
+        this();
+        this.model = model;
     }
 
     @Override
@@ -130,6 +137,12 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
         return result;
     }
 
+    public IResultSet executeQuery (long id) throws SourceQueryException {
+        this.id = "" + id;
+        setFlags[0] = true;
+        return executeQuery();
+    }
+
     private class ResultSetImpl implements IResultSet {
         private String result;
         public ResultSetImpl (String result) {this.result = result;}
@@ -137,12 +150,6 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
         public String printResults() {
             return result;
         }
-    }
-
-    public IResultSet executeQuery (long id) throws SourceQueryException {
-        this.id = "" + id;
-        setFlags[0] = true;
-        return executeQuery();
     }
 
 }

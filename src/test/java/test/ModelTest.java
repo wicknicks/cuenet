@@ -29,14 +29,19 @@ public class ModelTest extends TestBase {
         model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
                 "http://www.semanticweb.org/arjun/cuenet-main.owl");
 
-        String ns = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
+        String NS = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
 
         String nsPrefix = model.getNsPrefixMap().get("");
 
         logger.info("ModelTest Default Namespace: " + nsPrefix);
 
-        Individual indi = model.createIndividual(model.getOntClass(ns + "concert"));
+        Individual indi = model.createIndividual(model.getOntClass(NS + "concert"));
         logger.info(indi.getOntClass());
+
+        for (String s: model.getNsPrefixMap().values()) {
+            logger.info(s);
+            logger.info(model.getOntClass(s + "event") == null);
+        }
 
     }
 

@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
@@ -19,6 +20,10 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
     public LocalSimpleGeoPlaceDB() {
         super("test");
+    }
+
+    public LocalSimpleGeoPlaceDB(OntModel model) {
+        this();
     }
 
     @Override

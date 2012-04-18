@@ -1,15 +1,24 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.enhanced.EnhGraph;
+import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.PrintUtil;
+import com.hp.hpl.jena.vocabulary.RDF;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
+import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
+
+import java.util.regex.Pattern;
 
 public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
@@ -20,9 +29,15 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private long startTime = -1;
     private long endTime = -1;
     private int errorMargin = 5;
+    private OntModel model = null;
 
     public GoogleCalendarCollection() {
         super("test");
+    }
+
+    public GoogleCalendarCollection(OntModel model) {
+        this();
+        this.model = model;
     }
 
     public IResultSet query() {
@@ -40,9 +55,59 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         BasicDBList result = new BasicDBList();
         while (cursor.hasNext()) result.add(cursor.next());
 
+        return convertResults(result);
+    }
+
+    private IResultSet convertResults(BasicDBList result) {
+        OntClass event = null;
+        OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
+        DatatypeProperty nameProperty = model.getDatatypeProperty(
+                Constants.CuenetNamespace + "name");
+        DatatypeProperty emailProperty = model.getDatatypeProperty(
+                Constants.CuenetNamespace + "email");
+        DatatypeProperty titleProperty = model.getDatatypeProperty(
+                Constants.CuenetNamespace + "title");
+        ObjectProperty participatesInProperty = model.getObjectProperty(
+                Constants.DOLCE_Lite_Namespace + Constants.ParticipantIn);
+        ObjectProperty occursDuring = model.getObjectProperty(
+                Constants.CuenetNamespace + "occurs-during");
+
+        for (Object o: result) {
+            BasicDBObject entry = (BasicDBObject) o;
+
+            if (entry.containsField("title")) {
+                event = getOntologyClass(entry.getString("title"));
+            } else {
+                event = model.getOntClass("http://www.w3.org/1999/02/22-rdf-syntax-ns#event");
+            }
+
+            Individual ev = event.createIndividual();
+
+            Individual owner = person.createIndividual();
+            if (entry.containsField("name")) owner.addLiteral(nameProperty, entry.getString("name"));
+            if (entry.containsField("email")) owner.addLiteral(emailProperty, entry.getString("email"));
+            if (entry.containsField("title")) owner.addLiteral(titleProperty, entry.getString("title"));
+            if (entry.containsField("start-time") && entry.containsField("end-time")) {
+                TimeInterval interval = TimeInterval.createFromInterval(entry.getLong("start-time"),
+                        entry.getLong("start-time"), (EnhGraph) model);
+                ev.addProperty(occursDuring, interval);
+            }
+
+            owner.addProperty(participatesInProperty, ev);
+
+        }
+
         if (result.size() > 3)
             return new ResultSetImpl("Found " + result.size() + " entires in google_calendar.");
         else return new ResultSetImpl(result.toString());
+    }
+
+    private OntClass getOntologyClass(String title) {
+        if (Pattern.compile(Pattern.quote("meet"), Pattern.CASE_INSENSITIVE).matcher(title).find())
+            return model.getOntClass("http://www.semanticweb.org/arjun/cuenet-main.owl#meeting");
+        else if (Pattern.compile(Pattern.quote("talk"), Pattern.CASE_INSENSITIVE).matcher(title).find())
+            return model.getOntClass("http://www.semanticweb.org/arjun/cuenet-main.owl#talk");
+        return model.getOntClass(Constants.DOLCE_Lite_Namespace + "event");
     }
 
     public BasicDBObject search(String username, long timestamp) {
