@@ -1,9 +1,13 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.query.ResultIterator;
 import esl.cuenet.query.drivers.webjson.HttpDownloader;
 import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
@@ -13,6 +17,7 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
 
 public class UpcomingEventsAPI implements IAccessor {
 
@@ -24,6 +29,12 @@ public class UpcomingEventsAPI implements IAccessor {
     private double lat, lon;
     private String startDate, endDate;
     private String nameSubstring, descriptionSubstring;
+
+    private OntModel model = null;
+
+    public UpcomingEventsAPI(OntModel model) {
+        this.model = model;
+    }
 
     // startDate, endDate format: YYYY-MM-DD
     public BasicDBList searchUpcoming() throws IOException {
@@ -166,14 +177,22 @@ public class UpcomingEventsAPI implements IAccessor {
 
     private class ResultSetImpl implements IResultSet {
         private String result;
+        private ResultIterator resultIterator = new ResultIterator(model);
 
-        public ResultSetImpl(String result) {
-            this.result = result;
+        public ResultSetImpl (String result) {this.result = result;}
+
+        public void addResult(List<Individual> individuals) {
+            this.resultIterator.add(individuals);
         }
 
         @Override
         public String printResults() {
             return result;
+        }
+
+        @Override
+        public IResultIterator iterator() {
+            return resultIterator;
         }
     }
 }

@@ -4,4 +4,6 @@ public interface IResultSet {
 
     String printResults();
 
+    IResultIterator iterator();
+
 }

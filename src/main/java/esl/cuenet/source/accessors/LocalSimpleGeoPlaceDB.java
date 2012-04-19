@@ -1,15 +1,20 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.query.ResultIterator;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
+
+import java.util.List;
 
 public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
@@ -17,6 +22,7 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
     private boolean[] setFlags = new boolean[3];
     private Double lat, lon;
     private String address;
+    private OntModel model = null;
 
     public LocalSimpleGeoPlaceDB() {
         super("test");
@@ -24,6 +30,7 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
     public LocalSimpleGeoPlaceDB(OntModel model) {
         this();
+        this.model = model;
     }
 
     @Override
@@ -129,10 +136,22 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
     private class ResultSetImpl implements IResultSet {
         private String result;
+        private ResultIterator resultIterator = new ResultIterator(model);
+
         public ResultSetImpl (String result) {this.result = result;}
+
+        public void addResult(List<Individual> individuals) {
+            this.resultIterator.add(individuals);
+        }
+
         @Override
         public String printResults() {
             return result;
+        }
+
+        @Override
+        public IResultIterator iterator() {
+            return resultIterator;
         }
     }
 }

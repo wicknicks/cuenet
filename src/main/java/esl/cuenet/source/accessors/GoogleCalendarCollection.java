@@ -7,9 +7,12 @@ import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.Hash;
 import com.mongodb.util.JSON;
 import esl.cuenet.model.Constants;
+import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.query.ResultIterator;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
@@ -18,6 +21,10 @@ import esl.cuenet.source.SourceQueryException;
 import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class GoogleCalendarCollection extends MongoDB implements IAccessor {
@@ -177,12 +184,23 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
     private class ResultSetImpl implements IResultSet {
         private String result;
+        private ResultIterator resultIterator = new ResultIterator(model);
+
         public ResultSetImpl (String result) {this.result = result;}
+
+        public void addResult(List<Individual> individuals) {
+            this.resultIterator.add(individuals);
+        }
+
         @Override
         public String printResults() {
             return result;
         }
-    }
 
+        @Override
+        public IResultIterator iterator() {
+            return resultIterator;
+        }
+    }
 }
 

@@ -4,14 +4,14 @@ import org.apache.log4j.Logger;
 
 public class ExceptionHandler {
 
-    private int mode = 0;
+    private int mode = -1;
     private Logger logger = Logger.getLogger(ExceptionHandler.class);
     public static int DEBUG = 0;
     public static int PRODUCTION = 1;
 
     public ExceptionHandler(int mode) {
         this.mode = mode;
-        if (this.mode != DEBUG || this.mode != PRODUCTION) {
+        if (!(this.mode == DEBUG || this.mode == PRODUCTION)) {
             logger.info("Bad init");
             System.exit(1);
         }

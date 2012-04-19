@@ -1,9 +1,12 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.query.ResultIterator;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
@@ -12,6 +15,7 @@ import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class FacebookUserAccessor extends MongoDB implements IAccessor {
@@ -105,10 +109,22 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
 
     private class ResultSetImpl implements IResultSet {
         private String result;
+        private ResultIterator resultIterator = new ResultIterator(model);
+
         public ResultSetImpl (String result) {this.result = result;}
+
+        public void addResult(List<Individual> individuals) {
+            this.resultIterator.add(individuals);
+        }
+
         @Override
         public String printResults() {
             return result;
+        }
+
+        @Override
+        public IResultIterator iterator() {
+            return resultIterator;
         }
     }
     

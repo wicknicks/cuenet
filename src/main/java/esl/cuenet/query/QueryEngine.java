@@ -45,7 +45,17 @@ public class QueryEngine {
         String ns = "http://www.semanticweb.org/arjun/cuenet-main.owl";
         Query query = QueryFactory.create(sparqlQuery);
         query.getQueryPattern().visit(new ElementVisitorImpl(queryGraph));
+
         List<Var> projectVars = query.getProjectVars();
+        List<String> projectTypeURIs = new ArrayList<String>();
+        for (Var projectVar: projectVars) {
+            RelationGraphNode node =  queryGraph.getNodeByName(projectVar.toString());
+            for (RelationGraphEdge edge: queryGraph.getOutgoingEdges(node)) {
+                if (edge.label().equalsIgnoreCase(RDF.type.getURI()))
+                    projectTypeURIs.add(queryGraph.getDestinationNode(edge).name());
+            }
+        }
+
         logger.info("Finished parsing query");
 
         // convert query triples to individuals and their attributes

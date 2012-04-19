@@ -89,19 +89,20 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             email = (String) entity.getLiteralValue(Constants.Email);
         }
 
-        String sparqlQuery = "SELECT ?x " +
-                " WHERE { " +
-                "?x <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#event> . " +
-                "?p <" + cuenetNameSpace + "participant-in> ?x ." +
-                "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> .";
+        String sparqlQuery = "SELECT ?x \n" +
+                " WHERE { \n" +
+                "?x <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#event> . \n" +
+                "?p <" + cuenetNameSpace + "participant-in> ?x . \n" +
+                "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> . \n";
 
         if (email != null)
             sparqlQuery += "?p <" + cuenetNameSpace + "email> \"" + email + "\" .";
         if (name != null)
             sparqlQuery += "?p <" + cuenetNameSpace + "name> \"" + name + "\" .";
 
-        sparqlQuery += "}";
+        sparqlQuery += "} \n";
 
+        logger.info("Executing Sparql Query: \n" + sparqlQuery);
         queryEngine.execute(sparqlQuery);
     }
 
@@ -120,7 +121,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         sparqlQuery += "}";
 
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
-
         queryEngine.execute(sparqlQuery);
     }
 
