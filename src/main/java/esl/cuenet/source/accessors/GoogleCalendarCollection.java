@@ -66,6 +66,8 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     }
 
     private IResultSet convertResults(BasicDBList result) {
+        ResultSetImpl resultSet = new ResultSetImpl("Google Calendar Results");
+
         OntClass event = null;
         OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
         DatatypeProperty nameProperty = model.getDatatypeProperty(
@@ -89,8 +91,8 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             }
 
             Individual ev = event.createIndividual();
-
             Individual owner = person.createIndividual();
+
             if (entry.containsField("name")) owner.addLiteral(nameProperty, entry.getString("name"));
             if (entry.containsField("email")) owner.addLiteral(emailProperty, entry.getString("email"));
             if (entry.containsField("title")) owner.addLiteral(titleProperty, entry.getString("title"));
@@ -102,11 +104,14 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
             owner.addProperty(participatesInProperty, ev);
 
+            List<Individual> resultEntry = new ArrayList<Individual>();
+            resultEntry.add(ev);
+            resultEntry.add(owner);
+            resultSet.addResult(resultEntry);
+
         }
 
-        if (result.size() > 3)
-            return new ResultSetImpl("Found " + result.size() + " entires in google_calendar.");
-        else return new ResultSetImpl(result.toString());
+        return resultSet;
     }
 
     private OntClass getOntologyClass(String title) {

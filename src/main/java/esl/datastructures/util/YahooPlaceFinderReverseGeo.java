@@ -26,7 +26,7 @@ public class YahooPlaceFinderReverseGeo {
     }
 
     private BasicDBObject queryPlaceFinder(String addressWithSpaces) throws IOException {
-        logger.info("Geocoding adress");
+        logger.info("Geocoding adress: " + addressWithSpaces);
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + addressWithSpaces.replaceAll(" ", "%20")
                 + "&flags=J&appid=UmMtXR7c");
 

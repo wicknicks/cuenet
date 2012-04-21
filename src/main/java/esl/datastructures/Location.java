@@ -9,6 +9,7 @@ import esl.cuenet.model.Constants;
 import esl.datastructures.util.YahooPlaceFinderReverseGeo;
 
 import java.io.IOException;
+import java.util.UUID;
 
 public class Location extends IndividualImpl {
 
@@ -74,7 +75,7 @@ public class Location extends IndividualImpl {
 
     private static class LocationNodeURI extends Node_URI {
         protected LocationNodeURI() {
-            super(Constants.DOLCELocationURI);
+            super(Constants.DOLCELocationURI + UUID.randomUUID());
         }
     }
 

@@ -1,10 +1,14 @@
 package esl.cuenet.source.accessors;
 
 import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.util.PrintUtil;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.ResultIterator;
@@ -15,6 +19,7 @@ import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FacebookRelationAccessor extends MongoDB implements IAccessor {
@@ -76,6 +81,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
         DBReader reader = this.startReader("fb_relationships");
+        ResultSetImpl resultSet = new ResultSetImpl("FB_Relations for : " + id);
 
         BasicDBList clauses = new BasicDBList();
 
@@ -84,12 +90,19 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
             return new ResultSetImpl("");
         }
 
+        BasicDBObject inputPersonPredicates = new BasicDBObject("id", id);
+        BasicDBObject inputPersonDBObject = getPerson(inputPersonPredicates);
+        Individual inputPersonIndividual = Utils.createPersonFromFacebookRecord(inputPersonDBObject, model);
+
+        ObjectProperty knowsProperty = model.getObjectProperty(
+                Constants.CuenetNamespace + "knows");
+
         clauses.add(new BasicDBObject("id", id));
         clauses.add(new BasicDBObject("relation", id));
         BasicDBObject query = new BasicDBObject("$or", clauses);
 
         reader.query(query);
-        BasicDBList result = new BasicDBList();
+
         String tmpID, tmpName;
         while (reader.hasNext()) {
             DBObject rel = reader.next();
@@ -99,47 +112,65 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
             if ( ((String)normalizedRelation.get("id")).compareTo(id) != 0 ) {
                 tmpID = (String) normalizedRelation.get("relation");
                 tmpName = getNameFromFB(normalizedRelation.getString("relation"));
+
                 normalizedRelation.put("relation", normalizedRelation.get("id"));
                 normalizedRelation.put("relation_name", getNameFromFB((String)normalizedRelation.get("id")));
                 normalizedRelation.put("id",  tmpID);
                 normalizedRelation.put("name",  tmpName);
             }
 
-            result.add(normalizedRelation);
+            //result.add(normalizedRelation);
+
+            BasicDBObject friend = getPerson(new BasicDBObject("id", normalizedRelation.getString("relation")));
+            Individual friendIndividual = Utils.createPersonFromFacebookRecord(friend, model);
+            inputPersonIndividual.addProperty(knowsProperty, friendIndividual);
+
+            List<Individual> result = new ArrayList<Individual>();
+            result.add(inputPersonIndividual);
+            result.add(friendIndividual);
+            resultSet.addResult(result);
         }
 
-        if (result.size() > 3)
-            return new ResultSetImpl(id + " has " + result.size() + " relationships");
-        else
-            return new ResultSetImpl(result.toString());
+        return resultSet;
     }
 
     private String getIDFromName(String name) {
-        DBReader reader = this.startReader("fb_users");
-
         BasicDBObject query = new BasicDBObject("name", name);
-        reader.query(query);
-        String result = null;
-        while(reader.hasNext()) {
-            DBObject o = reader.next();
-            if (o.containsField("id")) result = (String) o.get("id");
-        }
+        BasicDBObject person = getPerson(query);
 
-        return result;
+        if (person.containsField("id")) return  person.getString("id");
+        return null;
+    }
+
+    private BasicDBObject getPerson(BasicDBObject inputPredicates) {
+        DBReader reader = this.startReader("fb_users");
+        reader.query(inputPredicates);
+        DBObject o = null;
+        while (reader.hasNext()) {
+            o = reader.next();
+        }
+        return (BasicDBObject) o;
     }
 
     private String getNameFromFB(String userID) {
-        DBReader reader = this.startReader("fb_users");
-
         BasicDBObject query = new BasicDBObject("id", userID);
-        reader.query(query);
-        String result = null;
-        while(reader.hasNext()) {
-            DBObject o = reader.next();
-            if (o.containsField("name")) result = (String) o.get("name");
-        }
+        BasicDBObject p = getPerson(query);
 
-        return result;
+        if (p.containsField("name")) return p.getString("name");
+        return null;
+    }
+
+    private IResultSet convertResults(BasicDBObject result) {
+
+        ResultSetImpl resultSet = new ResultSetImpl("");
+
+        Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
+
+        List<Individual> re = new ArrayList<Individual>();
+        re.add(personIndividual);
+        resultSet.addResult(re);
+
+        return resultSet;
     }
 
     public IResultSet executeQuery (long id) throws SourceQueryException {

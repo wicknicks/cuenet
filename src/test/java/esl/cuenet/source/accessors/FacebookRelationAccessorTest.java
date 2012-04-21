@@ -32,15 +32,16 @@ public class FacebookRelationAccessorTest extends TestBase {
         super();
     }
 
-    //@Test
-    public void doTest() throws SourceQueryException {
+    @Test
+    public void doTest() throws SourceQueryException, ParseException, FileNotFoundException {
 
-        FacebookRelationAccessor accessor = new FacebookRelationAccessor();
+        QueryRelationsTest qrt = new QueryRelationsTest();
+        FacebookRelationAccessor accessor = new FacebookRelationAccessor(qrt.getModel());
 
         accessor.start();
         IResultSet rs = accessor.executeQuery(717562539);
-        BasicDBList k = (BasicDBList) JSON.parse(rs.printResults());
-        logger.info("717562539 has " + k.size() + " relationships");
+        //BasicDBList k = (BasicDBList) JSON.parse(rs.printResults());
+        //logger.info("717562539 has " + k.size() + " relationships");
 
         rs = accessor.executeQuery(111290);
         logger.info(rs.printResults());
@@ -50,7 +51,7 @@ public class FacebookRelationAccessorTest extends TestBase {
 
     }
 
-    @Test
+    //@Test
     public void sourceQueryTest() throws SourceParseException, FileNotFoundException, ParseException {
         QueryRelationsTest qrt = new QueryRelationsTest();
         qrt.query();

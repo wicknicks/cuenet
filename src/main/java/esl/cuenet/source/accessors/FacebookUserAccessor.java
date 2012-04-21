@@ -3,7 +3,6 @@ package esl.cuenet.source.accessors;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.ResultIterator;
@@ -14,7 +13,7 @@ import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 
-import java.util.Calendar;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -94,18 +93,28 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
         }
 
         reader.query(query);
-        DBObject result = null;
+        BasicDBObject result = null;
         while (reader.hasNext()) {
-            result = reader.next();
+            result = (BasicDBObject) reader.next();
             BasicDBObject r = new BasicDBObject("name", result.get("name"));
             r.put("birthday", result.get("birthday"));
             logger.info(r.toString());
         }
 
-        if (result == null) return new ResultSetImpl("");
-        return new ResultSetImpl(result.toString());
+        return convertResults(result);
     }
 
+    private IResultSet convertResults(BasicDBObject result) {
+
+        ResultSetImpl resultSet = new ResultSetImpl("");
+        Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
+
+        List<Individual> re = new ArrayList<Individual>();
+        re.add(personIndividual);
+        resultSet.addResult(re);
+
+        return resultSet;
+    }
 
     private class ResultSetImpl implements IResultSet {
         private String result;

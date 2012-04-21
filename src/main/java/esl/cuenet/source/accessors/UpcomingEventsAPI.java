@@ -32,6 +32,8 @@ public class UpcomingEventsAPI implements IAccessor {
 
     private OntModel model = null;
 
+    public UpcomingEventsAPI() {}
+
     public UpcomingEventsAPI(OntModel model) {
         this.model = model;
     }
