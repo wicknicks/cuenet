@@ -118,12 +118,19 @@ public class QueryEngine {
 
             //check if source describe with any project URI
 
-            for (String uri: projectTypeURIs) {
-                logger.info(uri);
-            }
-
             IRelationGraph relationGraph = source.getRelationGraph();
             IMapper mapper = source.getMapper();
+
+            boolean flag = false;
+            for (String uri: projectTypeURIs) {
+                List<RelationGraphNode> nodes = relationGraph.getNodesOfType(removeNamespace(uri));
+                if (nodes != null && nodes.size() > 0)
+                    flag = true;
+                logger.info("Searching for: " + uri);
+            }
+
+            logger.info("Source suitable for querying: " + flag);
+            if (!flag) return;
 
             List<String> pathExpressions = new ArrayList<String>();
             List<Literal> literals = new ArrayList<Literal>();
