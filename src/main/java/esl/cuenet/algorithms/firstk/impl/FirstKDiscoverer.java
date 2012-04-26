@@ -29,13 +29,14 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private Queue<EventGraphNode> discoveryQueue = new LinkedList<EventGraphNode>();
     private QueryEngine queryEngine = null;
     private Property subeventOfProperty = null;
-    private Voter voter = new EntityVoter();
+    private Voter voter = null;
 
     private final String cuenetNameSpace = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
 
     public FirstKDiscoverer() throws FileNotFoundException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
+        voter = new EntityVoter(queryEngine);
         subeventOfProperty = model.getProperty(cuenetNameSpace + "subevent-of");
     }
 
