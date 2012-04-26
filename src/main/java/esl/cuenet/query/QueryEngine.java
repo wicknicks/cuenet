@@ -34,6 +34,7 @@ public class QueryEngine {
     private OntModel model = null;
     private QueryGraph queryGraph = new QueryGraph();
     private SourceMapper sourceMapper = null;
+    private List<String> projectTypeURIs = null;
 
     public QueryEngine(OntModel model, SourceMapper sourceMapper) {
         this.model = model;
@@ -47,7 +48,7 @@ public class QueryEngine {
         query.getQueryPattern().visit(new ElementVisitorImpl(queryGraph));
 
         List<Var> projectVars = query.getProjectVars();
-        List<String> projectTypeURIs = new ArrayList<String>();
+        projectTypeURIs = new ArrayList<String>();
         for (Var projectVar: projectVars) {
             RelationGraphNode node =  queryGraph.getNodeByName(projectVar.toString());
             for (RelationGraphEdge edge: queryGraph.getOutgoingEdges(node)) {
@@ -114,6 +115,12 @@ public class QueryEngine {
         @Override
         public void visit(ISource source) {
             logger.info("Visiting " + source.getName());
+
+            //check if source describe with any project URI
+
+            for (String uri: projectTypeURIs) {
+                logger.info(uri);
+            }
 
             IRelationGraph relationGraph = source.getRelationGraph();
             IMapper mapper = source.getMapper();

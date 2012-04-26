@@ -9,6 +9,7 @@ import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import esl.cuenet.algorithms.firstk.FirstKAlgorithm;
+import esl.cuenet.algorithms.firstk.Voter;
 import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.*;
@@ -28,6 +29,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private Queue<EventGraphNode> discoveryQueue = new LinkedList<EventGraphNode>();
     private QueryEngine queryEngine = null;
     private Property subeventOfProperty = null;
+    private Voter voter = new EntityVoter();
 
     private final String cuenetNameSpace = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
 
@@ -71,6 +73,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             if (node.getType() == EventGraph.NodeType.EVENT) discover((Event) node);
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
         }
+
+        voter.vote(graph);
 
         discover(graph);
     }

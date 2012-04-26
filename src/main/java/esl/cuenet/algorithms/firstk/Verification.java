@@ -1,9 +1,10 @@
 package esl.cuenet.algorithms.firstk;
 
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.Event;
 
-public interface Verification<T> {
+public interface Verification {
 
-    public double verify(Entity entity, Dataset<T> dataset);
+    public double verify(Entity entity, Event photoCaptureEvent);
 
 }
