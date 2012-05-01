@@ -1,7 +1,9 @@
 package esl.cuenet.source;
 
+import esl.cuenet.query.IResultSet;
+
 public interface SourceMapVisitor {
 
-    public void visit(ISource source);
+    public IResultSet visit(ISource source);
 
 }

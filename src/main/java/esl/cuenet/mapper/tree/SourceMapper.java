@@ -1,9 +1,12 @@
 package esl.cuenet.mapper.tree;
 
 import com.hp.hpl.jena.ontology.OntModel;
+import esl.cuenet.query.IResultSet;
 import esl.cuenet.source.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class SourceMapper {
@@ -46,9 +49,13 @@ public class SourceMapper {
         return null;
     }
 
-    public void accept(SourceMapVisitor visitor) {
-        for (ISource source: sourceMap.values())
-            visitor.visit(source);
+    public List<IResultSet> accept(SourceMapVisitor visitor) {
+        List<IResultSet> iResultSets = new ArrayList<IResultSet>();
+        for (ISource source: sourceMap.values()) {
+            IResultSet resultSet = visitor.visit(source);
+            iResultSets.add(resultSet);
+        }
+        return iResultSets;
     }
     
     public ISource createSource (String name) {

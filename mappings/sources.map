@@ -61,6 +61,19 @@
       (:map named-place.name work.name)))
 
 
+(:source email
+   (:attrs from to cc)
+   (:rel pf type-of person)
+   (:rel pt type-of person)
+   (:rel pc type-of person)
+   (:io disk (:db mongodb))
+   (:type personal)
+   (:axioms
+      (:map pf.email from)
+      (:map pt.email to)
+      (:map pc.email cc)))
+
+
 (:source fb-relation
    (:attrs name1 name2)
    (:rel p1 type-of person)

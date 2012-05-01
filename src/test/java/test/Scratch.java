@@ -6,12 +6,9 @@ import esl.cuenet.algorithms.firstk.impl.LocalFileDataset;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.system.ExceptionHandler;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Scratch extends TestBase {
 

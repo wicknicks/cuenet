@@ -77,6 +77,10 @@ public class MongoDB {
             cursor = collection.find(queryDBObject);
         }
 
+        public void query (BasicDBObject queryObject, BasicDBObject keys) {
+            cursor = collection.find(queryObject, keys);
+        }
+
         public boolean hasNext() {
             return cursor.hasNext();
         }

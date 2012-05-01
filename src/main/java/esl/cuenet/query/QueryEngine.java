@@ -113,7 +113,7 @@ public class QueryEngine {
         }
 
         @Override
-        public void visit(ISource source) {
+        public IResultSet visit(ISource source) {
             logger.info("Visiting " + source.getName());
 
             //check if source describe with any project URI
@@ -130,7 +130,7 @@ public class QueryEngine {
             }
 
             logger.info("Source suitable for querying: " + flag);
-            if (!flag) return;
+            if (!flag) return null;
 
             List<String> pathExpressions = new ArrayList<String>();
             List<Literal> literals = new ArrayList<Literal>();
@@ -168,7 +168,7 @@ public class QueryEngine {
 
             if (pathExpressions.size() == 0 || literals.size() == 0 ) {
                 logger.info("Zero input predicates for " + source.getName());
-                return;
+                return null;
             }
 
             /* set the query attributes */
@@ -180,8 +180,11 @@ public class QueryEngine {
             } catch (AccesorInitializationException e) {
                 e.printStackTrace();
             }
+
             if (resultsSet != null) logger.info(resultsSet.printResults());
             else logger.info("NULL Result Set");
+
+            return resultsSet;
         }
 
         private String removeNamespace(String uri) {

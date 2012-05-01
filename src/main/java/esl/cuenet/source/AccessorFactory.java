@@ -54,6 +54,11 @@ public class AccessorFactory {
             return new FacebookRelationAccessor(model);
         }
 
+        else if (name.compareTo("email") == 0) {
+            logger.info("Initializing Email Accessor");
+            return new EmailAccessor(model);
+        }
+
         return null;
     }
 

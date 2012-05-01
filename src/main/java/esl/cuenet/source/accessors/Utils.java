@@ -10,11 +10,37 @@ import esl.cuenet.model.Constants;
 import esl.datastructures.Location;
 import org.apache.log4j.Logger;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Utils {
 
     private static Logger logger = Logger.getLogger(Utils.class);
+
+    public static Individual createPersonFromNameEmail(String email, String name, OntModel model) {
+        OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
+        DatatypeProperty nameProperty = model.getDatatypeProperty(
+                Constants.CuenetNamespace + "name");
+        DatatypeProperty emailProperty = model.getDatatypeProperty(
+                Constants.CuenetNamespace + "email");
+
+        String id = (name != null) ? name : null;
+        if (id == null) id = (email != null) ? email : "";
+
+        Individual personIndividual = person.createIndividual(Constants.CuenetNamespace + id);
+
+        if (name != null)
+            personIndividual.addLiteral(nameProperty, model.createTypedLiteral(name));
+        if (email != null)
+            personIndividual.addLiteral(emailProperty, model.createTypedLiteral(email));
+
+        return personIndividual;
+    }
 
     public static Individual createPersonFromFacebookRecord(BasicDBObject personDBObject, OntModel model) {
         OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
@@ -32,7 +58,7 @@ public class Utils {
         if (personDBObject.containsField("name"))
             personIndividual.addLiteral(nameProperty, model.createTypedLiteral(personDBObject.getString("name")));
         if (personDBObject.containsField("email"))
-            personIndividual.addLiteral(nameProperty, model.createTypedLiteral(personDBObject.getString("email")));
+            personIndividual.addLiteral(emailProperty, model.createTypedLiteral(personDBObject.getString("email")));
         if (personDBObject.containsField("location")) {
             BasicDBObject loc = (BasicDBObject) personDBObject.get("location");
             if (loc.containsField("name")) {
@@ -67,6 +93,21 @@ public class Utils {
         }
 
         return personIndividual;
+    }
+
+
+    public static List<Map.Entry<String, String>> parseEmailAddresses(String addressList) {
+        List<Map.Entry<String, String>> entries = new ArrayList<Map.Entry<String, String>>();
+        try {
+            for (InternetAddress ia: InternetAddress.parse(addressList)) {
+                Map.Entry<String, String> entry =
+                        new AbstractMap.SimpleEntry<java.lang.String, java.lang.String>(ia.getAddress(), ia.getPersonal());
+                entries.add(entry);
+            }
+        } catch (AddressException e) {
+            e.printStackTrace();
+        }
+        return entries;
     }
 
 }

@@ -68,7 +68,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
             logger.info("Associated ID from name: " + id);
         }
         else
-            throw new AccesorInitializationException("Long value being initialized for wrong attribute "
+            throw new AccesorInitializationException("String value being initialized for wrong attribute "
                     + FacebookUserAccessor.class.getName());
     }
 
