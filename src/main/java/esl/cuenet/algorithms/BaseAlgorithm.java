@@ -37,4 +37,8 @@ public abstract class BaseAlgorithm implements IAlgorithm {
         return model;
     }
 
+    public SourceMapper getSourceMapper() {
+        return sourceMapper;
+    }
+
 }

@@ -21,8 +21,9 @@ public class EmailAccessorTest extends TestBase {
     public void doTest() throws FileNotFoundException, ParseException {
 
         EAAlgorithm algorithm = new EAAlgorithm();
-        EmailAccessor accessorTest = new EmailAccessor(algorithm.getModel());
-        accessorTest.execute(new String[]{"jain@ics.uci.edu", "gupta@sdsc.edu"});
+        EmailAccessor accessorTest = (EmailAccessor) algorithm.getSourceMapper().get("email").getAccessor();
+        accessorTest.execute(new String[]{"Fabian.Groffen@cwi.nl"});
+        //accessorTest.execute(new String[]{"21-questions@ics.uci.edu", "ppnguyen@uci.edu"});
     }
 
 

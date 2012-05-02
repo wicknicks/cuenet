@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.mongodb.BasicDBList;
@@ -13,8 +14,11 @@ import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
+import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,6 +32,7 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[3];
     private List<String> queryEmails = new ArrayList<String>();
+    private SimpleDateFormat rfc2822DateFormatter = new SimpleDateFormat("");
 
     public EmailAccessor(OntModel model) {
         super("test");
@@ -114,7 +119,7 @@ public class EmailAccessor extends MongoDB implements IAccessor {
         logger.info("Query: " + queryObject);
 
         int c = 1;
-        String to, from, cc;
+        String date, to, from, cc;
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
             List<Map.Entry<String, String>> entries = new ArrayList<Map.Entry<String, String>>();
@@ -127,17 +132,39 @@ public class EmailAccessor extends MongoDB implements IAccessor {
             cc = obj.getString("CC");
             if (cc != null)entries.addAll(Utils.parseEmailAddresses(cc));
 
-            List<Individual> persons = new ArrayList<Individual>();
+            List<Individual> individualCollection = new ArrayList<Individual>();
+
+            date = obj.getString("Date");
+            TimeInterval interval = getDate(date);
+            if (interval != null) individualCollection.add(interval);
 
             for (Map.Entry<String, String> entry: entries)
-                persons.add(Utils.createPersonFromNameEmail(entry.getKey(), entry.getValue(), model));
+                individualCollection.add(Utils.createPersonFromNameEmail(entry.getKey(), entry.getValue(), model));
 
-            resultSet.addResult(persons);
+            resultSet.addResult(individualCollection);
             logger.info(c + ". " + obj.toString()); c++;
+
+            if (c > 100) break;
         }
 
         return resultSet;
     }
+
+    private TimeInterval getDate(String date) {
+        TimeInterval interval = null;
+        long ms = 0;
+        if (date != null) {
+            try {
+                ms = (rfc2822DateFormatter.parse(date)).getTime();
+                interval = TimeInterval.createFromMoment(ms, (EnhGraph) model);
+            } catch (ParseException e) {
+                logger.error("RFC2822 Date Parsing failed: " + date);
+            }
+        }
+
+        return interval;
+    }
+
 
     public void execute(String[] emails) {
         setFlags[0] = true;

@@ -69,8 +69,8 @@ public class MongoDB {
             collection = db.getCollection(collectionName);
         }
 
-        public void getAll() {
-            cursor = collection.find();
+        public void getAll(BasicDBObject keys) {
+            cursor = collection.find(new BasicDBObject(), keys);
         }
 
         public void query (BasicDBObject queryDBObject) {
