@@ -31,7 +31,7 @@ public class Scratch extends TestBase {
 
     public void singleFileTest() throws IOException, ParseException, EventGraphException {
         //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
-        File file = new File("/home/arjun/Dataset/vldb/DSC_0404.JPG");
+        File file = new File("/home/arjun/Dataset/vldb/DSC_0401.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
         firstKDiscoverer.execute(new LocalFileDataset(file));
     }

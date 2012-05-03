@@ -47,6 +47,9 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private EventGraph graph = null;
     private LocalFileDataset dataset = null;
 
+    private int discoveryCount = 0;
+    private int k = 1;
+
     public FirstKDiscoverer() throws FileNotFoundException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
@@ -93,7 +96,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
         }
 
-        voter.vote(graph);
         discover(graph);
     }
 
@@ -147,6 +149,12 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private void verify(List<Individual> possiblePersons) {
+
+        if (possiblePersons.size() > 10) {
+            voter.vote(graph);
+            return;
+        }
+
         for (Individual person: possiblePersons) {
             Statement statement = person.getProperty(model.getProperty(Constants.CuenetNamespace + "name"));
             logger.info("Verifying person: " + statement.getObject().asLiteral().getValue());
@@ -173,6 +181,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private String getUIDConfidence(BasicDBObject obj) {
+        logger.info("Face.com response: "+ obj);
         BasicDBList photos = (BasicDBList) obj.get("photos");
         BasicDBObject photo = (BasicDBObject) photos.get(0);
         BasicDBList tags = (BasicDBList) photo.get("tags");
@@ -180,6 +189,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         BasicDBList uids = (BasicDBList) tag.get("uids");
         if (uids.size() == 0) return " NOT RECOGNIZED ";
         BasicDBObject uid = (BasicDBObject) uids.get(0);
+        discoveryCount++;
         return uid.getString("confidence");
     }
 
@@ -276,7 +286,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private boolean terminate(EventGraph graph) {
-        return (!graph.equals(graph));
+        return (discoveryCount == k);
     }
 
 }
