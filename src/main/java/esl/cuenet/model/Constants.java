@@ -32,5 +32,7 @@ public class Constants {
 
     public static String DOLCELocationURI = DOLCE_Lite_Namespace + "location";
 
+    public static String OccursDuring = "occurs-during";
 
+    public static String OccursAt = "occurs-at";
 }

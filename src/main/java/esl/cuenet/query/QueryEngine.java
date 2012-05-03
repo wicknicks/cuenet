@@ -1,5 +1,8 @@
 package esl.cuenet.query;
 
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
+import com.hp.hpl.jena.datatypes.xsd.impl.XSDDateTimeType;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
@@ -17,6 +20,7 @@ import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.syntax.*;
 import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.mapper.tree.SourceMapper;
+import esl.cuenet.model.Constants;
 import esl.cuenet.source.*;
 import esl.datastructures.graph.relationgraph.IRelationGraph;
 import esl.datastructures.graph.relationgraph.RelationGraphEdge;
@@ -85,6 +89,34 @@ public class QueryEngine {
             }
             individuals.add(ind);
         }
+
+
+
+        for (Var projectVar : projectVars) {
+            RelationGraphNode node = queryGraph.getNodeByName(projectVar.toString());
+            OntClass cl = model.getOntClass(ns + node.name());
+            Individual individual = model.createIndividual(cl);
+            boolean added = false;
+            for (RelationGraphEdge edge: queryGraph.getOutgoingEdges(node)) {
+                if(edge.label().compareTo(Constants.CuenetNamespace+ Constants.OccursDuring) == 0) {
+                    RelationGraphNode dest = queryGraph.getDestinationNode(edge);
+                    Literal l = model.createTypedLiteral(dest.name(), XSDDatatype.XSDdateTime);
+                    added = true;
+                    individual.addProperty(model.getProperty(Constants.CuenetNamespace+ Constants.OccursDuring), l);
+                }
+
+                if (edge.label().equalsIgnoreCase(RDF.type.getURI())) {
+                    RelationGraphNode dest = queryGraph.getDestinationNode(edge);
+                    individual.addProperty(RDF.type, model.getOntClass(dest.name()));
+                }
+            }
+
+            if (added)
+                individuals.add(individual);
+        }
+
+
+
 
         eval(individuals);
         clear();

@@ -7,6 +7,7 @@ import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.util.Hash;
 import com.mongodb.util.JSON;
 import esl.cuenet.model.Constants;
@@ -18,6 +19,7 @@ import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
+import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
@@ -37,6 +39,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private long endTime = -1;
     private int errorMargin = 5;
     private OntModel model = null;
+    private TimeInterval timeInterval = null;
 
     public GoogleCalendarCollection() {
         super("test");
@@ -57,10 +60,25 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
             query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
         }
+
+        if (timeInterval != null) {
+            startTime = timeInterval.getStart();
+            endTime = timeInterval.getEnd();
+            query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
+            query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
+        }
+
         cursor.query(query);
 
         BasicDBList result = new BasicDBList();
-        while (cursor.hasNext()) result.add(cursor.next());
+        while (cursor.hasNext()) {
+            DBObject object = cursor.next();
+            result.add(object);
+            logger.info(object.toString());
+        }
+
+        logger.info("Done");
+        System.exit(1);
 
         return convertResults(result);
     }
@@ -151,6 +169,17 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         /* re-init for next query */
         startTime = -1;
         endTime = -1;
+    }
+
+    @Override
+    public void associateTimeInterval(Attribute attribute, TimeInterval timeInterval) throws AccesorInitializationException {
+        this.timeInterval = timeInterval;
+    }
+
+    @Override
+    public void associateLocation(Attribute attribute, Location timeInterval) throws AccesorInitializationException {
+        throw new AccesorInitializationException("Incorrect Assignment: No location attributes in "
+                + YahooPlaceFinderAPI.class.getName());
     }
 
     @Override

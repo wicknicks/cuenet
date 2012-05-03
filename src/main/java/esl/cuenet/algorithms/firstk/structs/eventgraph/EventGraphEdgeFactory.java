@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.ObjectProperty;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Property;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.model.Constants;
 
@@ -22,7 +23,7 @@ public class EventGraphEdgeFactory {
             String ns = model.getNsPrefixMap().get(nsKey);
             property = model.getDatatypeProperty(model.getNsPrefixMap().get(ns) + literalLabel);
             if (property == null) continue;
-            return new ConcreteEventGraphEdge(property.getURI());
+            return new ConcreteEventGraphEdge(property.getURI(), property);
         }
 
         throw new EventGraphException("Model does not contain \"" + literalLabel + "\" property");
@@ -41,15 +42,16 @@ public class EventGraphEdgeFactory {
         for (String nsKey: model.getNsPrefixMap().keySet()) {
             property = model.getObjectProperty(model.getNsPrefixMap().get(nsKey) + edgeLabel);
             if (property == null) continue;
-            return new ConcreteEventGraphEdge(property.getURI());
+            return new ConcreteEventGraphEdge(property.getURI(), property);
         }
 
         throw new EventGraphException("Model does not contain \"" + edgeLabel + "\" property");
     }
 
     private static class ConcreteEventGraphEdge extends EventGraphEdge {
-        public ConcreteEventGraphEdge(String uri) {
+        public ConcreteEventGraphEdge(String uri, Property property) {
             super(uri);
+            setProperty(property);
         }
     }
 }

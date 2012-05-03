@@ -6,19 +6,34 @@ import com.hp.hpl.jena.graph.Node_URI;
 import com.hp.hpl.jena.ontology.impl.IndividualImpl;
 import esl.cuenet.model.Constants;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 public class TimeInterval extends IndividualImpl {
 
     private long end = 0;
     private long start = 0;
+    private String id = null;
+    private static HashMap<String, TimeInterval> tiCache = new HashMap<String, TimeInterval>();
 
-    protected TimeInterval(Node n, EnhGraph g, long start, long end) {
+    protected TimeInterval(Node n, EnhGraph g, long start, long end, String id) {
         super(n, g);
         this.start = start;
         this.end = end;
+        this.id = id;
+        tiCache.put(id, this);
     }
 
     public long getEnd() {
         return end;
+    }
+
+    public String getID() {
+        return id;
+    }
+
+    public static TimeInterval getFromCache(String id) {
+        return tiCache.get(id);
     }
 
     public long getStart() {
@@ -26,11 +41,13 @@ public class TimeInterval extends IndividualImpl {
     }
 
     public static TimeInterval createFromMoment(long timestamp, EnhGraph graph) {
-        return new TimeInterval(new TimeNodeURI(), graph, timestamp, timestamp);
+        String id = UUID.randomUUID().toString();
+        return new TimeInterval(new TimeNodeURI(id), graph, timestamp, timestamp, id);
     }
 
     public static TimeInterval createFromInterval(long start, long end, EnhGraph graph) {
-        return new TimeInterval(new TimeNodeURI(), graph, start, end);
+        String id = UUID.randomUUID().toString();
+        return new TimeInterval(new TimeNodeURI(id), graph, start, end, id);
     }
 
     /**
@@ -84,8 +101,8 @@ public class TimeInterval extends IndividualImpl {
 
 
     private static class TimeNodeURI extends Node_URI {
-        protected TimeNodeURI() {
-            super(Constants.DOLCETimeIntervalURI);
+        protected TimeNodeURI(String id) {
+            super(Constants.DOLCETimeIntervalURI + " " + id);
         }
     }
 }

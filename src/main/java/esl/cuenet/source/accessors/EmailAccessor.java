@@ -14,6 +14,7 @@ import esl.cuenet.source.AccesorInitializationException;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
+import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
@@ -48,6 +49,20 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     public void start() {
         for (int i=0; i<setFlags.length; i++) setFlags[i] = false;
         queryEmails.clear();
+    }
+
+    @Override
+    public void associateTimeInterval(Attribute attribute, TimeInterval timeInterval) throws AccesorInitializationException {
+        throw new AccesorInitializationException("Incorrect Assignment: No time interval attributes in "
+                + YahooPlaceFinderAPI.class.getName());
+
+    }
+
+    @Override
+    public void associateLocation(Attribute attribute, Location timeInterval) throws AccesorInitializationException {
+        throw new AccesorInitializationException("Incorrect Assignment: No location attributes in "
+                + YahooPlaceFinderAPI.class.getName());
+
     }
 
     @Override

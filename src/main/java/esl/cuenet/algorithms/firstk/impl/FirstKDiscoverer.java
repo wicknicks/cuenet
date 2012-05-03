@@ -1,10 +1,8 @@
 package esl.cuenet.algorithms.firstk.impl;
 
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -16,8 +14,10 @@ import esl.cuenet.algorithms.firstk.structs.eventgraph.*;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.QueryEngine;
+import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.*;
 import org.apache.log4j.Logger;
+import org.openjena.atlas.io.PrintUtils;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -28,22 +28,33 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private BFSEventGraphTraverser graphTraverser = null;
     private Queue<EventGraphNode> discoveryQueue = new LinkedList<EventGraphNode>();
     private QueryEngine queryEngine = null;
+
     private Property subeventOfProperty = null;
+    private Property participatesInProperty = null;
+    private Property occursDuringProperty = null;
+    private Property occursAtProperty = null;
+
     private Voter voter = null;
+    private EventGraph graph = null;
 
     private final String cuenetNameSpace = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
+
 
     public FirstKDiscoverer() throws FileNotFoundException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
         voter = new EntityVoter(queryEngine);
+
         subeventOfProperty = model.getProperty(cuenetNameSpace + "subevent-of");
+        participatesInProperty = model.getProperty(Constants.DOLCE_Lite_Namespace + "participant-in");
+        occursDuringProperty = model.getProperty(Constants.CuenetNamespace + "occurs-during");
+        occursAtProperty = model.getProperty(Constants.CuenetNamespace + "occurs-at");
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException, EventGraphException {
 
         LocalFilePreprocessor preprocessor = new LocalFilePreprocessor(model);
-        EventGraph graph = preprocessor.process(lds);
+        graph = preprocessor.process(lds);
 
         TraversalContext traversalContext = new TraversalContext();
         traversalContext.setCx(discoveryQueue);
@@ -94,21 +105,54 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             email = (String) entity.getLiteralValue(Constants.Email);
         }
 
+        //find related event (if exists), and its related timestamp, location
+        TimeInterval targetInterval = getTimeIntervalFromRelatedEvent(entity);
+
         String sparqlQuery = "SELECT ?x \n" +
-                " WHERE { \n" +
-                "?x <" + RDF.type + "> <http://www.w3.org/1999/02/22-rdf-syntax-ns#event> . \n" +
+                "WHERE { \n" +
+                "?x <" + RDF.type + "> <" + Constants.DOLCE_Lite_Namespace + "event> . \n" +
                 "?p <" + cuenetNameSpace + "participant-in> ?x . \n" +
                 "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> . \n";
 
         if (email != null)
-            sparqlQuery += "?p <" + cuenetNameSpace + "email> \"" + email + "\" .";
+            sparqlQuery += "?p <" + cuenetNameSpace + "email> \"" + email + "\" .\n";
         if (name != null)
-            sparqlQuery += "?p <" + cuenetNameSpace + "name> \"" + name + "\" .";
+            sparqlQuery += "?p <" + cuenetNameSpace + "name> \"" + name + "\" .\n";
+        if (targetInterval != null) {
+            sparqlQuery += "?x <" + occursDuringProperty.getURI() + "> \"" + targetInterval.getID() + "\" .\n";
+        }
 
         sparqlQuery += "} \n";
 
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
         queryEngine.execute(sparqlQuery);
+    }
+
+    private TimeInterval getTimeIntervalFromRelatedEvent(Entity entity) {
+        List<EventGraphEdge> edges = graph.getEdges(entity);
+        for (EventGraphEdge e: edges) {
+            if (e.uri().compareTo(participatesInProperty.getURI()) == 0) {
+                logger.info("Found: " + graph.getDestination(e).name());
+                EventGraphNode eventNode = graph.getDestination(e);
+                Statement ti = eventNode.getIndividual().getProperty(occursDuringProperty);
+                TimeInterval itvl = lookupTi(ti.getObject().asResource());
+                if (itvl != null) return itvl;
+            }
+        }
+        return null;
+    }
+
+    private TimeInterval lookupTi(Resource r) {
+        String uri = r.getURI();
+        String parts[] = uri.split(" ");
+
+        if (parts.length != 2) return null;
+
+        if (parts[0].compareTo(Constants.DOLCE_Lite_Namespace + "time-interval") == 0) {
+            return TimeInterval.getFromCache(parts[1]);
+        }
+
+        return null;
     }
 
     private void discover(Event event) throws EventGraphException {
@@ -118,7 +162,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
 
         String sparqlQuery = "SELECT ?p \n" +
-                " WHERE { \n" +
+                "WHERE { \n" +
                 "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
                 "?p <" + cuenetNameSpace + "participant-in> ?x .\n" +
                 "?p <" + RDF.type + "> <" + cuenetNameSpace + "person> .\n";

@@ -2,9 +2,11 @@ package esl.cuenet.source;
 
 import com.hp.hpl.jena.rdf.model.Literal;
 import esl.cuenet.query.IResultSet;
+import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.relationgraph.IRelationGraph;
 import esl.datastructures.graph.relationgraph.RelationGraph;
 
+import java.sql.Time;
 import java.util.List;
 
 public class Source implements ISource {
@@ -88,6 +90,10 @@ public class Source implements ISource {
             Attribute attr = mapper.getAttribute(pathExpressions[i]);
 
             try {
+                if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#dateTime") == 0) {
+                    TimeInterval ti = TimeInterval.getFromCache(literals[i].getString());
+                    accessor.associateTimeInterval(attr, ti);
+                }
                 if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") == 0)
                     accessor.associateString(attr, literals[i].getString());
                 else if (literals[i].getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#double") == 0)

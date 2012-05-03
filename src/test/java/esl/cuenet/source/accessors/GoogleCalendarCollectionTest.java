@@ -1,5 +1,6 @@
 package esl.cuenet.source.accessors;
 
+import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.ontology.DatatypeProperty;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
@@ -13,6 +14,7 @@ import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.mapper.tree.SourceParseException;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.source.*;
+import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.relationgraph.IRelationGraph;
 import esl.datastructures.graph.relationgraph.RelationGraphNode;
 import org.apache.log4j.Logger;
@@ -41,11 +43,12 @@ public class GoogleCalendarCollectionTest extends TestBase {
         //BasicDBObject o = calendarCollection.search("arjun", 1296171000000L);
         calendarCollection.setAttributeNames(new Attribute[]{null, new Attribute("owner.email"), null, null, null, null});
         calendarCollection.associateString(new Attribute("owner.email"), "arjun.satish@gmail.com");
+        TimeInterval ti = TimeInterval.createFromMoment(1251148200000L, (EnhGraph) qrt.getModel());
+        calendarCollection.associateTimeInterval(new Attribute("owner.email"), ti);
         IResultSet rs = calendarCollection.executeQuery();
         if (rs != null) logger.info(rs.printResults());
 
     }
-
 
     public void sourceQueryTest() throws FileNotFoundException, ParseException {
         QueryCalendarTest qrt = new QueryCalendarTest();

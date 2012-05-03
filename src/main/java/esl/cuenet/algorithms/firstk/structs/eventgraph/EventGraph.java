@@ -3,14 +3,12 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Property;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.datastructures.graph.relationgraph.RelationGraph;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class EventGraph extends RelationGraph {
 
@@ -21,6 +19,11 @@ public class EventGraph extends RelationGraph {
     private HashMap<EventGraphEdge, EventGraphNode> edgeDestinationMap = new HashMap<EventGraphEdge, EventGraphNode>();
     private HashMap<EventGraphEdge, EventGraphNode> edgeOriginMap = new HashMap<EventGraphEdge, EventGraphNode>();
     private Logger logger = Logger.getLogger(EventGraph.class);
+
+    public enum NodeType {
+        EVENT,
+        ENTITY
+    }
 
     public EventGraph (OntModel model) {
         this.model = model;
@@ -43,11 +46,6 @@ public class EventGraph extends RelationGraph {
         }
 
         return startNodes;
-    }
-
-    public enum NodeType {
-        EVENT,
-        ENTITY
     }
 
     public Event createEvent(String eventType) throws EventGraphException {
@@ -75,6 +73,14 @@ public class EventGraph extends RelationGraph {
 
     public List<EventGraphEdge> getEdges(EventGraphNode node) {
         return edgeMap.get(node);
+    }
+
+    public List<EventGraphEdge> getIncomingEdges(EventGraphNode node) {
+        List<EventGraphEdge> edges = new ArrayList<EventGraphEdge>();
+        for (Map.Entry<EventGraphEdge, EventGraphNode> entry: edgeDestinationMap.entrySet()) {
+            if (entry.getValue().equals(node)) edges.add(entry.getKey());
+        }
+        return edges;
     }
 
     private EventGraphNode createInstanceWithURI(String uri, NodeType type) {
@@ -221,6 +227,9 @@ public class EventGraph extends RelationGraph {
         if (n1 == null) throw new RuntimeException("Null Node (n1)");
         if (n2 == null) throw new RuntimeException("Null Node (n2)");
         List<EventGraphEdge> nodeEdges = edgeMap.get(n1);
+
+        n1.getIndividual().addProperty(edge.getProperty(), n2.getIndividual());
+
         nodeEdges.add(edge);
         edges.add(edge);
         edgeDestinationMap.put(edge, n2);

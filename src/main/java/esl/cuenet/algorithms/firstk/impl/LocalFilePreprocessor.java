@@ -67,8 +67,7 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             io.addLiteral(model.createProperty(
                     model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.ImageHeight),
                     model.createTypedLiteral(exif.width));
-            io.addResource(model.createProperty(
-                    model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.TimeInterval),
+            io.addResource(model.getProperty(Constants.CuenetNamespace + Constants.OccursDuring),
                     TimeInterval.createFromMoment(exif.timestamp, (EnhGraph) model));
 
             Entity author = null;
@@ -87,10 +86,11 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
                     model.createTypedLiteral(email));
 
             if (exif.GPSLatitude != 0 && exif.GPSLongitude != 0) {
-                io.addResource(model.createProperty(
-                        model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.Location),
+                io.addResource(model.getProperty(Constants.CuenetNamespace + Constants.OccursAt),
                         Location.createFromGPS(exif.GPSLatitude, exif.GPSLongitude, (EnhGraph) model));
             }
+
+            graph.addParticipant(io, author);
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -30,6 +30,8 @@
    (:attrs event email time location title description attendee)
    (:rel ev type-of event)
    (:rel owner type-of person)
+   (:rel ti type-of time-interval)
+   (:rel ev occurs-during ti)
    (:rel participant type-of person)
    (:rel owner participant-of ev)
    (:rel participant participant-of ev)
@@ -37,6 +39,7 @@
    (:type personal)
    (:axioms
       (:map ev event)
+      (:map ti time)
       (:map owner.email email B)
       (:map ev.occurs-during time)
       (:map ev.occurs-at location)

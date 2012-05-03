@@ -9,6 +9,7 @@ import esl.cuenet.model.Constants;
 import esl.datastructures.util.YahooPlaceFinderReverseGeo;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class Location extends IndividualImpl {
@@ -19,6 +20,9 @@ public class Location extends IndividualImpl {
     private String state;
     private String country;
     private String zipcode;
+
+    private String id = null;
+    private static HashMap<String, Location> lCache = new HashMap<String, Location>();
 
     public double getLat() {
         return lat;
@@ -50,6 +54,16 @@ public class Location extends IndividualImpl {
         if (rgeo.containsField("line4")) fullAddress += rgeo.getString("line4");
         fullAddress = fullAddress.trim();
 
+        this.id = UUID.randomUUID().toString();
+        lCache.put(id, this);
+    }
+
+    public String getID() {
+        return id;
+    }
+
+    public static Location getFromCache(String id) {
+        return lCache.get(id);
     }
 
     protected Location(Node n, EnhGraph g, String address) throws IOException {
@@ -75,7 +89,7 @@ public class Location extends IndividualImpl {
 
     private static class LocationNodeURI extends Node_URI {
         protected LocationNodeURI() {
-            super(Constants.DOLCELocationURI + UUID.randomUUID());
+            super(Constants.DOLCELocationURI + " " + UUID.randomUUID());
         }
     }
 
