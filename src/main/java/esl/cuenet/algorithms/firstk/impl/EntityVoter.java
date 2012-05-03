@@ -98,4 +98,11 @@ public class EntityVoter implements Voter {
         return new Vote[0];
     }
 
+    // throw some basic stuff out for now.
+    public String getUIDs(String name) {
+        if (name.compareTo("Torsten Grust") == 0) return "acx_1@wicknicks";
+        if (name.compareTo("Thomas Willhalm") == 0) return "acx_2@wicknicks";
+        else return "fb_717562539@wicknicks";
+    }
+
 }

@@ -9,6 +9,8 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Scratch extends TestBase {
 
@@ -29,7 +31,7 @@ public class Scratch extends TestBase {
 
     public void singleFileTest() throws IOException, ParseException, EventGraphException {
         //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
-        File file = new File("/home/arjun/Dataset/vldb/DSC_0402.JPG");
+        File file = new File("/home/arjun/Dataset/vldb/DSC_0404.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
         firstKDiscoverer.execute(new LocalFileDataset(file));
     }

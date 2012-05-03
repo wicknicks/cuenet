@@ -53,6 +53,7 @@ public class SourceMapper {
         List<IResultSet> iResultSets = new ArrayList<IResultSet>();
         for (ISource source: sourceMap.values()) {
             IResultSet resultSet = visitor.visit(source);
+            if (resultSet == null) continue;
             iResultSets.add(resultSet);
         }
         return iResultSets;

@@ -45,7 +45,7 @@ public class QueryEngine {
         this.sourceMapper = sourceMapper;
     }
 
-    public void execute(String sparqlQuery) {
+    public List<IResultSet> execute(String sparqlQuery) {
 
         String ns = "http://www.semanticweb.org/arjun/cuenet-main.owl";
         Query query = QueryFactory.create(sparqlQuery);
@@ -116,23 +116,24 @@ public class QueryEngine {
         }
 
 
+        List<IResultSet> results = eval(individuals);
 
-
-        eval(individuals);
         clear();
+
+        return results;
     }
 
     private void clear() {
         queryGraph = new QueryGraph();
     }
 
-    private void eval(List<Individual> individuals) {
+    private List<IResultSet> eval(List<Individual> individuals) {
         if (sourceMapper == null) {
             logger.info("No sources added. Returning");
-            return;
+            return null;
         }
 
-        sourceMapper.accept(new SourceVisitor(queryGraph, individuals));
+        return sourceMapper.accept(new SourceVisitor(queryGraph, individuals));
     }
 
     public class SourceVisitor implements SourceMapVisitor {

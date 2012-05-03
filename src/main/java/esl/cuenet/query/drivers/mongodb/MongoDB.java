@@ -11,7 +11,7 @@ public class MongoDB {
     private boolean isOpen = false;
     private DB db = null;
 
-    private String location = "localhost";
+    private String location = "128.195.54.27";
 
     public MongoDB(String dbName) {
         this.dbName = dbName;

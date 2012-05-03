@@ -23,10 +23,7 @@ import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class GoogleCalendarCollection extends MongoDB implements IAccessor {
@@ -37,7 +34,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private String ownerEmail = null;
     private long startTime = -1;
     private long endTime = -1;
-    private int errorMargin = 5;
+    private int errorMargin = 0;
     private OntModel model = null;
     private TimeInterval timeInterval = null;
 
@@ -68,6 +65,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
         }
 
+        logger.info("Query: " + query);
         cursor.query(query);
 
         BasicDBList result = new BasicDBList();
@@ -78,7 +76,6 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         }
 
         logger.info("Done");
-        System.exit(1);
 
         return convertResults(result);
     }
@@ -120,9 +117,20 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
                 ev.addProperty(occursDuring, interval);
             }
 
+            List<Individual> resultEntry = new ArrayList<Individual>();
+
+            if (entry.containsField("participants")) {
+                BasicDBList parts = (BasicDBList) entry.get("participants");
+                for (Object op: parts) {
+                    Individual participant = person.createIndividual();
+                    participant.addLiteral(nameProperty, op);
+                    participant.addProperty(participatesInProperty, ev);
+                    resultEntry.add(participant);
+                }
+            }
+
             owner.addProperty(participatesInProperty, ev);
 
-            List<Individual> resultEntry = new ArrayList<Individual>();
             resultEntry.add(ev);
             resultEntry.add(owner);
             resultSet.addResult(resultEntry);
