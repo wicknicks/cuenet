@@ -9,6 +9,7 @@ import org.junit.Test;
 import test.TestBase;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 
 public class FacebookUserAccessorTest extends TestBase {
@@ -20,8 +21,8 @@ public class FacebookUserAccessorTest extends TestBase {
     }
 
     @Test
-    public void doModelTest() throws ParseException, FileNotFoundException, SourceQueryException {
-        QueryFBTest fbTestBase = new QueryFBTest();
+    public void doModelTest() throws ParseException, IOException, SourceQueryException {
+        TestAlgorithm fbTestBase = new TestAlgorithm();
         FacebookUserAccessor accessor = new FacebookUserAccessor(fbTestBase.getModel());
         accessor.start();
         accessor.executeQuery("Arjun Satish", null);
@@ -38,11 +39,4 @@ public class FacebookUserAccessorTest extends TestBase {
         accessor.executeQuery(null, "06/19");
     }
 
-    public class QueryFBTest extends BaseAlgorithm {
-
-        public QueryFBTest() throws FileNotFoundException, ParseException, SourceParseException {
-            super();
-        }
-
-    }
 }

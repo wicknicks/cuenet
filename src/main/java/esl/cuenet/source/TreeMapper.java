@@ -103,7 +103,7 @@ public class TreeMapper implements IMapper {
         for (int i = 0; i < classnames.length - 1; i++) {
             uri = namespaceMap.get("this") + classnames[i];
             resourcePath[i] = model.getOntClass(uri);
-            if (resourcePath[i] == null) logger.error("Class not found: " + uri + " " + pathExpression);
+//            if (resourcePath[i] == null) logger.error("Class not found: " + uri + " " + pathExpression);
         }
 
         int last = classnames.length - 1;
@@ -114,8 +114,8 @@ public class TreeMapper implements IMapper {
             resourcePath[last] = model.getOntClass(uri);
         else if (model.getDatatypeProperty(uri) != null)
             resourcePath[last] = model.getDatatypeProperty(uri);
-        else
-            logger.error("Class not found: " + uri + " " + pathExpression);
+//        else
+//            logger.error("Class not found: " + uri + " " + pathExpression);
 
         return resourcePath;
     }

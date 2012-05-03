@@ -50,7 +50,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private int discoveryCount = 0;
     private int k = 1;
 
-    public FirstKDiscoverer() throws FileNotFoundException, ParseException {
+    public FirstKDiscoverer() throws IOException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
         voter = new EntityVoter(queryEngine);

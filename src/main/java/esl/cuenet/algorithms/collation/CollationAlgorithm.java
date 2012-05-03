@@ -19,6 +19,7 @@ import esl.cuenet.source.SourceQueryException;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class CollationAlgorithm extends BaseAlgorithm {
     private Logger logger = Logger.getLogger(CollationAlgorithm.class);
     ISource[] sources = null;
 
-    public CollationAlgorithm() throws SourceParseException, FileNotFoundException, ParseException {
+    public CollationAlgorithm() throws IOException, ParseException {
         super();
         sources = sourceMapper.getSources();
     }

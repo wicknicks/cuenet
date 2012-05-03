@@ -59,6 +59,11 @@ public class AccessorFactory {
             return new EmailAccessor(model);
         }
 
+        else if (name.compareTo("conferences") == 0) {
+            logger.info("Initializing Conference Accessor");
+            return new ConferenceAccessor(model);
+        }
+
         return null;
     }
 

@@ -9,6 +9,7 @@ import org.junit.Test;
 import test.TestBase;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 public class EventGraphTest extends TestBase {
@@ -16,7 +17,7 @@ public class EventGraphTest extends TestBase {
     private Logger logger = Logger.getLogger(EventGraphTest.class);
 
     @Test
-    public void simpleEventGraphTest() throws FileNotFoundException, ParseException, EventGraphException {
+    public void simpleEventGraphTest() throws IOException, ParseException, EventGraphException {
         BaseAlgorithm algorithm = new ConcreteAlgorithmClass();
 
         EventGraph graph = new EventGraph(algorithm.getModel());
@@ -76,7 +77,7 @@ public class EventGraphTest extends TestBase {
     }
 
     @Test
-    public void findParticipantsSubevents() throws FileNotFoundException, ParseException, EventGraphException {
+    public void findParticipantsSubevents() throws IOException, ParseException, EventGraphException {
         BaseAlgorithm algorithm = new ConcreteAlgorithmClass();
 
         EventGraph graph = new EventGraph(algorithm.getModel());
@@ -101,7 +102,7 @@ public class EventGraphTest extends TestBase {
     }
 
     @Test
-    public void dropEdgeTest() throws FileNotFoundException, ParseException, EventGraphException {
+    public void dropEdgeTest() throws IOException, ParseException, EventGraphException {
         BaseAlgorithm algorithm = new ConcreteAlgorithmClass();
 
         EventGraph graph = new EventGraph(algorithm.getModel());
@@ -150,7 +151,7 @@ public class EventGraphTest extends TestBase {
 
     public static class ConcreteAlgorithmClass extends BaseAlgorithm {
 
-        public ConcreteAlgorithmClass() throws FileNotFoundException, ParseException {
+        public ConcreteAlgorithmClass() throws IOException, ParseException {
             super();
         }
     }

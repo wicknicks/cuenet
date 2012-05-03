@@ -171,7 +171,7 @@ public class EmailAccessor extends MongoDB implements IAccessor {
         if (date != null) {
             try {
                 ms = (rfc2822DateFormatter.parse(date)).getTime();
-                interval = TimeInterval.createFromMoment(ms, (EnhGraph) model);
+                interval = TimeInterval.createFromMoment(ms, model);
             } catch (ParseException e) {
                 logger.error("RFC2822 Date Parsing failed: " + date);
             }

@@ -3,6 +3,7 @@ package esl.datastructures;
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.impl.IndividualImpl;
 import esl.cuenet.model.Constants;
 
@@ -40,14 +41,14 @@ public class TimeInterval extends IndividualImpl {
         return start;
     }
 
-    public static TimeInterval createFromMoment(long timestamp, EnhGraph graph) {
+    public static TimeInterval createFromMoment(long timestamp, OntModel graph) {
         String id = UUID.randomUUID().toString();
-        return new TimeInterval(new TimeNodeURI(id), graph, timestamp, timestamp, id);
+        return new TimeInterval(new TimeNodeURI(id), (EnhGraph) graph, timestamp, timestamp, id);
     }
 
-    public static TimeInterval createFromInterval(long start, long end, EnhGraph graph) {
+    public static TimeInterval createFromInterval(long start, long end, OntModel graph) {
         String id = UUID.randomUUID().toString();
-        return new TimeInterval(new TimeNodeURI(id), graph, start, end, id);
+        return new TimeInterval(new TimeNodeURI(id), (EnhGraph) graph, start, end, id);
     }
 
     /**

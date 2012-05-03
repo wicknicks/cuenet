@@ -3,6 +3,7 @@ package esl.datastructures;
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.impl.IndividualImpl;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.model.Constants;
@@ -79,12 +80,12 @@ public class Location extends IndividualImpl {
         if (rgeo.containsField("longitude")) lon = Double.parseDouble(rgeo.getString("longitude"));
     }
 
-    public static Location createFromGPS(double lat, double lon, EnhGraph graph) throws IOException {
-        return new Location(new LocationNodeURI(), graph, lat, lon);
+    public static Location createFromGPS(double lat, double lon, OntModel graph) throws IOException {
+        return new Location(new LocationNodeURI(), (EnhGraph) graph, lat, lon);
     }
 
-    public static Location createFromAddress(String address, EnhGraph graph) throws IOException {
-        return new Location(new LocationNodeURI(), graph, address);
+    public static Location createFromAddress(String address, OntModel graph) throws IOException {
+        return new Location(new LocationNodeURI(), (EnhGraph) graph, address);
     }
 
     private static class LocationNodeURI extends Node_URI {

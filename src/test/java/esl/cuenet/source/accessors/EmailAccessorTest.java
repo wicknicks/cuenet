@@ -8,6 +8,7 @@ import org.junit.Test;
 import test.TestBase;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class EmailAccessorTest extends TestBase {
 
@@ -18,19 +19,12 @@ public class EmailAccessorTest extends TestBase {
     }
 
     @Test
-    public void doTest() throws FileNotFoundException, ParseException {
+    public void doTest() throws IOException, ParseException {
 
-        EAAlgorithm algorithm = new EAAlgorithm();
+        TestAlgorithm algorithm = new TestAlgorithm();
         EmailAccessor accessorTest = (EmailAccessor) algorithm.getSourceMapper().get("email").getAccessor();
         accessorTest.execute(new String[]{"Fabian.Groffen@cwi.nl"});
         //accessorTest.execute(new String[]{"21-questions@ics.uci.edu", "ppnguyen@uci.edu"});
-    }
-
-
-    public class EAAlgorithm extends BaseAlgorithm {
-        public EAAlgorithm() throws FileNotFoundException, ParseException {
-            super();
-        }
     }
 
 }

@@ -7,8 +7,8 @@ import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.mapper.tree.*;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 
 public abstract class BaseAlgorithm implements IAlgorithm {
 
@@ -16,7 +16,7 @@ public abstract class BaseAlgorithm implements IAlgorithm {
     protected SourceMapper sourceMapper = null;
     protected String mappingsFile = "./mappings/sources.map";
 
-    public BaseAlgorithm() throws FileNotFoundException, ParseException {
+    public BaseAlgorithm() throws IOException, ParseException {
         model = ModelFactory.createOntologyModel();
 
         model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),

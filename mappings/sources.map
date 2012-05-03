@@ -88,6 +88,20 @@
       (:map p1.name name1 F)
       (:map p2.name name2 U)))
 
+(:source conferences
+   (:attrs time location ltitle stitle url)
+   (:rel conf type-of conference)
+   (:rel time type-of time-interval)
+   (:rel loc type-of location)
+   (:rel conf occurs-at location)
+   (:rel conf occurs-during time)
+   (:axioms
+      (:map time time)
+      (:map loc location)
+      (:map conf.title ltitle)
+      (:map conf.name stitle)
+      (:map conf.url url)))
+
 //(:source fb-user-old
 //        (:attrs id dob name location work[] email)
 //        (:rel person works-at named-place)

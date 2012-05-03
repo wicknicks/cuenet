@@ -43,21 +43,21 @@ public class GoogleCalendarCollectionTest extends TestBase {
         //BasicDBObject o = calendarCollection.search("arjun", 1296171000000L);
         calendarCollection.setAttributeNames(new Attribute[]{null, new Attribute("owner.email"), null, null, null, null});
         calendarCollection.associateString(new Attribute("owner.email"), "arjun.satish@gmail.com");
-        TimeInterval ti = TimeInterval.createFromMoment(1251148200000L, (EnhGraph) qrt.getModel());
+        TimeInterval ti = TimeInterval.createFromMoment(1251148200000L, qrt.getModel());
         calendarCollection.associateTimeInterval(new Attribute("owner.email"), ti);
         IResultSet rs = calendarCollection.executeQuery();
         if (rs != null) logger.info(rs.printResults());
 
     }
 
-    public void sourceQueryTest() throws FileNotFoundException, ParseException {
+    public void sourceQueryTest() throws IOException, ParseException {
         QueryCalendarTest qrt = new QueryCalendarTest();
         qrt.query();
     }
 
     public class QueryCalendarTest extends BaseAlgorithm {
 
-        public QueryCalendarTest() throws FileNotFoundException, ParseException, SourceParseException {
+        public QueryCalendarTest() throws IOException, ParseException {
             super();
         }
 

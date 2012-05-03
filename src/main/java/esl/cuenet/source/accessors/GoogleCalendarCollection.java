@@ -65,18 +65,14 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
         }
 
-        logger.info("Query: " + query);
         cursor.query(query);
-
         BasicDBList result = new BasicDBList();
+
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
             result.add(object);
             logger.info(object.toString());
         }
-
-        logger.info("Done");
-
         return convertResults(result);
     }
 
@@ -113,7 +109,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             if (entry.containsField("title")) owner.addLiteral(titleProperty, entry.getString("title"));
             if (entry.containsField("start-time") && entry.containsField("end-time")) {
                 TimeInterval interval = TimeInterval.createFromInterval(entry.getLong("start-time"),
-                        entry.getLong("start-time"), (EnhGraph) model);
+                        entry.getLong("start-time"), model);
                 ev.addProperty(occursDuring, interval);
             }
 

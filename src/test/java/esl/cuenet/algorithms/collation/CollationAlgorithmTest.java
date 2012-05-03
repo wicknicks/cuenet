@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class CollationAlgorithmTest {
 
@@ -15,7 +16,7 @@ public class CollationAlgorithmTest {
 
 
     @Test
-    public void doTest() throws SourceParseException, FileNotFoundException, ParseException {
+    public void doTest() throws IOException, ParseException {
 
         long l = System.currentTimeMillis();
         CollationAlgorithm collator = new CollationAlgorithm();

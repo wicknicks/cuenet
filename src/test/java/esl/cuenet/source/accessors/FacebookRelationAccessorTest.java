@@ -21,6 +21,7 @@ import org.junit.Test;
 import test.TestBase;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +34,7 @@ public class FacebookRelationAccessorTest extends TestBase {
     }
 
     @Test
-    public void doTest() throws SourceQueryException, ParseException, FileNotFoundException {
+    public void doTest() throws SourceQueryException, ParseException, IOException {
 
         QueryRelationsTest qrt = new QueryRelationsTest();
         FacebookRelationAccessor accessor = new FacebookRelationAccessor(qrt.getModel());
@@ -52,14 +53,14 @@ public class FacebookRelationAccessorTest extends TestBase {
     }
 
     //@Test
-    public void sourceQueryTest() throws SourceParseException, FileNotFoundException, ParseException {
+    public void sourceQueryTest() throws IOException, ParseException {
         QueryRelationsTest qrt = new QueryRelationsTest();
         qrt.query();
     }
 
     public class QueryRelationsTest extends BaseAlgorithm {
 
-        public QueryRelationsTest() throws FileNotFoundException, ParseException, SourceParseException {
+        public QueryRelationsTest() throws IOException, ParseException {
             super();
         }
 

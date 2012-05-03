@@ -19,7 +19,7 @@ public class EventGraphConstructionTest extends TestBase {
     private Logger logger = Logger.getLogger(EventGraphConstructionTest.class);
 
     @Test
-    public void constructSTGraphs() throws FileNotFoundException, ParseException, EventGraphException {
+    public void constructSTGraphs() throws IOException, ParseException, EventGraphException {
 
         BaseAlgorithm baseAlgorithm = new EventGraphTest.ConcreteAlgorithmClass();
         OntModel model = baseAlgorithm.getModel();
@@ -28,8 +28,8 @@ public class EventGraphConstructionTest extends TestBase {
         Event photoCapture1 = graph.createEvent("photo-capture");
         Event photoCapture2 = graph.createEvent("photo-capture");
 
-        TimeInterval interval1 = TimeInterval.createFromInterval(500, 900, (EnhGraph) model);
-        TimeInterval interval2 = TimeInterval.createFromInterval(10, 1000, (EnhGraph) model);
+        TimeInterval interval1 = TimeInterval.createFromInterval(500, 900, model);
+        TimeInterval interval2 = TimeInterval.createFromInterval(10, 1000, model);
 
         logger.info("Before: " + interval1.isBefore(interval2));
         logger.info("Meets: " + interval1.meets(interval2));
@@ -40,10 +40,10 @@ public class EventGraphConstructionTest extends TestBase {
         logger.info("Cotemporal: " + interval1.cotemporal(interval2));
 
         try {
-            Location beijing = Location.createFromGPS(39.933973, 116.384777, (EnhGraph) baseAlgorithm.getModel());
-            Location verano1 = Location.createFromGPS(33.643331,-117.829489, (EnhGraph) baseAlgorithm.getModel());
-            Location verano2 = Location.createFromAddress("Verano Pl, Irvine, CA - 92617", (EnhGraph) baseAlgorithm.getModel());
-            Location paloalto = Location.createFromAddress("Palo Alto, CA", (EnhGraph) baseAlgorithm.getModel());
+            Location beijing = Location.createFromGPS(39.933973, 116.384777, baseAlgorithm.getModel());
+            Location verano1 = Location.createFromGPS(33.643331,-117.829489, baseAlgorithm.getModel());
+            Location verano2 = Location.createFromAddress("Verano Pl, Irvine, CA - 92617", baseAlgorithm.getModel());
+            Location paloalto = Location.createFromAddress("Palo Alto, CA", baseAlgorithm.getModel());
 
             logger.info("Same City (verano1, verano2): " + verano1.getURI());
             logger.info("Same City (verano1, verano2): " + verano1.liesWithinSameCity(verano2));

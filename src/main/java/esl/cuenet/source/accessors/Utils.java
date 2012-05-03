@@ -64,7 +64,7 @@ public class Utils {
             if (loc.containsField("name")) {
                 Location location = null;
                 try {
-                    location = Location.createFromAddress(loc.getString("name"), (EnhGraph) model);
+                    location = Location.createFromAddress(loc.getString("name"), model);
                 } catch (IOException e) {
                     logger.warn("Location Fetch Failed: " + e.getMessage());
                 }
@@ -82,7 +82,7 @@ public class Utils {
                     if (name != null) {
                         Location wp = null;
                         try {
-                            wp = Location.createFromAddress(name, (EnhGraph) model);
+                            wp = Location.createFromAddress(name, model);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
