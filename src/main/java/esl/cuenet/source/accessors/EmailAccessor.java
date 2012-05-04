@@ -54,21 +54,21 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     @Override
     public void associateTimeInterval(Attribute attribute, TimeInterval timeInterval) throws AccesorInitializationException {
         throw new AccesorInitializationException("Incorrect Assignment: No time interval attributes in "
-                + YahooPlaceFinderAPI.class.getName());
+                + EmailAccessor.class.getName());
 
     }
 
     @Override
     public void associateLocation(Attribute attribute, Location timeInterval) throws AccesorInitializationException {
         throw new AccesorInitializationException("Incorrect Assignment: No location attributes in "
-                + YahooPlaceFinderAPI.class.getName());
+                + EmailAccessor.class.getName());
 
     }
 
     @Override
     public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         throw new AccesorInitializationException("Long value being initialized for wrong attribute "
-                + FacebookUserAccessor.class.getName());
+                + EmailAccessor.class.getName());
     }
 
     @Override
@@ -87,14 +87,14 @@ public class EmailAccessor extends MongoDB implements IAccessor {
         }
         else {
             throw new AccesorInitializationException("String value being initialized for wrong attribute "
-                    + FacebookUserAccessor.class.getName());
+                    + EmailAccessor.class.getName());
         }
     }
 
     @Override
     public void associateDouble(Attribute attribute, double value) throws AccesorInitializationException {
         throw new AccesorInitializationException("Long value being initialized for wrong attribute "
-                + FacebookUserAccessor.class.getName());
+                + EmailAccessor.class.getName());
     }
 
     @Override

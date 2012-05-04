@@ -64,6 +64,11 @@ public class AccessorFactory {
             return new ConferenceAccessor(model);
         }
 
+        else if (name.compareTo("conf-attendees") == 0) {
+            logger.info("Initializing Conference Attendee Accessor");
+            return new ConferenceAttendeeAccessor(model);
+        }
+
         return null;
     }
 

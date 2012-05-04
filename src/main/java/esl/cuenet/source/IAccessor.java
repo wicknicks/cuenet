@@ -12,7 +12,7 @@ public interface IAccessor {
 
 
     void associateTimeInterval(Attribute attribute, TimeInterval timeInterval) throws AccesorInitializationException;
-    void associateLocation(Attribute attribute, Location timeInterval) throws AccesorInitializationException;
+    void associateLocation(Attribute attribute, Location location) throws AccesorInitializationException;
     void associateLong(Attribute attribute, long value) throws AccesorInitializationException;
     void associateString(Attribute attribute, String value) throws AccesorInitializationException;
     void associateDouble(Attribute attribute, double value) throws AccesorInitializationException;
