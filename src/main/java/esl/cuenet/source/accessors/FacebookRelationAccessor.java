@@ -97,13 +97,13 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
         DBReader reader = this.startReader("fb_relationships");
-        ResultSetImpl resultSet = new ResultSetImpl("FB_Relations for : " + id);
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor for : " + id);
 
         BasicDBList clauses = new BasicDBList();
 
         if ( !setFlags[0] )  {
             logger.info("Empty");
-            return new ResultSetImpl("");
+            return new ResultSetImpl("Facebook Relation Accessor");
         }
 
         BasicDBObject inputPersonPredicates = new BasicDBObject("id", id);
@@ -178,7 +178,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
 
     private IResultSet convertResults(BasicDBObject result) {
 
-        ResultSetImpl resultSet = new ResultSetImpl("");
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor");
 
         Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
 

@@ -1,5 +1,9 @@
 package esl.cuenet.algorithms.firstk.impl;
 
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.algorithms.firstk.Vote;
 import esl.cuenet.algorithms.firstk.Voter;
@@ -8,25 +12,31 @@ import esl.cuenet.algorithms.firstk.structs.eventgraph.BFSEventGraphTraverser;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
 import esl.cuenet.model.Constants;
+import esl.cuenet.query.IResultIterator;
+import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.QueryEngine;
 import esl.datastructures.graph.*;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class EntityVoter implements Voter {
 
     private Logger logger = Logger.getLogger(EntityVoter.class);
     private QueryEngine queryEngine = null;
 
-    public EntityVoter (QueryEngine engine) {
+    private List<Map.Entry<Individual, Integer[]>> scores = new ArrayList<Map.Entry<Individual, Integer[]>>();
+    private Property nameProperty = null;
+    private OntModel model = null;
+
+    public EntityVoter (QueryEngine engine, OntModel model) {
         this.queryEngine = engine;
+        this.model = model;
+        nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
     }
 
     @Override
-    public Vote[] vote(EventGraph graph) {
+    public Vote[] vote(EventGraph graph, List<Individual> candidates) {
         BFSEventGraphTraverser traverser = new BFSEventGraphTraverser(graph);
         List<Entity> graphEntities = new ArrayList<Entity>();
 
@@ -50,8 +60,21 @@ public class EntityVoter implements Voter {
 
         traverser.start();
 
-        logger.info("Entities found: " + graphEntities.size());
+        List<String> projectVarURIs = new ArrayList<String>();
+        projectVarURIs.add(Constants.CuenetNamespace + "person");
 
+        logger.info("Entities found: " + graphEntities.size());
+        scores.clear();
+
+        int tb_size = candidates.size();
+        for (int i=0; i<tb_size; i++) {
+            Integer[] candScores = new Integer[graphEntities.size() + 1];
+            for (int j=0; j<candScores.length; j++) candScores[j]=0;
+            Map.Entry<Individual, Integer[]> entry = new AbstractMap.SimpleEntry<Individual, Integer[]>(candidates.get(i), candScores);
+            scores.add(entry);
+        }
+
+        int graphEntityIndex = 0;
         for (Entity entity: graphEntities) {
             String name = null;
             String email = null;
@@ -83,25 +106,96 @@ public class EntityVoter implements Voter {
             sparqlQuery += "}";
 
             logger.info("Executing Sparql Query: \n" + sparqlQuery);
-            queryEngine.execute(sparqlQuery);
+            List<IResultSet> relations = queryEngine.execute(sparqlQuery);
+            logger.info("Found Relations from " + relations.size() + " sources for " + name);
 
+            for (IResultSet resultSet : relations) {
+                logger.info(resultSet.printResults());
+                IResultIterator resultIterator = resultSet.iterator();
+                while(resultIterator.hasNext()) {
+                    Map<String, List<Individual>> result = resultIterator.next(projectVarURIs);
+                    List<Individual> relatedCandidates = result.get(Constants.CuenetNamespace + "person");
+                    updateScores(graphEntityIndex, relatedCandidates, candidates);
+                }
+            }
         }
 
-        System.out.print("Enter choice: ");
-        Scanner scanner = new Scanner(System.in);
-        String data = scanner.nextLine();
+        Collections.sort(scores, new Comparator<Map.Entry<Individual, Integer[]>>() {
+            @Override
+            public int compare(Map.Entry<Individual, Integer[]> _o1, Map.Entry<Individual, Integer[]> _o2) {
+                Integer[] o1 = _o1.getValue();
+                Integer[] o2 = _o2.getValue();
+                return (o2[o2.length-1]-o1[o1.length-1]);
+            }
+        });
 
-        if (data.compareToIgnoreCase("q") == 0) System.exit(0);
+        int nonZeroCandidates = 0;
+        for (Map.Entry<Individual, Integer[]> entry: scores) {
+            Integer[] cs = entry.getValue();
+            if (cs[cs.length-1] > 0) nonZeroCandidates++;
+            String sss = String.format("%-25s", getName(entry.getKey()));
+            for (Integer s: cs) sss += " " + s;
+            logger.info(sss);
+        }
 
-        logger.info("Choice: " + data);
+        Vote[] votes = new Vote[nonZeroCandidates];
+        int ix = 0;
+        for (Map.Entry<Individual, Integer[]> entry: scores) {
+            Integer[] cs = entry.getValue();
+            if (cs[cs.length-1] == 0) continue;
+            Vote vote = new Vote();
+            vote.entityID = getName(entry.getKey());
+            vote.score = cs[cs.length-1];
+            votes[ix] = vote; ix++;
+        }
 
-        return new Vote[0];
+        return votes;
+    }
+
+    private void updateScores(int graphEntityIndex, List<Individual> relatedCandidates, List<Individual> allCandidates) {
+        if (relatedCandidates == null) return;
+
+        for (Individual candidate: relatedCandidates) {
+            Statement statement = candidate.getProperty(nameProperty);
+            if (statement == null) continue;
+            if (!statement.getObject().isLiteral()) continue;
+            updateScore(graphEntityIndex, statement.getObject().asLiteral().getString(), allCandidates);
+        }
+    }
+
+    private String getName(Individual individual) {
+        Statement statement = individual.getProperty(nameProperty);
+        if (statement == null) return null;
+        if (!statement.getObject().isLiteral()) return null;
+        return statement.getObject().asLiteral().getString();
+    }
+
+    private void updateScore(int graphEntityIndex, String relationName, List<Individual> allCandidates) {
+        if (relationName == null) return;
+
+        int pos = -1; int ix = 0;
+        for (Individual candidate: allCandidates) {
+            String candidateName = getName(candidate);
+            if (candidateName == null) continue;
+            if (candidateName.compareTo(relationName) == 0 /*&& candidateName.compareTo("Arjun Satish") != 0*/) {
+                Integer[] candScores = scores.get(ix).getValue();
+                candScores[graphEntityIndex]++;
+                candScores[candScores.length - 1]++;
+                logger.info("Yohoo! Found " + candidateName + " at " + ix);
+            }
+            ix++;
+        }
     }
 
     // throw some basic stuff out for now.
     public String getUIDs(String name) {
         if (name.compareTo("Torsten Grust") == 0) return "acx_1@wicknicks";
-        if (name.compareTo("Thomas Willhalm") == 0) return "acx_2@wicknicks";
+        else if (name.compareTo("Chen Li") == 0) return "fb_1385092812@wicknicks";
+        else if (name.compareTo("Atish Das Sarma") == 0) return "fb_640150760@wicknicks";
+        else if (name.compareTo("Danupon Nanongkai") == 0) return "fb_12815178@wicknicks";
+        else if (name.compareTo("Galen Reeves") == 0) return "fb_1230757@wicknicks";
+        else if (name.compareTo("Nicola Onose") == 0) return "fb_3312053@wicknicks";
+        else if (name.compareTo("Ramesh Jain") == 0) return "fb_6028816@wicknicks";
         else return "fb_717562539@wicknicks";
     }
 

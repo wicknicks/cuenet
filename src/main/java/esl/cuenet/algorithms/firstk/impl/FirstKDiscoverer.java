@@ -10,6 +10,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import esl.cuenet.algorithms.firstk.FirstKAlgorithm;
+import esl.cuenet.algorithms.firstk.Vote;
 import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.*;
@@ -50,7 +51,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     public FirstKDiscoverer() throws IOException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
-        voter = new EntityVoter(queryEngine);
+        voter = new EntityVoter(queryEngine, model);
 
         subeventOfProperty = model.getProperty(Constants.CuenetNamespace + "subevent-of");
         participatesInProperty = model.getProperty(Constants.DOLCE_Lite_Namespace + "participant-in");
@@ -94,6 +95,13 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
         }
 
+        System.out.print("Enter choice: ");
+        Scanner scanner = new Scanner(System.in);
+        String data = scanner.nextLine();
+
+        if (data.compareToIgnoreCase("q") == 0) System.exit(0);
+        logger.info("Choice: " + data);
+
         discover(graph);
     }
 
@@ -134,11 +142,11 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         List<IResultSet> results = queryEngine.execute(sparqlQuery);
         logger.info("Got results from " + results.size() + " sources.");
 
+        List<String> projectVarURIs = new ArrayList<String>();
+        projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+        projectVarURIs.add(Constants.CuenetNamespace + "person");
         for (IResultSet result : results) {
             IResultIterator iter = result.iterator();
-            List<String> projectVarURIs = new ArrayList<String>();
-            projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
-            projectVarURIs.add(Constants.CuenetNamespace + "person");
             while (iter.hasNext()) {
                 Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
                 List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
@@ -183,7 +191,9 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private void verify(List<Individual> possiblePersons) {
 
         if (possiblePersons.size() > 10) {
-            voter.vote(graph);
+            Vote[] votes = voter.vote(graph, possiblePersons);
+            logger.info("Got: " + votes.length);
+            for (Vote v: votes) verify(v.entityID);
             return;
         }
 
@@ -286,6 +296,21 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
         List<IResultSet> results = queryEngine.execute(sparqlQuery);
         logger.info("Got results from " + results.size() + " sources.");
+
+        for (IResultSet result : results) {
+            IResultIterator iter = result.iterator();
+            List<String> projectVarURIs = new ArrayList<String>();
+            projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+            projectVarURIs.add(Constants.CuenetNamespace + "person");
+            while (iter.hasNext()) {
+                Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
+                List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
+                verify(possiblePersons);
+
+                List<Individual> associatableEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
+                mergeEvents(associatableEvents);
+            }
+        }
     }
 
     private List<OntClass> getPossibleSubeventClasses(String superEventURI) {

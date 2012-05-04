@@ -122,7 +122,7 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
 
     private IResultSet convertResults(BasicDBObject result) {
 
-        ResultSetImpl resultSet = new ResultSetImpl("");
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook User Accessor");
         Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
 
         List<Individual> re = new ArrayList<Individual>();
