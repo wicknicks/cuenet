@@ -227,12 +227,16 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         BasicDBList photos = (BasicDBList) obj.get("photos");
         BasicDBObject photo = (BasicDBObject) photos.get(0);
         BasicDBList tags = (BasicDBList) photo.get("tags");
-        BasicDBObject tag = (BasicDBObject) tags.get(0);
-        BasicDBList uids = (BasicDBList) tag.get("uids");
-        if (uids.size() == 0) return " NOT RECOGNIZED ";
-        BasicDBObject uid = (BasicDBObject) uids.get(0);
-        discoveryCount++;
-        return uid.getString("confidence");
+        for (int i=0; i<tags.size(); i++) {
+            BasicDBObject tag = (BasicDBObject) tags.get(i);
+            BasicDBList uids = (BasicDBList) tag.get("uids");
+            if (uids.size() == 0) continue;
+            BasicDBObject uid = (BasicDBObject) uids.get(0);
+            discoveryCount++;
+            return uid.getString("confidence");
+        }
+
+        return " NOT RECOGNIZED ";
     }
 
     private TimeInterval getTimeIntervalFromRelatedEvent(Entity entity) {
