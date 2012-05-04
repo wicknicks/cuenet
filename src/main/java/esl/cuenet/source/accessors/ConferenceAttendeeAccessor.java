@@ -30,11 +30,14 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
 
     private OntModel model = null;
     private Attribute[] attributes = null;
-    private boolean[] setFlags = new boolean[2];
-    private String url = null;
+    private boolean[] setFlags = new boolean[6];
+    private String ltitle, stitle, url;
     private List<String> personNames = new ArrayList<String>();
+    private TimeInterval interval = null;
+    private Location location = null;
 
-    private Logger logger = Logger.getLogger(ConferenceAccessor.class);
+
+    private Logger logger = Logger.getLogger(ConferenceAttendeeAccessor.class);
 
     public ConferenceAttendeeAccessor(OntModel model) {
         super("test");
@@ -55,16 +58,25 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
 
     @Override
     public void associateTimeInterval(Attribute attribute, TimeInterval timeInterval) throws AccesorInitializationException {
-        throw new AccesorInitializationException("Incorrect Assignment: No time interval attributes in "
-                + ConferenceAttendeeAccessor.class.getName());
+        if (attribute.compareTo(attributes[2])==0) {
+            this.interval = timeInterval;
+            setFlags[2] = true;
+        } else {
+            throw new AccesorInitializationException("TimeInterval value being initialized for wrong attribute "
+                    + ConferenceAccessor.class.getName());
+        }
     }
 
     @Override
     public void associateLocation(Attribute attribute, Location location) throws AccesorInitializationException {
-        throw new AccesorInitializationException("Incorrect Assignment: No location attributes in "
-                + ConferenceAttendeeAccessor.class.getName());
+        if (attribute.compareTo(attributes[3])==0) {
+            this.location = location;
+            setFlags[3] = true;
+        } else {
+            throw new AccesorInitializationException("Location value being initialized for wrong attribute "
+                    + ConferenceAccessor.class.getName());
+        }
     }
-
     @Override
     public void associateLong(Attribute attribute, long value) throws AccesorInitializationException {
         throw new AccesorInitializationException("Incorrect Assignment: No long attributes in "
@@ -73,19 +85,28 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
 
     @Override
     public void associateString(Attribute attribute, String value) throws AccesorInitializationException {
-
         if (attribute.compareTo(attributes[0])==0) {
             this.url = value;
             setFlags[0] = true;
         }
         else if (attribute.compareTo(attributes[1])==0) {
-            setAttributeNames(null);
             this.personNames.add(value);
             setFlags[1] = true;
         }
-        else throw new AccesorInitializationException("Incorrect Assignment: No long attributes in "
+        else if (attribute.compareTo(attributes[4])==0) {
+            setFlags[4] = true;
+            this.ltitle = value;
+        }
+        else if (attribute.compareTo(attributes[5])==0) {
+            setFlags[5] = true;
+            this.stitle = value;
+        }
+        else if (attribute.compareTo(attributes[4])==0) {
+            setFlags[4] = true;
+            this.url = value;
+        }
+        else throw new AccesorInitializationException("Incorrect Assignment: String attributes in "
                 + ConferenceAttendeeAccessor.class.getName());
-
     }
 
     @Override
@@ -171,6 +192,10 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
 
         Location confLocation = null;
         if (conf.containsField("location")) confLocation = convertToLocation(conf.getString("location"));
+
+        if (stitle != null && stitle.compareTo(conf.getString("short"))!=0) return null;
+        if (ltitle != null && ltitle.compareTo(conf.getString("title"))!=0) return null;
+
 
         long _sdate = conf.getLong("start-date");
         long _edate = conf.getLong("end-date");

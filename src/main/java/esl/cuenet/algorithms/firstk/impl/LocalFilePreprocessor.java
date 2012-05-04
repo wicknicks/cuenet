@@ -66,7 +66,7 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
                     model.createTypedLiteral(exif.width));
             io.addLiteral(model.createProperty(
                     model.getNsPrefixMap().get(Constants.DefaultNamespace) + Constants.ImageHeight),
-                    model.createTypedLiteral(exif.width));
+                    model.createTypedLiteral(exif.height));
             io.addResource(model.getProperty(Constants.CuenetNamespace + Constants.OccursDuring),
                     TimeInterval.createFromMoment(exif.timestamp, model));
 

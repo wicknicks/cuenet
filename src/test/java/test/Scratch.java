@@ -18,13 +18,13 @@ public class Scratch extends TestBase {
     private Logger logger = Logger.getLogger(Scratch.class);
     private ExceptionHandler exceptionHandler = new ExceptionHandler(ExceptionHandler.DEBUG);
 
-    @Test
+//    @Test
     public void dateTest() throws ParseException {
-
-        long start = 1251173399000L;
-        long end =  1251173399000L;
-        BasicDBObject o = (BasicDBObject) JSON.parse(String.format("{\"start-date\" : { \"$lt\" : %d} , \"end-date\" : { \"$gt\" : %d}}", start, end));
-        logger.info(o.toMap());
+//
+//        long start = 1251173399000L;
+//        long end =  1251173399000L;
+//        BasicDBObject o = (BasicDBObject) JSON.parse(String.format("{\"start-date\" : { \"$lt\" : %d} , \"end-date\" : { \"$gt\" : %d}}", start, end));
+//        logger.info(o.toMap());
 
 //
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -39,23 +39,23 @@ public class Scratch extends TestBase {
 //        logger.info( (d.getYear()+1900) + " " + (d.getMonth()+1) + " "+ d.getDate() + "   " + d.getHours() + " " + d.getMinutes() + " " + d.getSeconds());
     }
 
-//    public static void main(String... args) {
-//        (new Scratch()).doSingleFileTest();
-//    }
-//
-//    public void doSingleFileTest() {
-//        try {
-//            singleFileTest();
-//        } catch (Exception e) {
-//            exceptionHandler.handle(e);
-//        }
-//    }
-//
-//    public void singleFileTest() throws IOException, ParseException, EventGraphException {
-//        //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
-//        File file = new File("/home/arjun/Dataset/vldb/DSC_0414.JPG");
-//        FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
-//        firstKDiscoverer.execute(new LocalFileDataset(file));
-//    }
+    public static void main(String... args) {
+        (new Scratch()).doSingleFileTest();
+    }
+
+    public void doSingleFileTest() {
+        try {
+            singleFileTest();
+        } catch (Exception e) {
+            exceptionHandler.handle(e);
+        }
+    }
+
+    public void singleFileTest() throws IOException, ParseException, EventGraphException {
+        //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
+        File file = new File("/home/arjun/Dataset/vldb/DSC_0413.JPG");
+        FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
+        firstKDiscoverer.execute(new LocalFileDataset(file));
+    }
 
 }

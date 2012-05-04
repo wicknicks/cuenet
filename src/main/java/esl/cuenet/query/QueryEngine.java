@@ -19,6 +19,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.syntax.*;
 import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
 import esl.cuenet.mapper.tree.SourceMapper;
 import esl.cuenet.model.Constants;
 import esl.cuenet.source.*;
@@ -159,6 +160,16 @@ public class QueryEngine {
                 List<RelationGraphNode> nodes = relationGraph.getNodesOfType(removeNamespace(uri));
                 if (nodes != null && nodes.size() > 0)
                     flag = true;
+
+                // see if any subclasses can be found
+                if (!flag) {
+                    List<OntClass> subclasses = getSubClasses(uri);
+                    for (OntClass ontClass: subclasses) {
+                        nodes = relationGraph.getNodesOfType(removeNamespace(ontClass.getURI()));
+                        if (nodes != null && nodes.size() > 0)
+                            flag = true;
+                    }
+                }
                 logger.info("Searching for: " + uri);
             }
 
@@ -171,9 +182,9 @@ public class QueryEngine {
             for (Individual ind : inputIndividuals) {
 
                 Statement s = ind.getProperty(RDF.type);
-                String personType = removeNamespace(s.getObject().toString());
+                String individualType = removeNamespace(s.getObject().toString());
 
-                List<RelationGraphNode> queryNodes = relationGraph.getNodesOfType(personType);
+                List<RelationGraphNode> queryNodes = relationGraph.getNodesOfType(individualType);
 
                 StmtIterator si;
                 String pathExpr;
@@ -218,6 +229,22 @@ public class QueryEngine {
             else logger.info("NULL Result Set");
 
             return resultsSet;
+        }
+
+        private List<OntClass> getSubClasses(String uri) {
+            List<OntClass> subClasses = new ArrayList<OntClass>();
+
+            // list all the sub classes.
+            OntClass eventOntClass = model.getOntClass(uri);
+            StmtIterator iterator = model.listStatements(null, RDFS.subClassOf, eventOntClass);
+
+            while(iterator.hasNext()) {
+                Statement stmt = iterator.nextStatement();
+                OntClass event = model.getOntClass(stmt.getSubject().getURI());
+                subClasses.add(event);
+            }
+
+            return subClasses;
         }
 
         private String removeNamespace(String uri) {

@@ -20,6 +20,12 @@ public class EventGraph extends RelationGraph {
     private HashMap<EventGraphEdge, EventGraphNode> edgeOriginMap = new HashMap<EventGraphEdge, EventGraphNode>();
     private Logger logger = Logger.getLogger(EventGraph.class);
 
+    public List<Event> getEvents() {
+        List<Event> events = new ArrayList<Event>();
+        for (EventGraphNode n: graphNodes) if (n instanceof Event) events.add((Event) n);
+        return events;
+    }
+
     public enum NodeType {
         EVENT,
         ENTITY

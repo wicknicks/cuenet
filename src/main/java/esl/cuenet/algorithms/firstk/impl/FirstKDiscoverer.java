@@ -2,10 +2,7 @@ package esl.cuenet.algorithms.firstk.impl;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.rdf.model.*;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
@@ -91,7 +88,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         graphTraverser.start();
         logger.info("Size of DQ: " + discoveryQueue.size());
 
-        for (EventGraphNode node : discoveryQueue) {
+        while(discoveryQueue.size() > 0) {
+            EventGraphNode node = discoveryQueue.remove();
             if (node.getType() == EventGraph.NodeType.EVENT) discover((Event) node);
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
         }
@@ -100,7 +98,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private void discover(Entity entity) throws EventGraphException {
-
         String name = null;
         String email = null;
 
@@ -133,19 +130,54 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         sparqlQuery += "} \n";
 
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
-        List<IResultSet> results = queryEngine.execute(sparqlQuery);
-        IResultIterator iter = results.get(0).iterator();
-        List<String> projectVarURIs = new ArrayList<String>();
-        projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
-        projectVarURIs.add(Constants.CuenetNamespace + "person");
-        while(iter.hasNext()) {
-            Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
-            List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
-            verify(possiblePersons);
-        }
 
+        List<IResultSet> results = queryEngine.execute(sparqlQuery);
         logger.info("Got results from " + results.size() + " sources.");
 
+        for (IResultSet result : results) {
+            IResultIterator iter = result.iterator();
+            List<String> projectVarURIs = new ArrayList<String>();
+            projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+            projectVarURIs.add(Constants.CuenetNamespace + "person");
+            while (iter.hasNext()) {
+                Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
+                List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
+                verify(possiblePersons);
+
+                List<Individual> associatableEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
+                mergeEvents(associatableEvents);
+            }
+        }
+    }
+
+    private void mergeEvents(List<Individual> associatableEvents) throws EventGraphException{
+        for (Individual individual: associatableEvents) mergeEvent(individual);
+    }
+
+    private void mergeEvent(Individual event) throws EventGraphException {
+
+        Statement eti = event.getProperty(occursDuringProperty);
+        TimeInterval eItvl = lookupTi(eti.getObject().asResource());
+        if (eItvl == null) return;
+
+        List<Event> eventsInGraph = graph.getEvents();
+        for (Event eventInGraph: eventsInGraph) {
+            Statement ti = eventInGraph.getIndividual().getProperty(occursDuringProperty);
+            TimeInterval itvl = lookupTi(ti.getObject().asResource());
+            if (itvl == null) continue;
+            if (eItvl.contains(itvl)) {
+                EventGraphNode node = graph.addIndividual(event, EventGraph.NodeType.EVENT);
+                graph.addSubevent((Event)node, eventInGraph);
+                discoveryQueue.add(node);
+            }
+            else if (itvl.contains(eItvl)) {
+                EventGraphNode node = graph.addIndividual(event, EventGraph.NodeType.EVENT);
+                graph.addSubevent(eventInGraph, (Event)node);
+                discoveryQueue.add(node);
+            }
+        }
+
+        logger.info("Merging event");
     }
 
     private void verify(List<Individual> possiblePersons) {
@@ -226,16 +258,34 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
         else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
 
+
+        StmtIterator iterator = event.getIndividual().listProperties();
+        StringBuilder builder = new StringBuilder("");
+        while(iterator.hasNext()) {
+            Statement iter = iterator.nextStatement();
+            if (iter.getObject().isLiteral()) {
+                Literal literal = iter.getObject().asLiteral();
+                if (literal.getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") != 0) continue;
+                builder.append("?x <").append(iter.getPredicate().getURI()).append("> \"");
+                builder.append(literal.getValue());
+                builder.append("\" .\n");
+            }
+        }
+
+        logger.info("Adding Triples: \n" + builder.substring(0));
+
         String sparqlQuery = "SELECT ?p \n" +
                 "WHERE { \n" +
                 "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
+                (( builder.length() == 0) ? "" : builder.substring(0)) +
                 "?p <" + Constants.CuenetNamespace + "participant-in> ?x .\n" +
                 "?p <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n";
 
         sparqlQuery += "}";
 
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
-        queryEngine.execute(sparqlQuery);
+        List<IResultSet> results = queryEngine.execute(sparqlQuery);
+        logger.info("Got results from " + results.size() + " sources.");
     }
 
     private List<OntClass> getPossibleSubeventClasses(String superEventURI) {
