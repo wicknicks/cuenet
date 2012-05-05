@@ -29,6 +29,8 @@ public class EntityVoter implements Voter {
     private Property nameProperty = null;
     private OntModel model = null;
 
+    private List<Individual> verifiedPile = new ArrayList<Individual>();
+
     public EntityVoter (QueryEngine engine, OntModel model) {
         this.queryEngine = engine;
         this.model = model;
@@ -146,10 +148,23 @@ public class EntityVoter implements Voter {
             Vote vote = new Vote();
             vote.entityID = getName(entry.getKey());
             vote.score = cs[cs.length-1];
+            vote.entity = entry.getKey();
             votes[ix] = vote; ix++;
         }
 
         return votes;
+    }
+
+    private boolean isVerified(Individual individual) {
+        String indName = getName(individual);
+        if (indName == null) return false;
+
+        for (Individual verifiedIndividual: verifiedPile) {
+            String vName = getName(verifiedIndividual);
+            if (vName == null) continue;
+            if (vName.compareTo(indName) == 0) return true;
+        }
+        return false;
     }
 
     private void updateScores(int graphEntityIndex, List<Individual> relatedCandidates, List<Individual> allCandidates) {
@@ -163,6 +178,27 @@ public class EntityVoter implements Voter {
         }
     }
 
+    private void updateScore(int graphEntityIndex, String relationName, List<Individual> allCandidates) {
+        if (relationName == null) return;
+
+        int pos = -1; int ix = 0;
+        for (Individual candidate: allCandidates) {
+            if (isVerified(candidate)) {
+                ix++;
+                continue;
+            }
+            String candidateName = getName(candidate);
+            if (candidateName == null) continue;
+            if (candidateName.compareTo(relationName) == 0 /*&& candidateName.compareTo("Arjun Satish") != 0*/) {
+                Integer[] candScores = scores.get(ix).getValue();
+                candScores[graphEntityIndex]++;
+                candScores[candScores.length-1]++;
+                logger.info("Yohoo! Found " + candidateName + " at " + ix);
+            }
+            ix++;
+        }
+    }
+
     private String getName(Individual individual) {
         Statement statement = individual.getProperty(nameProperty);
         if (statement == null) return null;
@@ -170,26 +206,10 @@ public class EntityVoter implements Voter {
         return statement.getObject().asLiteral().getString();
     }
 
-    private void updateScore(int graphEntityIndex, String relationName, List<Individual> allCandidates) {
-        if (relationName == null) return;
-
-        int pos = -1; int ix = 0;
-        for (Individual candidate: allCandidates) {
-            String candidateName = getName(candidate);
-            if (candidateName == null) continue;
-            if (candidateName.compareTo(relationName) == 0 /*&& candidateName.compareTo("Arjun Satish") != 0*/) {
-                Integer[] candScores = scores.get(ix).getValue();
-                candScores[graphEntityIndex]++;
-                candScores[candScores.length - 1]++;
-                logger.info("Yohoo! Found " + candidateName + " at " + ix);
-            }
-            ix++;
-        }
-    }
-
     // throw some basic stuff out for now.
     public String getUIDs(String name) {
         if (name.compareTo("Torsten Grust") == 0) return "acx_1@wicknicks";
+        else if (name.compareTo("Thomas Willhalm") == 0) return "acx_2@wicknicks";
         else if (name.compareTo("Chen Li") == 0) return "fb_1385092812@wicknicks";
         else if (name.compareTo("Atish Das Sarma") == 0) return "fb_640150760@wicknicks";
         else if (name.compareTo("Danupon Nanongkai") == 0) return "fb_12815178@wicknicks";
@@ -199,4 +219,7 @@ public class EntityVoter implements Voter {
         else return "fb_717562539@wicknicks";
     }
 
+    public void addToVerifiedPile(Individual person) {
+        verifiedPile.add(person);
+    }
 }

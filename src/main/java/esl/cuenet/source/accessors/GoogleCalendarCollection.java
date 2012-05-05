@@ -94,14 +94,17 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
         for (Object o: result) {
             BasicDBObject entry = (BasicDBObject) o;
+            String title = null;
 
             if (entry.containsField("title")) {
+                title = entry.getString("title");
                 event = getOntologyClass(entry.getString("title"));
             } else {
+                title = "geve";
                 event = model.getOntClass("http://www.w3.org/1999/02/22-rdf-syntax-ns#event");
             }
 
-            Individual ev = event.createIndividual();
+            Individual ev = event.createIndividual(Constants.CuenetNamespace + "event_" + title.replace(" ", "_"));
             Individual owner = person.createIndividual();
 
             if (entry.containsField("name")) owner.addLiteral(nameProperty, entry.getString("name"));

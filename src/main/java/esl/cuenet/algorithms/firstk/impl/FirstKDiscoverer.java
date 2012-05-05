@@ -25,7 +25,6 @@ import esl.datastructures.graph.*;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -46,7 +45,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 1;
+    private int k = 10;
 
     public FirstKDiscoverer() throws IOException, ParseException {
         super();
@@ -93,6 +92,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             EventGraphNode node = discoveryQueue.remove();
             if (node.getType() == EventGraph.NodeType.EVENT) discover((Event) node);
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
+            if (terminate(graph)) return;
         }
 
         System.out.print("Enter choice: ");
@@ -149,11 +149,11 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             IResultIterator iter = result.iterator();
             while (iter.hasNext()) {
                 Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
-                List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
-                verify(possiblePersons);
+                List<Individual> discoveredEntities = resultMap.get(Constants.CuenetNamespace + "person");
+                verify(discoveredEntities);
 
-                List<Individual> associatableEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
-                mergeEvents(associatableEvents);
+                List<Individual> discoveredEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
+                mergeEvents(discoveredEvents);
             }
         }
     }
@@ -167,6 +167,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         Statement eti = event.getProperty(occursDuringProperty);
         TimeInterval eItvl = lookupTi(eti.getObject().asResource());
         if (eItvl == null) return;
+
+        if (isPresentInGraph(event)) return;
 
         List<Event> eventsInGraph = graph.getEvents();
         for (Event eventInGraph: eventsInGraph) {
@@ -188,38 +190,73 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         logger.info("Merging event");
     }
 
+    private boolean isPresentInGraph(Individual event) {
+        List<Event> eventsInGraph = graph.getEvents();
+        String eventURI = event.getURI();
+        for (Event eventInGraph: eventsInGraph) {
+            String eventInGraphURI = eventInGraph.getIndividual().getURI();
+            if (eventInGraphURI.compareTo(eventURI) == 0)
+                return true;
+        }
+
+        return false;
+    }
+
     private void verify(List<Individual> possiblePersons) {
 
         if (possiblePersons.size() > 10) {
             Vote[] votes = voter.vote(graph, possiblePersons);
             logger.info("Got: " + votes.length);
-            for (Vote v: votes) verify(v.entityID);
+            for (Vote v: votes) {
+                int conf = verify(v.entityID);
+                confirm(conf, v.entity);
+            }
             return;
         }
 
         for (Individual person: possiblePersons) {
             Statement statement = person.getProperty(model.getProperty(Constants.CuenetNamespace + "name"));
             logger.info("Verifying person: " + statement.getObject().asLiteral().getValue());
-            verify(statement.getObject().asLiteral().getString());
+            int conf = verify(statement.getObject().asLiteral().getString());
+            confirm(conf, person);
         }
 
         logger.info("Verification Complete");
     }
 
-    public void verify (String person) {
+    private void confirm(int confidence, Individual person) {
+        voter.addToVerifiedPile(person);
+        if (confidence < 0) return;
+        discoveryCount++;
+    }
+
+    public int verify(String person) {
         File file = dataset.item();
         String url = "http://api.face.com/faces/recognize.json?api_key=72b454f5b9b9fb7c83a6f7b6bfda3e59&" +
                 "api_secret=a8f9877166d42fc73a1dda1a7d8704e5&urls=" +
                 "http://tracker.ics.uci.edu/content/" + file.getName() + "&uids=" + voter.getUIDs(person);
 
         HttpDownloader downloader = new HttpDownloader();
+        int conf = -1;
+        byte[] sa = null;
         try {
-            byte[] sa = downloader.get(url);
-            BasicDBObject obj = (BasicDBObject) JSON.parse(new String(sa));
-            logger.info("Verification Results: (" + person +  ") --> " + getUIDConfidence(obj));
+            sa = downloader.get(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (sa == null) return conf;
+
+        BasicDBObject obj = (BasicDBObject) JSON.parse(new String(sa));
+        String confidence = getUIDConfidence(obj);
+        try {
+            conf = Integer.parseInt(confidence);
+            logger.info("Verification Results: (" + person + ") --> " + getUIDConfidence(obj));
+        } catch (NumberFormatException nfe) {
+            logger.info("Verification Results: (" + person + ") --> " + getUIDConfidence(obj));
+        }
+
+        return conf;
     }
 
     private String getUIDConfidence(BasicDBObject obj) {
@@ -232,7 +269,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             BasicDBList uids = (BasicDBList) tag.get("uids");
             if (uids.size() == 0) continue;
             BasicDBObject uid = (BasicDBObject) uids.get(0);
-            discoveryCount++;
             return uid.getString("confidence");
         }
 
