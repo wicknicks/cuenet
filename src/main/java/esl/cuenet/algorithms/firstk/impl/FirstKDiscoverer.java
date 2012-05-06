@@ -263,6 +263,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         if (sa == null) return conf;
 
         BasicDBObject obj = (BasicDBObject) JSON.parse(new String(sa));
+        logger.info("Face.com response: "+ obj);
         String confidence = getUIDConfidence(obj);
         try {
             conf = Integer.parseInt(confidence);
@@ -275,7 +276,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private String getUIDConfidence(BasicDBObject obj) {
-        logger.info("Face.com response: "+ obj);
         BasicDBList photos = (BasicDBList) obj.get("photos");
         BasicDBObject photo = (BasicDBObject) photos.get(0);
         BasicDBList tags = (BasicDBList) photo.get("tags");
