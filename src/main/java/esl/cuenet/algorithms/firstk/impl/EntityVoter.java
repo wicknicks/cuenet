@@ -39,29 +39,7 @@ public class EntityVoter implements Voter {
 
     @Override
     public Vote[] vote(EventGraph graph, List<Individual> candidates) {
-        BFSEventGraphTraverser traverser = new BFSEventGraphTraverser(graph);
-        List<Entity> graphEntities = new ArrayList<Entity>();
-
-        TraversalContext traversalContext = new TraversalContext();
-        traversalContext.setCx(graphEntities);
-        traverser.setTraversalContext(traversalContext);
-
-        traverser.setNodeVisitorCallback(new NodeVisitor() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public void visit(Node node, TraversalContext traversalContext) {
-                List<Entity> entities = (List<Entity>) traversalContext.getCx();
-                if (node instanceof Entity) entities.add((Entity) node);
-            }
-        });
-
-        traverser.setEdgeVisitorCallback(new EdgeVisitor() {
-            @Override
-            public void visit(Edge edge, TraversalContext traversalContext) { }
-        });
-
-        traverser.start();
-
+        List<Entity> graphEntities = graph.getEntities();
         List<String> projectVarURIs = new ArrayList<String>();
         projectVarURIs.add(Constants.CuenetNamespace + "person");
 

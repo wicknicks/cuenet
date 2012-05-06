@@ -26,6 +26,12 @@ public class EventGraph extends RelationGraph {
         return events;
     }
 
+    public List<Entity> getEntities() {
+        List<Entity> entities = new ArrayList<Entity>();
+        for (EventGraphNode n: graphNodes) if (n instanceof Entity) entities.add((Entity) n);
+        return entities;
+    }
+
     public enum NodeType {
         EVENT,
         ENTITY

@@ -38,7 +38,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private Property subeventOfProperty = null;
     private Property participatesInProperty = null;
     private Property occursDuringProperty = null;
-    private Property occursAtProperty = null;
+    private Property nameProperty = null;
 
     private EntityVoter voter = null;
     private EventGraph graph = null;
@@ -55,7 +55,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         subeventOfProperty = model.getProperty(Constants.CuenetNamespace + "subevent-of");
         participatesInProperty = model.getProperty(Constants.DOLCE_Lite_Namespace + "participant-in");
         occursDuringProperty = model.getProperty(Constants.CuenetNamespace + "occurs-during");
-        occursAtProperty = model.getProperty(Constants.CuenetNamespace + "occurs-at");
+        nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException, EventGraphException {
@@ -227,7 +227,22 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private void confirm(int confidence, Individual person) {
         voter.addToVerifiedPile(person);
         if (confidence < 0) return;
+        addEntity(person);
         discoveryCount++;
+    }
+
+    private void addEntity(Individual person) {
+        String pName = getName(person);
+        if (pName == null) return;
+        List<Entity> graphEntities = graph.getEntities();
+
+        for (Entity entity: graphEntities) {
+            String entityName = getName(entity.getIndividual());
+            if (entityName == null) continue;
+            if (entityName.compareToIgnoreCase(pName) == 0) return;
+        }
+
+        graph.addIndividual(person, EventGraph.NodeType.ENTITY);
     }
 
     public int verify(String person) {
@@ -307,7 +322,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
         if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
         else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
-
 
         StmtIterator iterator = event.getIndividual().listProperties();
         StringBuilder builder = new StringBuilder("");
@@ -403,5 +417,13 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private boolean terminate(EventGraph graph) {
         return (discoveryCount == k);
     }
+
+    private String getName(Individual individual) {
+        Statement statement = individual.getProperty(nameProperty);
+        if (statement == null) return null;
+        if (!statement.getObject().isLiteral()) return null;
+        return statement.getObject().asLiteral().getString();
+    }
+
 
 }
