@@ -156,12 +156,22 @@ public class EntityVoter implements Voter {
     private void updateScores(int graphEntityIndex, List<Individual> relatedCandidates, List<Individual> allCandidates) {
         if (relatedCandidates == null) return;
 
+        String relatedCandidateName = null;
+
+//        long start = System.currentTimeMillis();
         for (Individual candidate: relatedCandidates) {
-            Statement statement = candidate.getProperty(nameProperty);
-            if (statement == null) continue;
-            if (!statement.getObject().isLiteral()) continue;
-            updateScore(graphEntityIndex, statement.getObject().asLiteral().getString(), allCandidates);
+            relatedCandidateName = getName(candidate);
+            if (relatedCandidateName == null) continue;
+            updateScore(graphEntityIndex, relatedCandidateName, allCandidates);
+
+//            Statement statement = candidate.getProperty(nameProperty);
+//            if (statement == null) continue;
+//            if (!statement.getObject().isLiteral()) continue;
+//            updateScore(graphEntityIndex, statement.getObject().asLiteral().getString(), allCandidates);
         }
+
+//        long end = System.currentTimeMillis();
+//        logger.info("Exec Time: " + (end-start));
     }
 
     private void updateScore(int graphEntityIndex, String relationName, List<Individual> allCandidates) {
@@ -173,6 +183,7 @@ public class EntityVoter implements Voter {
                 ix++;
                 continue;
             }
+
             String candidateName = getName(candidate);
             if (candidateName == null) continue;
             if (candidateName.compareTo(relationName) == 0 /*&& candidateName.compareTo("Arjun Satish") != 0*/) {

@@ -95,12 +95,14 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             if (terminate(graph)) return;
         }
 
-        System.out.print("Enter choice: ");
-        Scanner scanner = new Scanner(System.in);
-        String data = scanner.nextLine();
+        if (discoveryCount == 8) System.exit(0);
 
-        if (data.compareToIgnoreCase("q") == 0) System.exit(0);
-        logger.info("Choice: " + data);
+//        System.out.print("Enter choice (k=" + discoveryCount + ") : ");
+//        Scanner scanner = new Scanner(System.in);
+//        String data = scanner.nextLine();
+//
+//        if (data.compareToIgnoreCase("q") == 0) System.exit(0);
+//        logger.info("Choice: " + data);
 
         discover(graph);
     }
