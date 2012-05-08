@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class Scratch extends TestBase {
 
@@ -40,6 +41,9 @@ public class Scratch extends TestBase {
     }
 
     public static void main(String... args) {
+        System.out.print("Type in something to start program.... ");
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
         (new Scratch()).doSingleFileTest();
     }
 
@@ -53,7 +57,7 @@ public class Scratch extends TestBase {
 
     public void singleFileTest() throws IOException, ParseException, EventGraphException {
         //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
-        File file = new File("/home/arjun/Dataset/vldb/vldb_group.jpg");
+        File file = new File("/home/arjun/Dataset/vldb/DSC_0413.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
         firstKDiscoverer.execute(new LocalFileDataset(file));
     }
