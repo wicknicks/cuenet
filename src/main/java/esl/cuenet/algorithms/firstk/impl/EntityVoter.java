@@ -27,14 +27,12 @@ public class EntityVoter implements Voter {
 
     private List<Map.Entry<Individual, Integer[]>> scores = new ArrayList<Map.Entry<Individual, Integer[]>>();
     private Property nameProperty = null;
-    private OntModel model = null;
     int xxx = 0;
 
     private List<Individual> verifiedPile = new ArrayList<Individual>();
 
     public EntityVoter (QueryEngine engine, OntModel model) {
         this.queryEngine = engine;
-        this.model = model;
         nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
     }
 
@@ -226,6 +224,7 @@ public class EntityVoter implements Voter {
         else return null;
     }
 
+    @Override
     public void addToVerifiedPile(Individual person) {
         verifiedPile.add(person);
     }

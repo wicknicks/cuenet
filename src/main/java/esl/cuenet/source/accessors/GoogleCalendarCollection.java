@@ -68,11 +68,15 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         cursor.query(query);
         BasicDBList result = new BasicDBList();
 
+        int c=0;
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
             result.add(object);
-            logger.info(object.toString());
+            c++;
         }
+
+        logger.info("Found " + c + " calendar entries.");
+
         return convertResults(result);
     }
 

@@ -157,11 +157,12 @@ public class EmailAccessor extends MongoDB implements IAccessor {
                 individualCollection.add(Utils.createPersonFromNameEmail(entry.getKey(), entry.getValue(), model));
 
             resultSet.addResult(individualCollection);
-            logger.info(c + ". " + obj.toString()); c++;
+            c++;
 
             if (c > 100) break;
         }
 
+        logger.info("Returning " + c + " emails.");
         return resultSet;
     }
 

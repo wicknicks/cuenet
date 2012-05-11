@@ -9,5 +9,7 @@ public interface Voter {
 
     public Vote[] vote(EventGraph graph, List<Individual> candidates);
 
+    public void addToVerifiedPile(Individual person);
+
 }
 
