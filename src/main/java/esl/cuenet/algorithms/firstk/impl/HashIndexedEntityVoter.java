@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 
 import java.util.*;
 
-public class HashIndexedEntityVoter implements Voter {
+public class HashIndexedEntityVoter {
 
     private Logger logger = Logger.getLogger(EntityVoter.class);
 
@@ -41,36 +41,31 @@ public class HashIndexedEntityVoter implements Voter {
         projectVarURIs.add(Constants.CuenetNamespace + "person");
     }
 
-    @Override
-    public Vote[] vote(EventGraph graph, List<Individual> doNotUseArg0) {
+    public Vote[] vote(EventGraph graph, List<Entity> discoverableEntities) {
         List<Entity> graphEntities = graph.getEntities();
         logger.info("Entities found: " + graphEntities.size());
 
         merge(graphEntities);
 
-        for (Entity entity: graphEntities) {
+        for (Entity entity: discoverableEntities) {
             if (isDiscovered(entity)) continue;
             entityBeingDiscovered = getLiteralValue(entity.getIndividual(), nameProperty);
             discover(entity);
             addToDiscoveredPile(entityBeingDiscovered);
         }
 
-        List<Vote> votes = new ArrayList<Vote>();
+        List<Vote> nonZeroVotes = new ArrayList<Vote>();
         for(ScoreArray scoreArray: candidateTable.values()) {
             int tot = 0;
-            if (isVerified(getLiteralValue(scoreArray.individual, nameProperty))) continue;
-            Collection<Integer> scores = scoreArray.scores.values();
-            for (Integer s: scores) tot += s;
+            String name = getLiteralValue(scoreArray.individual, nameProperty);
+            if (isVerified(name)) continue;
+            for (Integer s: scoreArray.scores.values()) tot += s;
             if (tot == 0) continue;
-            Vote v = new Vote();
-            v.entity = scoreArray.individual;
-            v.entityID = getLiteralValue(v.entity, nameProperty);
-            v.score = tot;
-            votes.add(v);
+            nonZeroVotes.add(new Vote(name, tot, scoreArray.individual));
         }
 
-        Vote[] rVotes = new Vote[votes.size()];
-        votes.toArray(rVotes);
+        Vote[] rVotes = new Vote[nonZeroVotes.size()];
+        nonZeroVotes.toArray(rVotes);
         return rVotes;
     }
 
@@ -115,6 +110,8 @@ public class HashIndexedEntityVoter implements Voter {
 
     private void merge(List<Entity> entities) {
         for (Entity entity: entities) {
+//            if (isDiscovered(entity)) continue;
+//            if (isVerified(entity)) continue;
             merge(entity.getIndividual());
         }
     }
@@ -123,11 +120,7 @@ public class HashIndexedEntityVoter implements Voter {
         for (Individual rCandidate: relatedCandidates) {
             String rName = getLiteralValue(rCandidate, nameProperty);
             ScoreArray original = candidateTable.get(rName);
-            if (original == null) {
-                //original = new ScoreArray(rCandidate);
-                //candidateTable.put(rName, original);
-                continue;
-            }
+            if (original == null) continue;
 
             if (entityBeingDiscovered.equals(rName)) continue;
             if (isVerified(rName)) continue;
@@ -151,7 +144,6 @@ public class HashIndexedEntityVoter implements Voter {
         return val;
     }
 
-    @Override
     public void addToVerifiedPile(Individual entity) {
         String name = getLiteralValue(entity, nameProperty);
         ScoreArray scoreArray = candidateTable.get(name);
@@ -160,6 +152,10 @@ public class HashIndexedEntityVoter implements Voter {
             candidateTable.put(name, scoreArray);
         }
         scoreArray.isVerified = true;
+    }
+
+    private boolean isVerified(Entity entity) {
+        return isVerified(getLiteralValue(entity.getIndividual(), nameProperty));
     }
 
     private boolean isVerified(String name) {

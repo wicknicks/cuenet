@@ -8,7 +8,9 @@ import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.Vote;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.Event;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
+import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraphNode;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.QueryEngine;
@@ -62,16 +64,25 @@ public class HashIndexedEntityVoterTest extends MongoDB {
 
         EventGraph graph = new EventGraph(model);
 
+        Event conference = graph.createEvent("conference");
+        for (Individual ind: eventAttendees) {
+            EventGraphNode node = graph.addIndividual(ind, EventGraph.NodeType.ENTITY);
+            graph.addParticipant(conference, (Entity) node);
+        }
+
         Entity entity = graph.createPerson();
         entity.getIndividual().addProperty(nameProperty, "Arjun Satish");
         entity.getIndividual().addProperty(emailProperty, "arjun.satish@gmail.com");
         indexedVoter.addToVerifiedPile(entity.getIndividual());
 
-        Vote[] votes = indexedVoter.vote(graph, eventAttendees);
-        for (Vote vote : votes) logger.info(vote.entityID + "  " + vote.score);
-        if (votes.length == 0)  logger.info("0 entities voted!");
+        List<Entity> discoverableEntity = new ArrayList<Entity>();
+        discoverableEntity.add(entity);
 
-        Entity e1 = graph.createPerson();
+        Vote[] votes = indexedVoter.vote(graph, discoverableEntity);
+        for (Vote vote : votes) logger.info(vote.entityID + "  " + vote.score);
+        if (votes.length == 0)  logger.info("voter returned 0 possible entities!");
+
+        /*Entity e1 = graph.createPerson();
         e1.getIndividual().addProperty(nameProperty, "Atish Das Sarma");
         e1.getIndividual().addProperty(emailProperty, "atish.dassarma@gmail.com");
         indexedVoter.addToVerifiedPile(e1.getIndividual());
@@ -102,6 +113,7 @@ public class HashIndexedEntityVoterTest extends MongoDB {
 
         long end = System.currentTimeMillis();
         logger.info("Terminated in " + (end-start) + " ms.");
+        */
     }
 
 }
