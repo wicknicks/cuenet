@@ -73,7 +73,7 @@ public class HashIndexedEntityVoterTest extends MongoDB {
         Entity entity = graph.createPerson();
         entity.getIndividual().addProperty(nameProperty, "Arjun Satish");
         entity.getIndividual().addProperty(emailProperty, "arjun.satish@gmail.com");
-        indexedVoter.addToVerifiedPile(entity.getIndividual());
+        indexedVoter.addToVerifiedList(entity);
 
         List<Entity> discoverableEntity = new ArrayList<Entity>();
         discoverableEntity.add(entity);

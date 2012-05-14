@@ -6,7 +6,6 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.algorithms.firstk.Vote;
-import esl.cuenet.algorithms.firstk.Voter;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
@@ -23,155 +22,101 @@ public class HashIndexedEntityVoter {
     private Logger logger = Logger.getLogger(EntityVoter.class);
 
     private String entityBeingDiscovered = null;
-//    private List<String> discoveredEntityURIs = new ArrayList<String>();
-//    private List<String> verifiedEntityURIs = new ArrayList<String>();
 
-    private HashMap<String, ScoreArray> candidateTable = new HashMap<String, ScoreArray>();
-
-    List<String> projectVarURIs = new ArrayList<String>();
+    private CandidateVotingTable<String> candidateTable = new CandidateVotingTable<String>("eventgraph");
+    private HashMap<String, CandidateVotingTable<String>> discoveredCandidatesTables = new
+            HashMap<String, CandidateVotingTable<String>>();
+    private List<String> projectVarURIs = new ArrayList<String>();
 
     private QueryEngine queryEngine = null;
     private Property nameProperty = null;
     private Property emailProperty = null;
+    private List<EntityContext> verifiedEntities = null;
 
     public HashIndexedEntityVoter(QueryEngine engine, OntModel model) {
         this.queryEngine = engine;
         nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
         emailProperty = model.getProperty(Constants.CuenetNamespace + "email");
         projectVarURIs.add(Constants.CuenetNamespace + "person");
+        verifiedEntities = new ArrayList<EntityContext>();
     }
 
     public Vote[] vote(EventGraph graph, List<Entity> discoverableEntities) {
         List<Entity> graphEntities = graph.getEntities();
         logger.info("Entities found: " + graphEntities.size());
 
-        merge(graphEntities);
+        List<EntityContext> discoverableEntityContexts = new ArrayList<EntityContext>();
 
         for (Entity entity: discoverableEntities) {
-            if (isDiscovered(entity)) continue;
-            entityBeingDiscovered = getLiteralValue(entity.getIndividual(), nameProperty);
-            discover(entity);
-            addToDiscoveredPile(entityBeingDiscovered);
+            EntityContext ecx = new EntityContext(entity,
+                    getLiteralValue(entity.getIndividual(), nameProperty),
+                    getLiteralValue(entity.getIndividual(), emailProperty));
+            discoverableEntityContexts.add(ecx);
         }
 
-        List<Vote> nonZeroVotes = new ArrayList<Vote>();
-        for(ScoreArray scoreArray: candidateTable.values()) {
-            int tot = 0;
-            String name = getLiteralValue(scoreArray.individual, nameProperty);
-            if (isVerified(name)) continue;
-            for (Integer s: scoreArray.scores.values()) tot += s;
-            if (tot == 0) continue;
-            nonZeroVotes.add(new Vote(name, tot, scoreArray.individual));
+        for (EntityContext ecx: discoverableEntityContexts) {
+            if (discoveredCandidatesTables.get(ecx.name) != null)
+                discover(ecx);
         }
 
-        Vote[] rVotes = new Vote[nonZeroVotes.size()];
-        nonZeroVotes.toArray(rVotes);
-        return rVotes;
+        updateScoresForEventAttendees(graph.getEntities());
+
+        return extractTopDCandidates();
     }
 
-    private void discover(Entity entity) {
-        String name = getValueFromEntityNode(entity, Constants.Name);
-        String email = getValueFromEntityNode(entity, Constants.Email);
+    private Vote[] extractTopDCandidates() {
+        Iterator<String> ctIter = candidateTable.iterator();
+        ArrayList<Vote> nonZeroVotes = new ArrayList<Vote>();
+        while(ctIter.hasNext()) {
+            Score<String> score = candidateTable.getScore(ctIter.next());
+            if (score.scores > 0) nonZeroVotes.add(
+                    new Vote(getLiteralValue(score.individual, nameProperty),
+                            score.scores, score.individual));
+        }
+        Vote[] votes = new Vote[nonZeroVotes.size()];
+        nonZeroVotes.toArray(votes);
+        return votes;
+    }
 
-        String sparqlQuery = "SELECT ?x \n" +
-                " WHERE { \n" +
-                "?x <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n" +
-                "?y <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n" +
-                "?y <" + Constants.CuenetNamespace + "knows" + ">" + " ?x .\n";
+    private void updateScoresForEventAttendees(List<Entity> entities) {
+        String name = null;
+        for (Entity entity: entities) {
+            name = getLiteralValue(entity.getIndividual(), nameProperty);
+            if ( !candidateTable.contains(name) )
+                candidateTable.addToCandidateTable(name, entity.getIndividual());
+            updateScoresForEventAttendee(entity, name);
+        }
+    }
 
-        if (email != null)
-            sparqlQuery += "?y <" + Constants.CuenetNamespace + "email> \"" + email + "\" .\n";
-        if (name != null)
-            sparqlQuery += "?y <" + Constants.CuenetNamespace + "name> \"" + name + "\" .\n";
+    private void updateScoresForEventAttendee(Entity entity, String name) {
+        for (Map.Entry<String, CandidateVotingTable<String>> dctEntry:
+                discoveredCandidatesTables.entrySet()) {
+            Score<String> score = dctEntry.getValue().getScore(name);
+            candidateTable.updateScore(name, score.scores);
+        }
+    }
 
-        sparqlQuery += "}";
-
-        logger.info("Executing Sparql Query: \n" + sparqlQuery);
-        List<IResultSet> relations = queryEngine.execute(sparqlQuery);
-        logger.info("Found Relations from " + relations.size() + " sources for " + name);
-
-        for (IResultSet resultSet : relations) {
+    private void discover(EntityContext ecx) {
+        CandidateVotingTable<String> votingTable = new CandidateVotingTable<String>(ecx.name);
+        for (IResultSet resultSet : query(ecx)) {
             logger.info(resultSet.printResults());
             IResultIterator resultIterator = resultSet.iterator();
             while(resultIterator.hasNext()) {
                 Map<String, List<Individual>> result = resultIterator.next(projectVarURIs);
                 List<Individual> relatedCandidates = result.get(Constants.CuenetNamespace + "person");
-                updateScores(entity.getIndividual(), relatedCandidates);
+                updateScores(votingTable, relatedCandidates);
             }
         }
     }
 
-    private void merge(Individual ind) {
-        String name = getLiteralValue(ind, nameProperty);
-        ScoreArray scoreArray = candidateTable.get(name);
-        if (scoreArray == null) candidateTable.put(name, new ScoreArray(ind));
-        else merge(scoreArray.individual, ind);
-    }
-
-    private void merge(List<Entity> entities) {
-        for (Entity entity: entities) {
-//            if (isDiscovered(entity)) continue;
-//            if (isVerified(entity)) continue;
-            merge(entity.getIndividual());
+    private void updateScores(CandidateVotingTable<String> votingTable,
+                              List<Individual> relatedCandidates) {
+        String name;
+        for (Individual candidate: relatedCandidates) {
+            name = getLiteralValue(candidate, nameProperty);
+            if ( !votingTable.contains(name) ) votingTable.addToCandidateTable(name, candidate);
+            else votingTable.updateScore(name, 1);
         }
-    }
-
-    private void updateScores(Individual graphEntityIndividual, List<Individual> relatedCandidates) {
-        for (Individual rCandidate: relatedCandidates) {
-            String rName = getLiteralValue(rCandidate, nameProperty);
-            ScoreArray original = candidateTable.get(rName);
-            if (original == null) continue;
-
-            if (entityBeingDiscovered.equals(rName)) continue;
-            if (isVerified(rName)) continue;
-
-            String name = getLiteralValue(graphEntityIndividual, nameProperty);
-            Integer score = original.scores.get(name);
-            if (score == null) original.scores.put(name, 1);
-            else original.scores.put(name, score+1);
-        }
-    }
-
-    private String getValueFromEntityNode(Entity entity, String constant) {
-        String val = null;
-        if (!entity.containsLiteralEdge(constant)) return null;
-        try {
-            val = (String) entity.getLiteralValue(constant);
-            logger.info(val);
-        } catch (EventGraphException e) {
-            e.printStackTrace();
-        }
-        return val;
-    }
-
-    public void addToVerifiedPile(Individual entity) {
-        String name = getLiteralValue(entity, nameProperty);
-        ScoreArray scoreArray = candidateTable.get(name);
-        if (scoreArray == null) {
-            scoreArray = new ScoreArray(entity);
-            candidateTable.put(name, scoreArray);
-        }
-        scoreArray.isVerified = true;
-    }
-
-    private boolean isVerified(Entity entity) {
-        return isVerified(getLiteralValue(entity.getIndividual(), nameProperty));
-    }
-
-    private boolean isVerified(String name) {
-        ScoreArray scoreArray = candidateTable.get(name);
-        return scoreArray.isVerified;
-    }
-
-    private void addToDiscoveredPile(String name) {
-        ScoreArray scoreArray = candidateTable.get(name);
-        scoreArray.isDiscovered = true;
-    }
-
-    private boolean isDiscovered(Entity entity) {
-        String name = getLiteralValue(entity.getIndividual(), nameProperty);
-        ScoreArray scoreArray = candidateTable.get(name);
-        return scoreArray.isDiscovered;
     }
 
     private String getLiteralValue(Individual individual, Property property) {
@@ -181,24 +126,40 @@ public class HashIndexedEntityVoter {
         return statement.getObject().asLiteral().getString();
     }
 
-    private class ScoreArray {
-        public ScoreArray(Individual individual) {
-            this.individual = individual;
-            this.scores = new HashMap<String, Integer>(10);
-            this.isDiscovered = false;
-            this.isVerified = false;
+    public List<IResultSet> query(EntityContext ecx) {
+        String sparqlQuery = "SELECT ?x \n" +
+                " WHERE { \n" +
+                "?x <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n" +
+                "?y <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n" +
+                "?y <" + Constants.CuenetNamespace + "knows" + ">" + " ?x .\n";
+
+        if (ecx.email != null)
+            sparqlQuery += "?y <" + Constants.CuenetNamespace + "email> \"" + ecx.email + "\" .\n";
+        if (ecx.name != null)
+            sparqlQuery += "?y <" + Constants.CuenetNamespace + "name> \"" + ecx.name + "\" .\n";
+
+        sparqlQuery += "}";
+
+        logger.info("Executing Sparql Query: \n" + sparqlQuery);
+        return queryEngine.execute(sparqlQuery);
+    }
+
+    public void addToVerifiedList(Entity verifiedEntity) {
+        EntityContext ecx = new EntityContext(verifiedEntity,
+                getLiteralValue(verifiedEntity.getIndividual(), nameProperty),
+                getLiteralValue(verifiedEntity.getIndividual(), emailProperty));
+        verifiedEntities.add(ecx);
+    }
+
+    private class EntityContext {
+        public EntityContext(Entity entity, String name, String email) {
+            this.email = email;
+            this.entity = entity;
+            this.name = name;
         }
-        public Individual individual;
-        public HashMap<String, Integer> scores;
-        public boolean isDiscovered;
-        public boolean isVerified;
+        Entity entity;
+        String name;
+        String email;
     }
 
-    private void merge(Individual original, Individual newIndividual) {
-        String oem = getLiteralValue(original, emailProperty);
-        String nem = getLiteralValue(newIndividual, emailProperty);
-
-        if (oem == null && nem != null)
-            original.addLiteral(emailProperty, nem);
-    }
 }
