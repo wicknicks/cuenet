@@ -55,7 +55,7 @@ public class HashIndexedEntityVoter {
         }
 
         for (EntityContext ecx: discoverableEntityContexts) {
-            if (discoveredCandidatesTables.get(ecx.name) != null)
+            if (discoveredCandidatesTables.get(ecx.name) == null)
                 discover(ecx);
         }
 
@@ -68,12 +68,26 @@ public class HashIndexedEntityVoter {
         Iterator<String> ctIter = candidateTable.iterator();
         ArrayList<Vote> nonZeroVotes = new ArrayList<Vote>();
         while(ctIter.hasNext()) {
-            Score<String> score = candidateTable.getScore(ctIter.next());
+            String name = ctIter.next();
+            Score<String> score = candidateTable.getScore(name);
             if (score.scores > 0) nonZeroVotes.add(
                     new Vote(getLiteralValue(score.individual, nameProperty),
                             score.scores, score.individual));
         }
-        Vote[] votes = new Vote[nonZeroVotes.size()];
+
+        int dups = 0;
+        for (Vote v: nonZeroVotes) {
+            if (discoveredCandidatesTables.get(v.entityID) != null ||
+                    isVerified(v.entityID)) dups++;
+        }
+
+        Vote[] votes = new Vote[nonZeroVotes.size() - dups];
+
+        int i = 0;
+        for (Vote v: nonZeroVotes)
+            if (discoveredCandidatesTables.get(v.entityID) == null && !isVerified(v.entityID))
+                votes[i++] = v;
+
         nonZeroVotes.toArray(votes);
         return votes;
     }
@@ -92,7 +106,8 @@ public class HashIndexedEntityVoter {
         for (Map.Entry<String, CandidateVotingTable<String>> dctEntry:
                 discoveredCandidatesTables.entrySet()) {
             Score<String> score = dctEntry.getValue().getScore(name);
-            candidateTable.updateScore(name, score.scores);
+            if (score == null) continue;
+            candidateTable.updateScore(name, score.scores + 1);
         }
     }
 
@@ -107,6 +122,7 @@ public class HashIndexedEntityVoter {
                 updateScores(votingTable, relatedCandidates);
             }
         }
+        discoveredCandidatesTables.put(ecx.name, votingTable);
     }
 
     private void updateScores(CandidateVotingTable<String> votingTable,
@@ -142,6 +158,11 @@ public class HashIndexedEntityVoter {
 
         logger.info("Executing Sparql Query: \n" + sparqlQuery);
         return queryEngine.execute(sparqlQuery);
+    }
+
+    public boolean isVerified(String name) {
+        for (EntityContext ecx: verifiedEntities) if (ecx.name.equals(name)) return true;
+        return false;
     }
 
     public void addToVerifiedList(Entity verifiedEntity) {

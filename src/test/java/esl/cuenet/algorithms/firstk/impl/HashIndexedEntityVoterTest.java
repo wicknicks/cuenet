@@ -37,9 +37,6 @@ public class HashIndexedEntityVoterTest extends MongoDB {
 
     @Test
     public void run1() throws IOException, ParseException, EventGraphException {
-        long start = System.currentTimeMillis();
-        logger.info("Starting Second Test: " + start);
-
         OntModel model = testAlgorithm.getModel();
         List<Individual> eventAttendees = new ArrayList<Individual>(500);
         OntClass personClass = model.getOntClass(Constants.CuenetNamespace + "person");
@@ -50,9 +47,9 @@ public class HashIndexedEntityVoterTest extends MongoDB {
         BasicDBObject queryObject = new BasicDBObject("url", "http://vldb2009.org/");
         cursor.query(queryObject);
         while(cursor.hasNext()) {
-            Individual attendee = personClass.createIndividual();
             BasicDBObject obj = (BasicDBObject) cursor.next();
             String name = obj.getString("name");
+            Individual attendee = personClass.createIndividual(Constants.CuenetNamespace + "person_"+name.replaceAll(" ", "_"));
             attendee.addLiteral(nameProperty, name);
             eventAttendees.add(attendee);
         }
@@ -78,42 +75,53 @@ public class HashIndexedEntityVoterTest extends MongoDB {
         List<Entity> discoverableEntity = new ArrayList<Entity>();
         discoverableEntity.add(entity);
 
+        long start = System.currentTimeMillis();
+        logger.info("Starting First Test: " + start);
+
         Vote[] votes = indexedVoter.vote(graph, discoverableEntity);
         for (Vote vote : votes) logger.info(vote.entityID + "  " + vote.score);
         if (votes.length == 0)  logger.info("voter returned 0 possible entities!");
 
-        /*Entity e1 = graph.createPerson();
+        long end = System.currentTimeMillis();
+        logger.info("Terminated in " + (end-start) + " ms.");
+
+        Entity e1 = graph.createPerson();
         e1.getIndividual().addProperty(nameProperty, "Atish Das Sarma");
         e1.getIndividual().addProperty(emailProperty, "atish.dassarma@gmail.com");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
+        discoverableEntity.add(e1);
 
         e1 = graph.createPerson();
         e1.getIndividual().addProperty(nameProperty, "Danupon Nanongkai");
         e1.getIndividual().addProperty(emailProperty, "danupon@gmail.com");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
+        discoverableEntity.add(e1);
 
         e1 = new Entity(personClass.createIndividual());
         e1.getIndividual().addProperty(nameProperty, "Chen Li");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
 
         e1 = graph.createPerson();
         e1.getIndividual().addProperty(nameProperty, "Ramesh Jain");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
 
         e1 = graph.createPerson();
         e1.getIndividual().addProperty(nameProperty, "Galen Reeves");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
 
         e1 = new Entity(personClass.createIndividual());
         e1.getIndividual().addProperty(nameProperty, "Nicola Onose");
-        indexedVoter.addToVerifiedPile(e1.getIndividual());
+        indexedVoter.addToVerifiedList(e1);
 
-        votes = indexedVoter.vote(graph, eventAttendees);
+        start = System.currentTimeMillis();
+        logger.info("Starting Second Pass: " + start);
+
+        votes = indexedVoter.vote(graph, discoverableEntity);
         for (Vote vote : votes) logger.info(vote.entityID + "  " + vote.score);
 
-        long end = System.currentTimeMillis();
+        end = System.currentTimeMillis();
         logger.info("Terminated in " + (end-start) + " ms.");
-        */
+
     }
 
 }
