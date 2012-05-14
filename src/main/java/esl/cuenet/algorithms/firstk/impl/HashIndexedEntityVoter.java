@@ -6,7 +6,6 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.algorithms.firstk.Vote;
-import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
 import esl.cuenet.model.Constants;
@@ -20,8 +19,6 @@ import java.util.*;
 public class HashIndexedEntityVoter {
 
     private Logger logger = Logger.getLogger(EntityVoter.class);
-
-    private String entityBeingDiscovered = null;
 
     private CandidateVotingTable<String> candidateTable = new CandidateVotingTable<String>("eventgraph");
     private HashMap<String, CandidateVotingTable<String>> discoveredCandidatesTables = new
@@ -93,16 +90,16 @@ public class HashIndexedEntityVoter {
     }
 
     private void updateScoresForEventAttendees(List<Entity> entities) {
-        String name = null;
+        String name;
         for (Entity entity: entities) {
             name = getLiteralValue(entity.getIndividual(), nameProperty);
             if ( !candidateTable.contains(name) )
                 candidateTable.addToCandidateTable(name, entity.getIndividual());
-            updateScoresForEventAttendee(entity, name);
+            updateScoresForEventAttendee(name);
         }
     }
 
-    private void updateScoresForEventAttendee(Entity entity, String name) {
+    private void updateScoresForEventAttendee(String name) {
         for (Map.Entry<String, CandidateVotingTable<String>> dctEntry:
                 discoveredCandidatesTables.entrySet()) {
             Score<String> score = dctEntry.getValue().getScore(name);
