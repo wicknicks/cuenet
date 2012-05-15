@@ -38,6 +38,30 @@ app.post('/relationships', function (req, res, next) {
   res.send('');
 });
 
+
+
+
+app.get('/sfu', function(req, res, next) {
+  res.send('use post');
+});
+
+app.post('/sfu', function (req, res, next) {
+  res.send('Got it');
+  console.log(Object.keys(req.files));
+  console.log(format('Received upload %s (%d Kb) to %s'
+    , req.files.image.name
+    , req.files.image.size / 1024 | 0
+    , req.files.image.path));
+  console.log('Original filename: ' + req.files.image.filename);
+});
+
+
+
+app.get('/uploader', function(req, res, next) {
+  res.send('Hello, Android')
+  console.log(req.body)
+});
+
 app.post('/uploader', function(req, res, next) {
   console.log(format('Received upload %s (%d Kb) to %s'
     , req.files.image.name
