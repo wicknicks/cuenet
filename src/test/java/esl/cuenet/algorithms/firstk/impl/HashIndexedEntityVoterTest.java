@@ -26,7 +26,7 @@ import java.util.List;
 
 public class HashIndexedEntityVoterTest extends MongoDB {
 
-    private Logger logger = Logger.getLogger(IndexedEntityVoterTest.class);
+    private Logger logger = Logger.getLogger(HashIndexedEntityVoterTest.class);
     private TestBase.TestAlgorithm testAlgorithm = null;
 
     public HashIndexedEntityVoterTest() throws IOException, ParseException {
