@@ -19,7 +19,7 @@ public class ExceptionHandler {
 
     public void handle(Exception ex) {
         if (mode == PRODUCTION)
-            logger.warn(ex.getClass().getCanonicalName() + " " + ex.getMessage());
+            logger.error(ex.getClass().getCanonicalName() + " " + ex.getMessage(), ex);
         else if (mode == DEBUG)
             ex.printStackTrace();
     }

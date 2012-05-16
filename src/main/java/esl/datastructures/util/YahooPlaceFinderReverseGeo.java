@@ -18,7 +18,12 @@ public class YahooPlaceFinderReverseGeo {
 
     private Logger logger = Logger.getLogger(YahooPlaceFinderReverseGeo.class);
     private static YahooPlaceFinderReverseGeo instance = new YahooPlaceFinderReverseGeo();
-    private HashMap<String, BasicDBObject> geocodeCache= new HashMap<String, BasicDBObject>();
+    private HashMap<String, BasicDBObject> geocodeCache = null;
+    private GeocodingCache persistentGeocodingCache = new GeocodingCache();
+
+    public YahooPlaceFinderReverseGeo() {
+        geocodeCache = persistentGeocodingCache.getAll();
+    }
 
     public static BasicDBObject reverseGeoCode(double lat, double lon) throws IOException {
         return instance.queryPlaceFinder(lat, lon);
@@ -32,8 +37,14 @@ public class YahooPlaceFinderReverseGeo {
 
         BasicDBObject cachedObj = geocodeCache.get(addressWithSpaces);
         if (cachedObj != null) {
-            logger.info("Found cached address for: " + addressWithSpaces);
+            //logger.info("Found cached address for: " + addressWithSpaces);
             return cachedObj;
+        }
+
+        BasicDBObject pGcInfo = persistentGeocodingCache.getFromCache(addressWithSpaces);
+        if (pGcInfo != null) {
+            geocodeCache.put(addressWithSpaces, pGcInfo);
+            return pGcInfo;
         }
 
         logger.info("Geocoding adress: " + addressWithSpaces);
@@ -61,6 +72,7 @@ public class YahooPlaceFinderReverseGeo {
 
         BasicDBObject result = (BasicDBObject) list.get(0);
         geocodeCache.put(addressWithSpaces, result);
+        persistentGeocodingCache.addToCache(addressWithSpaces, result);
 
         return result;
     }

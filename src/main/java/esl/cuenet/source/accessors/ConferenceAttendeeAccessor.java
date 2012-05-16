@@ -160,7 +160,8 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
             result.add(confIndividual);
 
             for (String attendeeName: entry.getValue()) {
-                Individual personIndividual = model.createIndividual(personClass);
+                Individual personIndividual = personClass.createIndividual(personClass.getURI()+attendeeName.replaceAll(" ", "_"));
+                //Individual personIndividual = model.createIndividual(personClass);
                 personIndividual.addProperty(nameProperty, attendeeName);
                 result.add(personIndividual);
                 logger.info(entry.getKey() + " attended-by " + attendeeName);

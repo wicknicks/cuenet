@@ -45,9 +45,10 @@ public class HashIndexedEntityVoter {
         List<EntityContext> discoverableEntityContexts = new ArrayList<EntityContext>();
 
         for (Entity entity: discoverableEntities) {
-            EntityContext ecx = new EntityContext(entity,
-                    getLiteralValue(entity.getIndividual(), nameProperty),
-                    getLiteralValue(entity.getIndividual(), emailProperty));
+            String name = getLiteralValue(entity.getIndividual(), nameProperty);
+            String email = getLiteralValue(entity.getIndividual(), emailProperty);
+            if (email == null) email = EntityVoter.getEmail(name);
+            EntityContext ecx = new EntityContext(entity, name, email);
             discoverableEntityContexts.add(ecx);
         }
 

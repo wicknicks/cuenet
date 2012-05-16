@@ -19,6 +19,7 @@ import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.QueryEngine;
+import esl.cuenet.query.drivers.mongodb.MongoDBHelper;
 import esl.cuenet.query.drivers.webjson.HttpDownloader;
 import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.*;
@@ -33,29 +34,48 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private Logger logger = Logger.getLogger(FirstKDiscoverer.class);
     private BFSEventGraphTraverser graphTraverser = null;
     private Queue<EventGraphNode> discoveryQueue = new LinkedList<EventGraphNode>();
+
     private QueryEngine queryEngine = null;
 
     private Property subeventOfProperty = null;
     private Property participatesInProperty = null;
     private Property occursDuringProperty = null;
     private Property nameProperty = null;
+    private Property urlProperty = null;
+    private Property titleProperty = null;
 
-    private EntityVoter voter = null;
+    //private EntityVoter voter = null;
+    private HashIndexedEntityVoter voter = null;
     private EventGraph graph = null;
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 10;
+    private int k = 4;
+
+    private Event photoCaptureEvent = null;
+
+    List<String> projectVarURIs = new ArrayList<String>();
 
     public FirstKDiscoverer() throws IOException, ParseException {
         super();
         queryEngine = new QueryEngine(model, sourceMapper);
-        voter = new EntityVoter(queryEngine, model);
+
+        //voter = new EntityVoter(queryEngine, model);
+        voter = new HashIndexedEntityVoter(queryEngine, model);
 
         subeventOfProperty = model.getProperty(Constants.CuenetNamespace + "subevent-of");
         participatesInProperty = model.getProperty(Constants.DOLCE_Lite_Namespace + "participant-in");
         occursDuringProperty = model.getProperty(Constants.CuenetNamespace + "occurs-during");
         nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
+        urlProperty = model.getProperty(Constants.CuenetNamespace + "url");
+        titleProperty = model.getProperty(Constants.CuenetNamespace + "title");
+
+        projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+        projectVarURIs.add(Constants.CuenetNamespace + "person");
+    }
+
+    public void setK(int k) {
+        this.k = k;
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException, EventGraphException {
@@ -79,7 +99,22 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             @Override
             public void visit(Edge edge, TraversalContext traversalContext) { } });
 
+
+        List<Event> initEvents = graph.getEvents();
+        for (Event e: initEvents) if (isPhotoCaptureEvent(e)) photoCaptureEvent = e;
+
+        List<Entity> initEntites = graph.getEntities();
+        for (Entity e: initEntites) {
+            String name = getLiteralValue(e.getIndividual(), nameProperty);
+            confirm(verify(name), e);
+        }
+
         discover(graph);
+    }
+
+    private boolean isPhotoCaptureEvent(Event event) {
+        OntClass cs = event.getIndividual().getOntClass();
+        return cs.getURI().equals(Constants.CuenetNamespace + Constants.PhotoCaptureEvent);
     }
 
     private void discover(EventGraph graph) throws EventGraphException {
@@ -144,33 +179,148 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         List<IResultSet> results = queryEngine.execute(sparqlQuery);
         logger.info("Got results from " + results.size() + " sources.");
 
-        List<String> projectVarURIs = new ArrayList<String>();
-        projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
-        projectVarURIs.add(Constants.CuenetNamespace + "person");
+        mergeQueryResults(results);
+
+//        List<String> projectVarURIs = new ArrayList<String>();
+//        projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+//        projectVarURIs.add(Constants.CuenetNamespace + "person");
+//        for (IResultSet result : results) {
+//            IResultIterator iter = result.iterator();
+//            while (iter.hasNext()) {
+//                Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
+//                List<Individual> discoveredEntities = resultMap.get(Constants.CuenetNamespace + "person");
+//                verify(discoveredEntities);
+//
+//                List<Individual> discoveredEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
+//                mergeEvents(discoveredEvents);
+//            }
+//        }
+    }
+
+    private void discover(Event event) throws EventGraphException {
+        OntClass ontClass = event.getIndividual().getOntClass();
+        List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
+        if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
+        else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
+
+        StringBuilder builder = new StringBuilder("");
+
+        String t = getLiteralValue(event.getIndividual(), urlProperty);
+        if (t != null) append(builder, Constants.CuenetNamespace + "url", t);
+
+        t = getLiteralValue(event.getIndividual(), nameProperty);
+        if (t != null) append(builder, Constants.CuenetNamespace + "name", t);
+
+        t = getLiteralValue(event.getIndividual(), titleProperty);
+        if (t != null) append(builder, Constants.CuenetNamespace + "title", t);
+
+//        StmtIterator iterator = event.getIndividual().listProperties();
+//
+//        while(iterator.hasNext()) {
+//            Statement iter = iterator.nextStatement();
+//            if (iter.getObject().isLiteral()) {
+//                Literal literal = iter.getObject().asLiteral();
+//                if (literal.getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") != 0) continue;
+//                builder.append("?x <").append(iter.getPredicate().getURI()).append("> \"");
+//                builder.append(literal.getValue());
+//                builder.append("\" .\n");
+//            }
+//        }
+
+        logger.info("Adding Triples: \n" + builder.substring(0));
+
+        String sparqlQuery = "SELECT ?p \n" +
+                "WHERE { \n" +
+                "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
+                (( builder.length() == 0) ? "" : builder.substring(0)) +
+                "?p <" + Constants.CuenetNamespace + "participant-in> ?x .\n" +
+                "?p <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n";
+
+        sparqlQuery += "}";
+
+        logger.info("Executing Sparql Query: \n" + sparqlQuery);
+        List<IResultSet> results = queryEngine.execute(sparqlQuery);
+        logger.info("Got results from " + results.size() + " sources.");
+
+        mergeQueryResults(results);
+
+//        for (IResultSet result : results) {
+//            IResultIterator iter = result.iterator();
+//            List<String> projectVarURIs = new ArrayList<String>();
+//            projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
+//            projectVarURIs.add(Constants.CuenetNamespace + "person");
+//            while (iter.hasNext()) {
+//                Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
+//                List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
+//                verify(possiblePersons);
+//
+//                List<Individual> associatableEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
+//                mergeEvents(associatableEvents);
+//            }
+//        }
+    }
+
+    private void append(StringBuilder builder, String propertyURI, String temp) {
+        builder.append("?x <").append(propertyURI).append("> \"");
+        builder.append(temp);
+        builder.append("\" .\n");
+    }
+
+    private void mergeQueryResults(List<IResultSet> results) throws EventGraphException {
+        boolean merged = false;
         for (IResultSet result : results) {
             IResultIterator iter = result.iterator();
             while (iter.hasNext()) {
                 Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
                 List<Individual> discoveredEntities = resultMap.get(Constants.CuenetNamespace + "person");
-                verify(discoveredEntities);
+                //verify(discoveredEntities);
 
                 List<Individual> discoveredEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
-                mergeEvents(discoveredEvents);
+                mergeEvents(discoveredEvents, discoveredEntities);
+                merged = true;
             }
         }
+
+        if (!merged) return;
+
+        List<Entity> parts = graph.getParticipants(photoCaptureEvent);
+        Vote[] votes =  voter.vote(graph, parts);
+
+        if (votes.length == 0)  logger.info("voter returned 0 possible entities!");
+        else logger.info("voter returned " + votes.length + " possibilities");
+
+        for (Vote vote : votes) {
+            logger.info(vote.entityID + "  " + vote.score);
+
+            int conf = verify(vote.entityID);
+            confirm(conf, vote.entity);
+        }
+
+//        if (votes.length > 0) {
+//            if (ix > 0)
+//                throw new EventGraphException("Sandese aate hein");
+//            ix++;
+//        }
+
     }
 
-    private void mergeEvents(List<Individual> associatableEvents) throws EventGraphException{
-        for (Individual individual: associatableEvents) mergeEvent(individual);
+//    private int ix = 0;
+
+    private void mergeEvents(List<Individual> associatableEvents, List<Individual> participatingEntities) throws EventGraphException{
+        for (Individual individual: associatableEvents) mergeEvent(individual, participatingEntities);
     }
 
-    private void mergeEvent(Individual event) throws EventGraphException {
+    private void mergeEvent(Individual event, List<Individual> participatingEntities) throws EventGraphException {
 
         Statement eti = event.getProperty(occursDuringProperty);
         TimeInterval eItvl = lookupTi(eti.getObject().asResource());
         if (eItvl == null) return;
 
-        if (isPresentInGraph(event)) return;
+        Event eig = identicalEvent(event);
+        if (eig != null) {
+            addParticipants(eig, participatingEntities);
+            return;
+        }
 
         List<Event> eventsInGraph = graph.getEvents();
         for (Event eventInGraph: eventsInGraph) {
@@ -178,13 +328,15 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             TimeInterval itvl = lookupTi(ti.getObject().asResource());
             if (itvl == null) continue;
             if (eItvl.contains(itvl)) {
-                EventGraphNode node = graph.addIndividual(event, EventGraph.NodeType.EVENT);
-                graph.addSubevent((Event)node, eventInGraph);
+                Event node = (Event) graph.addIndividual(event, EventGraph.NodeType.EVENT);
+                graph.addSubevent(node, eventInGraph);
+                addParticipants(node, participatingEntities);
                 discoveryQueue.add(node);
             }
             else if (itvl.contains(eItvl)) {
-                EventGraphNode node = graph.addIndividual(event, EventGraph.NodeType.EVENT);
-                graph.addSubevent(eventInGraph, (Event)node);
+                Event node = (Event) graph.addIndividual(event, EventGraph.NodeType.EVENT);
+                graph.addSubevent(eventInGraph, node);
+                addParticipants(node, participatingEntities);
                 discoveryQueue.add(node);
             }
         }
@@ -192,66 +344,99 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         logger.info("Merging event");
     }
 
-    private boolean isPresentInGraph(Individual event) {
+    private List<Entity> addParticipants(Event event, List<Individual> participatingEntities) throws EventGraphException {
+        List<Entity> graphEntities = new ArrayList<Entity>();
+        List<Entity> originalParticipants = graph.getParticipants(event);
+
+        for (Individual pEnt: participatingEntities) {
+            String pEntName = getLiteralValue(pEnt, nameProperty);
+            if (containedIn(pEntName, originalParticipants)) continue;
+            Entity gEnt = (Entity) graph.addIndividual(pEnt, EventGraph.NodeType.ENTITY);
+            graph.addParticipant(event, gEnt);
+            graphEntities.add(gEnt);
+        }
+        return graphEntities;
+    }
+
+    private boolean containedIn(String pEntName, List<Entity> originalParticipants) {
+        for (Entity e: originalParticipants) {
+            String p = getLiteralValue(e.getIndividual(), nameProperty);
+            if (p.equals(pEntName)) return true;
+        }
+        return false;
+    }
+
+    private Event identicalEvent(Individual event) {
         List<Event> eventsInGraph = graph.getEvents();
         String eventURI = event.getURI();
         for (Event eventInGraph: eventsInGraph) {
             String eventInGraphURI = eventInGraph.getIndividual().getURI();
             if (eventInGraphURI.compareTo(eventURI) == 0)
-                return true;
+                return eventInGraph;
         }
 
-        return false;
+        return null;
     }
 
-    private void verify(List<Individual> possiblePersons) {
+    private void confirm(int conf, Individual individual)
+            throws EventGraphException {
+        Entity ent = null;
 
-        if (possiblePersons.size() > 10) {
-            Vote[] votes = voter.vote(graph, possiblePersons);
-            logger.info("Got: " + votes.length);
-            for (Vote v: votes) {
-                int conf = verify(v.entityID);
-                confirm(conf, v.entity);
+        List<Entity> gEntities = graph.getEntities();
+        for (Entity ge: gEntities) {
+            if ( getLiteralValue(ge.getIndividual(), nameProperty).equals(
+                    getLiteralValue(individual, nameProperty)) ) {
+                ent = ge; break;
             }
-            return;
         }
 
-        for (Individual person: possiblePersons) {
-            Statement statement = person.getProperty(model.getProperty(Constants.CuenetNamespace + "name"));
-            logger.info("Verifying person: " + statement.getObject().asLiteral().getValue());
-            int conf = verify(statement.getObject().asLiteral().getString());
-            confirm(conf, person);
-        }
-
-        logger.info("Verification Complete");
+        confirm(conf, ent);
     }
 
-    private void confirm(int confidence, Individual person) {
-        voter.addToVerifiedPile(person);
-        if (confidence < 0) return;
-        addEntity(person);
+    private void confirm(int confidence, Entity person) throws EventGraphException {
+        voter.addToVerifiedList(person);
+        if (confidence < 25) return;
+        pushdown(person);
         discoveryCount++;
     }
 
-    private void addEntity(Individual person) {
-        String pName = getName(person);
-        if (pName == null) return;
-        List<Entity> graphEntities = graph.getEntities();
+    private void pushdown(Entity verifiedPerson) throws EventGraphException {
+        String verifiedPersonName = getLiteralValue(verifiedPerson.getIndividual(), nameProperty);
+        List<Event> allEvents = graph.getEvents();
 
-        for (Entity entity: graphEntities) {
-            String entityName = getName(entity.getIndividual());
-            if (entityName == null) continue;
-            if (entityName.compareToIgnoreCase(pName) == 0) return;
+        for (Event ae: allEvents) {
+            List<Entity> participants = graph.getParticipants(ae);
+            if (containedIn(verifiedPersonName, participants)) {
+                graph.dropParticipantEdge(ae, verifiedPerson);
+                graph.addParticipant(photoCaptureEvent, verifiedPerson);
+            }
+
         }
 
-        graph.addIndividual(person, EventGraph.NodeType.ENTITY);
     }
+
+//    private void addEntity(Entity person) {
+//        String pName = getLiteralValue(person.getIndividual());
+//        if (pName == null) return;
+//        List<Entity> graphEntities = graph.getEntities();
+//
+//        for (Entity entity: graphEntities) {
+//            String entityName = getLiteralValue(entity.getIndividual());
+//            if (entityName == null) continue;
+//            if (entityName.compareToIgnoreCase(pName) == 0) return;
+//        }
+//
+//        graph.addIndividual(person, EventGraph.NodeType.ENTITY);
+//    }
 
     public int verify(String person) {
         File file = dataset.item();
+
+        String uid = EntityVoter.getUIDs(person);
+
         String url = "http://api.face.com/faces/recognize.json?api_key=72b454f5b9b9fb7c83a6f7b6bfda3e59&" +
                 "api_secret=a8f9877166d42fc73a1dda1a7d8704e5&urls=" +
-                "http://tracker.ics.uci.edu/content/" + file.getName() + "&uids=" + voter.getUIDs(person);
+                "http://tracker.ics.uci.edu/content/" + file.getName() + "&uids=" + uid;//voter.getUIDs(person);
 
         HttpDownloader downloader = new HttpDownloader();
         int conf = -1;
@@ -319,57 +504,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         return null;
     }
 
-    private void discover(Event event) throws EventGraphException {
-        OntClass ontClass = event.getIndividual().getOntClass();
-        List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
-        if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
-        else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
-
-        StmtIterator iterator = event.getIndividual().listProperties();
-        StringBuilder builder = new StringBuilder("");
-        while(iterator.hasNext()) {
-            Statement iter = iterator.nextStatement();
-            if (iter.getObject().isLiteral()) {
-                Literal literal = iter.getObject().asLiteral();
-                if (literal.getDatatypeURI().compareTo("http://www.w3.org/2001/XMLSchema#string") != 0) continue;
-                builder.append("?x <").append(iter.getPredicate().getURI()).append("> \"");
-                builder.append(literal.getValue());
-                builder.append("\" .\n");
-            }
-        }
-
-        logger.info("Adding Triples: \n" + builder.substring(0));
-
-        String sparqlQuery = "SELECT ?p \n" +
-                "WHERE { \n" +
-                "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
-                (( builder.length() == 0) ? "" : builder.substring(0)) +
-                "?p <" + Constants.CuenetNamespace + "participant-in> ?x .\n" +
-                "?p <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n";
-
-        sparqlQuery += "}";
-
-        logger.info("Executing Sparql Query: \n" + sparqlQuery);
-        List<IResultSet> results = queryEngine.execute(sparqlQuery);
-        logger.info("Got results from " + results.size() + " sources.");
-
-        for (IResultSet result : results) {
-            IResultIterator iter = result.iterator();
-            List<String> projectVarURIs = new ArrayList<String>();
-            projectVarURIs.add(Constants.DOLCE_Lite_Namespace + "event");
-            projectVarURIs.add(Constants.CuenetNamespace + "person");
-            while (iter.hasNext()) {
-                Map<String, List<Individual>> resultMap = iter.next(projectVarURIs);
-                List<Individual> possiblePersons = resultMap.get(Constants.CuenetNamespace + "person");
-                verify(possiblePersons);
-
-                List<Individual> associatableEvents = resultMap.get(Constants.DOLCE_Lite_Namespace + "event");
-                mergeEvents(associatableEvents);
-            }
-        }
-    }
-
     private List<OntClass> getPossibleSubeventClasses(String superEventURI) {
+
         List<OntClass> subevents = new ArrayList<OntClass>();
         OntClass superEvent = model.getOntClass(superEventURI);
 
@@ -420,12 +556,35 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         return (discoveryCount == k);
     }
 
-    private String getName(Individual individual) {
-        Statement statement = individual.getProperty(nameProperty);
+    private String getLiteralValue(Individual individual, Property property) {
+        Statement statement = individual.getProperty(property);
         if (statement == null) return null;
         if (!statement.getObject().isLiteral()) return null;
         return statement.getObject().asLiteral().getString();
     }
+
+    //
+//    private void verify(List<Entity> possiblePersons) {
+//
+//        if (possiblePersons.size() > 10) {
+//            Vote[] votes = voter.vote(graph, possiblePersons);
+//            logger.info("Got: " + votes.length);
+//            for (Vote v: votes) {
+//                int conf = verify(v.entityID);
+//                confirm(conf, new Entity(v.entity));    //TODO: Quick fix for confirm entities.
+//            }
+//            return;
+//        }
+//
+//        for (Entity person: possiblePersons) {
+//            Statement statement = person.getIndividual().getProperty(model.getProperty(Constants.CuenetNamespace + "name"));
+//            logger.info("Verifying person: " + statement.getObject().asLiteral().getValue());
+//            int conf = verify(statement.getObject().asLiteral().getString());
+//            confirm(conf, person);
+//        }
+//
+//        logger.info("Verification Complete");
+//    }
 
 
 }

@@ -8,14 +8,12 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import esl.cuenet.algorithms.firstk.Vote;
 import esl.cuenet.algorithms.firstk.Voter;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
-import esl.cuenet.algorithms.firstk.structs.eventgraph.BFSEventGraphTraverser;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.Entity;
 import esl.cuenet.algorithms.firstk.structs.eventgraph.EventGraph;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.QueryEngine;
-import esl.datastructures.graph.*;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -64,7 +62,7 @@ public class EntityVoter implements Voter {
                     logger.info(name);
                 }
 
-                email = cheatEmail(name);
+                email = getEmail(name);
                 if (email == null && entity.containsLiteralEdge(Constants.Email)) {
                     email = (String) entity.getLiteralValue(Constants.Email);
                     logger.info(email);
@@ -202,7 +200,7 @@ public class EntityVoter implements Voter {
     }
 
     // throw some basic stuff out for now.
-    public String getUIDs(String name) {
+    public static String getUIDs(String name) {
         if (name.compareTo("Torsten Grust") == 0) return "acx_1@wicknicks";
         else if (name.compareTo("Thomas Willhalm") == 0) return "acx_2@wicknicks";
         else if (name.compareTo("Chen Li") == 0) return "fb_1385092812@wicknicks";
@@ -215,7 +213,7 @@ public class EntityVoter implements Voter {
         else return "fb_717562539@wicknicks";
     }
 
-    private String cheatEmail(String name) {
+    public static String getEmail(String name) {
         if (name.compareTo("Atish Das Sarma") == 0) return "atish.dassarma@gmail.com";
         else if (name.compareTo("Danupon Nanongkai") == 0) return "danupon@gmail.com";
         else if (name.compareTo("Galen Reeves") == 0) return "unknown@gmail.com";
