@@ -61,6 +61,13 @@ public class HashIndexedEntityVoter {
         return extractTopDCandidates();
     }
 
+    public void addToVerifiedList(Entity verifiedEntity) {
+        EntityContext ecx = new EntityContext(verifiedEntity,
+                getLiteralValue(verifiedEntity.getIndividual(), nameProperty),
+                getLiteralValue(verifiedEntity.getIndividual(), emailProperty));
+        verifiedEntities.add(ecx);
+    }
+
     private Vote[] extractTopDCandidates() {
         Iterator<String> ctIter = candidateTable.iterator();
         ArrayList<Vote> nonZeroVotes = new ArrayList<Vote>();
@@ -139,7 +146,7 @@ public class HashIndexedEntityVoter {
         return statement.getObject().asLiteral().getString();
     }
 
-    public List<IResultSet> query(EntityContext ecx) {
+    private List<IResultSet> query(EntityContext ecx) {
         String sparqlQuery = "SELECT ?x \n" +
                 " WHERE { \n" +
                 "?x <" + RDF.type + "> <" + Constants.CuenetNamespace + "person> .\n" +
@@ -157,16 +164,9 @@ public class HashIndexedEntityVoter {
         return queryEngine.execute(sparqlQuery);
     }
 
-    public boolean isVerified(String name) {
+    private boolean isVerified(String name) {
         for (EntityContext ecx: verifiedEntities) if (ecx.name.equals(name)) return true;
         return false;
-    }
-
-    public void addToVerifiedList(Entity verifiedEntity) {
-        EntityContext ecx = new EntityContext(verifiedEntity,
-                getLiteralValue(verifiedEntity.getIndividual(), nameProperty),
-                getLiteralValue(verifiedEntity.getIndividual(), emailProperty));
-        verifiedEntities.add(ecx);
     }
 
     private class EntityContext {
