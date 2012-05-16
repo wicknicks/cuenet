@@ -56,7 +56,7 @@ public class HashIndexedEntityVoter {
                 discover(ecx);
         }
 
-        updateScoresForEventAttendees(graph.getEntities());
+        updateScoresForEventAttendees(graphEntities);
 
         return extractTopDCandidates();
     }
