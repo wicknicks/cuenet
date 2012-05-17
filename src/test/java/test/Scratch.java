@@ -41,9 +41,9 @@ public class Scratch extends TestBase {
     }
 
     public static void main(String... args) {
-        System.out.print("Type in something to start program.... ");
-        Scanner scanner = new Scanner(System.in);
-        scanner.nextLine();
+//        System.out.print("Type in something to start program.... ");
+//        Scanner scanner = new Scanner(System.in);
+//        scanner.nextLine();
         (new Scratch()).doSingleFileTest();
     }
 

@@ -153,6 +153,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     private String getIDFromName(String name) {
         BasicDBObject query = new BasicDBObject("name", name);
         BasicDBObject person = getPerson(query);
+        if (person == null) return null;
 
         if (person.containsField("id")) return  person.getString("id");
         return null;

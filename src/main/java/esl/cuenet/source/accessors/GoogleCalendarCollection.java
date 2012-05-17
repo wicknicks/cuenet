@@ -116,7 +116,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             if (entry.containsField("title")) owner.addLiteral(titleProperty, entry.getString("title"));
             if (entry.containsField("start-time") && entry.containsField("end-time")) {
                 TimeInterval interval = TimeInterval.createFromInterval(entry.getLong("start-time"),
-                        entry.getLong("start-time"), model);
+                        entry.getLong("end-time"), model);
                 ev.addProperty(occursDuring, interval);
             }
 
@@ -125,7 +125,8 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             if (entry.containsField("participants")) {
                 BasicDBList parts = (BasicDBList) entry.get("participants");
                 for (Object op: parts) {
-                    Individual participant = person.createIndividual();
+                    Individual participant = person.createIndividual(person.getURI() +
+                            op.toString().replaceAll(" ", "_"));
                     participant.addLiteral(nameProperty, op);
                     participant.addProperty(participatesInProperty, ev);
                     resultEntry.add(participant);

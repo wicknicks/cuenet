@@ -3,7 +3,6 @@ package esl.cuenet.algorithms.firstk.structs.eventgraph;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Property;
 import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.datastructures.graph.relationgraph.RelationGraph;
 import org.apache.log4j.Logger;
@@ -13,7 +12,7 @@ import java.util.*;
 public class EventGraph extends RelationGraph {
 
     private OntModel model = null;
-    private List<EventGraphNode> graphNodes = new ArrayList<EventGraphNode>();
+    private List<EventGraphNode> egNodes = new ArrayList<EventGraphNode>();
     private List<EventGraphEdge> edges = new ArrayList<EventGraphEdge>();
     private HashMap<EventGraphNode, List<EventGraphEdge>> edgeMap = new HashMap<EventGraphNode, List<EventGraphEdge>>();
     private HashMap<EventGraphEdge, EventGraphNode> edgeDestinationMap = new HashMap<EventGraphEdge, EventGraphNode>();
@@ -22,14 +21,18 @@ public class EventGraph extends RelationGraph {
 
     public List<Event> getEvents() {
         List<Event> events = new ArrayList<Event>();
-        for (EventGraphNode n: graphNodes) if (n instanceof Event) events.add((Event) n);
+        for (EventGraphNode n: egNodes) if (n instanceof Event) events.add((Event) n);
         return events;
     }
 
     public List<Entity> getEntities() {
         List<Entity> entities = new ArrayList<Entity>();
-        for (EventGraphNode n: graphNodes) if (n instanceof Entity) entities.add((Entity) n);
+        for (EventGraphNode n: egNodes) if (n instanceof Entity) entities.add((Entity) n);
         return entities;
+    }
+
+    public int getNodeCount() {
+        return egNodes.size();
     }
 
     public enum NodeType {
@@ -52,7 +55,7 @@ public class EventGraph extends RelationGraph {
     public List<EventGraphNode> getStartNodes() {
         List<EventGraphNode> startNodes = new ArrayList<EventGraphNode>();
 
-        for (EventGraphNode node: graphNodes) {
+        for (EventGraphNode node: egNodes) {
             if (edgeDestinationMap.values().contains(node)) continue;
             startNodes.add(node);
         }
@@ -105,14 +108,14 @@ public class EventGraph extends RelationGraph {
     public EventGraphNode addIndividual(Individual individual, NodeType type) {
         if (type == NodeType.EVENT) {
             EventGraphNode event = new Event(individual);
-            this.graphNodes.add(event);
+            this.egNodes.add(event);
             edgeMap.put(event, new ArrayList<EventGraphEdge>());
             return event;
         }
 
         else if (type == NodeType.ENTITY) {
             EventGraphNode entity = new Entity(individual);
-            this.graphNodes.add(entity);
+            this.egNodes.add(entity);
             edgeMap.put(entity, new ArrayList<EventGraphEdge>());
             return entity;
         }
@@ -214,21 +217,21 @@ public class EventGraph extends RelationGraph {
             if (edgeDestinationMap.containsKey(edge)) edgeDestinationMap.remove(edge);
             if (edgeOriginMap.containsKey(edge)) edgeOriginMap.remove(edge);
 
-            for (EventGraphNode node: graphNodes) {
+            for (EventGraphNode node: egNodes) {
                 if (edgeMap.get(node).contains(edge)) edgeMap.get(node).remove(edge);
             }
 
         }
 
         edgeMap.remove(targetNode);
-        graphNodes.remove(targetNode);
+        egNodes.remove(targetNode);
         edges.removeAll(removedEdges);
     }
 
     private void dropEdge(EventGraphEdge edge) {
         edgeOriginMap.remove(edge);
         edgeDestinationMap.remove(edge);
-        for (EventGraphNode node: graphNodes) {
+        for (EventGraphNode node: egNodes) {
             List<EventGraphEdge> edges = edgeMap.get(node);
             if (edges.contains(edge)) edges.remove(edge);
         }

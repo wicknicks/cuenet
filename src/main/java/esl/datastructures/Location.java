@@ -37,7 +37,7 @@ public class Location extends IndividualImpl {
         return fullAddress;
     }
 
-    protected Location(Node n, EnhGraph g, double lat, double lon) throws IOException {
+    protected Location(Node n, EnhGraph g, double lat, double lon, String _id) throws IOException {
         super(n, g);
         this.lat = lat;
         this.lon = lon;
@@ -55,7 +55,7 @@ public class Location extends IndividualImpl {
         if (rgeo.containsField("line4")) fullAddress += rgeo.getString("line4");
         fullAddress = fullAddress.trim();
 
-        this.id = UUID.randomUUID().toString();
+        this.id = _id;
         lCache.put(id, this);
     }
 
@@ -67,7 +67,7 @@ public class Location extends IndividualImpl {
         return lCache.get(id);
     }
 
-    protected Location(Node n, EnhGraph g, String address) throws IOException {
+    protected Location(Node n, EnhGraph g, String address, String _id) throws IOException {
         super(n, g);
         this.fullAddress = address;
         BasicDBObject rgeo = YahooPlaceFinderReverseGeo.geoCode(address);
@@ -78,19 +78,24 @@ public class Location extends IndividualImpl {
         if (rgeo.containsField("uzip")) zipcode = rgeo.getString("uzip");
         if (rgeo.containsField("latitude")) lat = Double.parseDouble(rgeo.getString("latitude"));
         if (rgeo.containsField("longitude")) lon = Double.parseDouble(rgeo.getString("longitude"));
+
+        this.id = _id;
+        lCache.put(id, this);
     }
 
     public static Location createFromGPS(double lat, double lon, OntModel graph) throws IOException {
-        return new Location(new LocationNodeURI(), (EnhGraph) graph, lat, lon);
+        String id = UUID.randomUUID().toString();
+        return new Location(new LocationNodeURI(id), (EnhGraph) graph, lat, lon, id);
     }
 
     public static Location createFromAddress(String address, OntModel graph) throws IOException {
-        return new Location(new LocationNodeURI(), (EnhGraph) graph, address);
+        String id = UUID.randomUUID().toString();
+        return new Location(new LocationNodeURI(id), (EnhGraph) graph, address, id);
     }
 
     private static class LocationNodeURI extends Node_URI {
-        protected LocationNodeURI() {
-            super(Constants.DOLCELocationURI + " " + UUID.randomUUID());
+        protected LocationNodeURI(String id) {
+            super(Constants.DOLCELocationURI + "_" + id);
         }
     }
 

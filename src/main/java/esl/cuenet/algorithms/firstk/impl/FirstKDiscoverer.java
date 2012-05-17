@@ -123,11 +123,19 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         graphTraverser.start();
         logger.info("Size of DQ: " + discoveryQueue.size());
 
+        int gnc = graph.getNodeCount();
+
         while(discoveryQueue.size() > 0) {
             EventGraphNode node = discoveryQueue.remove();
             if (node.getType() == EventGraph.NodeType.EVENT) discover((Event) node);
             else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
             if (terminate(graph)) return;
+        }
+
+        if (gnc == graph.getNodeCount()) {
+            logger.info("Initiating Impulse Response");
+            voter.impulse(graph, photoCaptureEvent);
+            return;
         }
 
         if (discoveryCount == 8) System.exit(0);
@@ -286,7 +294,10 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         List<Entity> parts = graph.getParticipants(photoCaptureEvent);
         Vote[] votes =  voter.vote(graph, parts);
 
-        if (votes.length == 0)  logger.info("voter returned 0 possible entities!");
+        if (votes.length == 0)  {
+            logger.info("voter returned 0 possible entities!");
+            verifyOverAllGraphEntities();
+        }
         else logger.info("voter returned " + votes.length + " possibilities");
 
         for (Vote vote : votes) {
@@ -301,6 +312,24 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 //                throw new EventGraphException("Sandese aate hein");
 //            ix++;
 //        }
+
+    }
+
+    private void verifyOverAllGraphEntities() throws EventGraphException {
+        List<Entity> allEntities = graph.getEntities();
+        List<Entity> pcEntities = graph.getParticipants(photoCaptureEvent);
+
+        if ( (allEntities.size() - pcEntities.size()) > 10) {
+            logger.info("Too many participants to verify on everyone");
+            return;
+        }
+
+        for (Entity gEnt: allEntities) {
+            String name = getLiteralValue(gEnt.getIndividual(), nameProperty);
+            if (containedIn(name, pcEntities)) continue;
+            int conf = verify(name);
+            confirm(conf, gEnt);
+        }
 
     }
 
