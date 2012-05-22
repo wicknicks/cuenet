@@ -88,6 +88,17 @@
       (:map p1.name name1 F)
       (:map p2.name name2 U)))
 
+(:source academix
+   (:attrs name1 name2)
+   (:rel p1 type-of person)
+   (:rel p2 type-of person)
+   (:rel p1 knows p2)
+   (:io disk (:db mongodb))
+   (:type public)
+   (:axioms
+      (:map p1.name name1 F)
+      (:map p2.name name2 U)))
+
 //(:source conferences
 //   (:attrs time location ltitle stitle url)
 //   (:rel conf type-of event)

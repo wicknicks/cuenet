@@ -203,10 +203,11 @@ public class EntityVoter implements Voter {
     public static String getUIDs(String name) {
         if (name.compareTo("Torsten Grust") == 0) return "acx_1@wicknicks";
         else if (name.compareTo("Thomas Willhalm") == 0) return "acx_2@wicknicks";
+        else if (name.compareTo("Jennie Zhang") == 0) return "acx_3@wicknicks";
+        else if (name.compareTo("Martin Kersten") == 0) return "acx_4@wicknicks";
         else if (name.compareTo("Chen Li") == 0) return "fb_1385092812@wicknicks";
         else if (name.compareTo("Atish Das Sarma") == 0) return "fb_640150760@wicknicks";
         else if (name.compareTo("Danupon Nanongkai") == 0) return "fb_12815178@wicknicks";
-        else if (name.compareTo("Jennie Zhang") == 0) return "acx_3@wicknicks";
         else if (name.compareTo("Galen Reeves") == 0) return "fb_1230757@wicknicks";
         else if (name.compareTo("Nicola Onose") == 0) return "fb_3312053@wicknicks";
         else if (name.compareTo("Ramesh Jain") == 0) return "fb_6028816@wicknicks";

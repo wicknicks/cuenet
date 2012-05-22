@@ -64,6 +64,11 @@ public class AccessorFactory {
             return new ConferenceAttendeeAccessor(model);
         }
 
+        else if (name.compareTo("academix") == 0) {
+            logger.info("Initializing Academix Relations Accessor");
+            return new AcademixRelationAccessor(model);
+        }
+
         return null;
     }
 
