@@ -14,6 +14,7 @@ import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.QueryEngine;
 import esl.datastructures.Location;
+import esl.system.ExperimentsLogger;
 import org.apache.log4j.Logger;
 
 import java.util.*;
@@ -21,6 +22,7 @@ import java.util.*;
 public class HashIndexedEntityVoter {
 
     private Logger logger = Logger.getLogger(HashIndexedEntityVoter.class);
+    private ExperimentsLogger el = ExperimentsLogger.getInstance();
 
     private CandidateVotingTable<String> candidateTable = new CandidateVotingTable<String>("eventgraph");
     private HashMap<String, CandidateVotingTable<String>> discoveredCandidatesTables = new
@@ -122,7 +124,11 @@ public class HashIndexedEntityVoter {
 
         int i = 1;
         for (LocationContext lcx: lcxCandidates) pq.add(lcx);
-        for (LocationContext l : pq) logger.info(i++ + " " + l.name);
+        for (LocationContext l : pq) {
+            logger.info(i + " " + l.name);
+            el.list(i + " " + l.name);
+            i++;
+        }
 
         logger.info("Leaving OrderByLocation");
     }

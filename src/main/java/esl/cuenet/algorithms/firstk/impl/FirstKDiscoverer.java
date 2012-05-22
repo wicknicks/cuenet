@@ -23,6 +23,7 @@ import esl.cuenet.query.drivers.mongodb.MongoDBHelper;
 import esl.cuenet.query.drivers.webjson.HttpDownloader;
 import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.*;
+import esl.system.ExperimentsLogger;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -32,6 +33,7 @@ import java.util.*;
 public class FirstKDiscoverer extends FirstKAlgorithm {
 
     private Logger logger = Logger.getLogger(FirstKDiscoverer.class);
+    private ExperimentsLogger expLogger = ExperimentsLogger.getInstance();
     private BFSEventGraphTraverser graphTraverser = null;
     private Queue<EventGraphNode> discoveryQueue = new LinkedList<EventGraphNode>();
 
@@ -119,6 +121,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
     private void discover(EventGraph graph) throws EventGraphException {
         if (terminate(graph)) return;
+        expLogger.incrementIteration();
+
         discoveryQueue.clear();
         graphTraverser.start();
         logger.info("Size of DQ: " + discoveryQueue.size());
@@ -146,7 +150,6 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 //
 //        if (data.compareToIgnoreCase("q") == 0) System.exit(0);
 //        logger.info("Choice: " + data);
-
         discover(graph);
     }
 
@@ -158,6 +161,9 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             logger.info(entity.getLiteralValue(Constants.Name));
             name = (String) entity.getLiteralValue(Constants.Name);
         }
+
+        expLogger.discoveryStart("entity", name);
+
         if (entity.containsLiteralEdge(Constants.Email)) {
             logger.info(entity.getLiteralValue(Constants.Email));
             email = (String) entity.getLiteralValue(Constants.Email);
@@ -215,6 +221,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         String t = getLiteralValue(event.getIndividual(), urlProperty);
         if (t != null) append(builder, Constants.CuenetNamespace + "url", t);
+        expLogger.discoveryStart("event", t);
 
         t = getLiteralValue(event.getIndividual(), nameProperty);
         if (t != null) append(builder, Constants.CuenetNamespace + "name", t);
@@ -302,6 +309,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         for (Vote vote : votes) {
             logger.info(vote.entityID + "  " + vote.score);
+            expLogger.voterScore(vote.entityID, vote.score);
 
             int conf = verify(vote.entityID);
             confirm(conf, vote.entity);
@@ -483,9 +491,11 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         String confidence = getUIDConfidence(obj);
         try {
             conf = Integer.parseInt(confidence);
-            logger.info("Verification Results: (" + person + ") --> " + getUIDConfidence(obj));
+            logger.info("Verification Results: (" + person + ") --> " + conf);
+            expLogger.recognized(person, conf);
         } catch (NumberFormatException nfe) {
-            logger.info("Verification Results: (" + person + ") --> " + getUIDConfidence(obj));
+            logger.info("Verification Results: (" + person + ") --> " + " NOT RECOG'D ");
+            expLogger.recognized(person, -1);
         }
 
         return conf;

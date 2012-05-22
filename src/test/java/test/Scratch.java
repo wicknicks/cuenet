@@ -5,6 +5,7 @@ import esl.cuenet.algorithms.firstk.impl.FirstKDiscoverer;
 import esl.cuenet.algorithms.firstk.impl.LocalFileDataset;
 import esl.cuenet.mapper.parser.ParseException;
 import esl.system.ExceptionHandler;
+import esl.system.ExperimentsLogger;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -25,16 +26,26 @@ public class Scratch extends TestBase {
 
     public void doSingleFileTest() {
         try {
-            singleFileTest();
+            singleFileTest("DSC_0404.JPG");
         } catch (Exception e) {
             exceptionHandler.handle(e);
         }
     }
 
-    public void singleFileTest() throws IOException, ParseException, EventGraphException {
-        File file = new File("/home/arjun/Dataset/vldb/DSC_0467.JPG");
+    public void singleFileTest(String photo) throws IOException, ParseException, EventGraphException {
+        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/" + photo + ".log");
+
+        File file = new File("/home/arjun/Dataset/vldb/" + photo);
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
+
+        long st = System.currentTimeMillis();
+
         firstKDiscoverer.execute(new LocalFileDataset(file));
+
+        long et = System.currentTimeMillis();
+        el.list("Duration:" + (et-st));
+
+        el.close();
     }
 
 }
