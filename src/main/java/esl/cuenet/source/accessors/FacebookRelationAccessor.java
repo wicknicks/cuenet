@@ -108,6 +108,12 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
 
         BasicDBObject inputPersonPredicates = new BasicDBObject("id", id);
         BasicDBObject inputPersonDBObject = getPerson(inputPersonPredicates);
+
+        if (inputPersonDBObject == null) {
+            logger.info("Could not find person with id = " + id + " in database.");
+            return resultSet;
+        }
+
         Individual inputPersonIndividual = Utils.createPersonFromFacebookRecord(inputPersonDBObject, model);
 
         ObjectProperty knowsProperty = model.getObjectProperty(

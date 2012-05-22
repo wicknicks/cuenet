@@ -121,8 +121,9 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
     }
 
     private IResultSet convertResults(BasicDBObject result) {
-
         ResultSetImpl resultSet = new ResultSetImpl("Facebook User Accessor");
+        if (result == null) return resultSet;
+
         Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
 
         List<Individual> re = new ArrayList<Individual>();
