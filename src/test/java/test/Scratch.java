@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Scratch extends TestBase {
@@ -40,6 +42,15 @@ public class Scratch extends TestBase {
 //        logger.info( (d.getYear()+1900) + " " + (d.getMonth()+1) + " "+ d.getDate() + "   " + d.getHours() + " " + d.getMinutes() + " " + d.getSeconds());
     }
 
+//    @Test
+//    public void sa() throws java.text.ParseException { //
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+//        Date f = sdf.parse("2009:08:27 18:00:00");  //1251421200000
+//        logger.info(f.getTime());
+//        f = sdf.parse("2009:08:27 23:59:59");  //1251442799000
+//        logger.info(f.getTime());
+//    }
+
     public static void main(String... args) {
 //        System.out.print("Type in something to start program.... ");
 //        Scanner scanner = new Scanner(System.in);
@@ -57,7 +68,7 @@ public class Scratch extends TestBase {
 
     public void singleFileTest() throws IOException, ParseException, EventGraphException {
         //File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
-        File file = new File("/home/arjun/Dataset/vldb/DSC_0413.JPG");
+        File file = new File("/home/arjun/Dataset/vldb/DSC_0470.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
         firstKDiscoverer.execute(new LocalFileDataset(file));
     }
