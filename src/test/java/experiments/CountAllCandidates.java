@@ -37,7 +37,7 @@ public class CountAllCandidates {
             if (r != null) dups++;
         }
 
-        logger.info("Candidates in map: " + map.size());
+        logger.info("Candidates in Confs: " + map.size());
         logger.info("Duplicates found: " + dups);
     }
 
@@ -67,15 +67,16 @@ public class CountAllCandidates {
 
             for (Map.Entry<String, String> entry: entries) {
                 if (entry.getValue() == null) continue;
-                map.put(entry.getValue(), entry.getKey());
+                String l = map.put(entry.getValue(), entry.getKey());
+                if (l != null) c++;
             }
 
-            c++;
+
             //if (c == 10) break;
         }
 
         logger.info("Candidates from email: " + map.size());
-
+        logger.info("Duplicates in email map: " + c);
     }
 
 //    Results
