@@ -26,16 +26,16 @@ public class Scratch extends TestBase {
 
     public void doSingleFileTest() {
         try {
-            singleFileTest("DSC_0404.JPG");
+            singleFileTest("IMG_20111228_205759.jpg");
         } catch (Exception e) {
             exceptionHandler.handle(e);
         }
     }
 
     public void singleFileTest(String photo) throws IOException, ParseException, EventGraphException {
-        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/" + photo + ".log");
+        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/dinner/" + photo + ".log");
 
-        File file = new File("/home/arjun/Dataset/vldb/" + photo);
+        File file = new File("/home/arjun/Dataset/dinner/" + photo);
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
 
         long st = System.currentTimeMillis();
@@ -43,7 +43,7 @@ public class Scratch extends TestBase {
         firstKDiscoverer.execute(new LocalFileDataset(file));
 
         long et = System.currentTimeMillis();
-        el.list("Duration:" + (et-st));
+        el.list("duration = " + (et-st));
 
         el.close();
     }

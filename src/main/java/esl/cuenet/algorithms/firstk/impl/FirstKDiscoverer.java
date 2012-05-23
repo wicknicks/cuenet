@@ -52,7 +52,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 4;
+    private int k = 7;
 
     private Event photoCaptureEvent = null;
 
@@ -81,6 +81,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     public void execute(LocalFileDataset lds) throws CorruptDatasetException, EventGraphException {
+        expLogger.list("k = " + k);
+
         this.dataset = lds;
         LocalFilePreprocessor preprocessor = new LocalFilePreprocessor(model);
         graph = preprocessor.process(lds);
@@ -592,7 +594,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private boolean terminate(EventGraph graph) {
-        return (discoveryCount == k);
+        return (discoveryCount >= k);
     }
 
     private String getLiteralValue(Individual individual, Property property) {
