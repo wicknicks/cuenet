@@ -37,9 +37,15 @@ public class RelationGraph implements IRelationGraph {
         return node;
     }
 
+//    String x = "";
+
     @Override
     public RelationGraphEdge createEdge(String label, RelationGraphNode n1, RelationGraphNode n2) {
+        //TODO: UUID is an expensive trick
         return createEdge(label, UUID.randomUUID().toString(), n1, n2);
+
+//        x += "x";
+//        return createEdge(label, x, n1, n2);
     }
 
     @Override
