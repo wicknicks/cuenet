@@ -30,7 +30,7 @@ public class GraphBenchmarks {
         recordTick("Created Type Nodes");
 
         //create 100 nodes
-        for (int i=0; i<5; i++) {
+        for (int i=0; i<100; i++) {
             RelationGraphNode n = graph.createNode("n" + i);
             graph.createEdge("type-of", n, typeNodes[generator.nextInt(typeNodes.length)]);
         }
