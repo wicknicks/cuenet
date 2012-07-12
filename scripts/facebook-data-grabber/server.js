@@ -17,10 +17,20 @@ app.configure(function() {
   app.use(app.error);
 });
 
+app.get('/gcal', function(req, res, next) {
+  console.log(req.body);
+  res.send('');  
+});
+
+app.post('/gcal', function (req, res, next) {
+  console.log(req.body);
+  res.send('');
+});
+
 app.get('/', function(req, res, next) {
   console.log(req.body)
-  res.send('')
-  //serve_html(res, '/web/fb-grabber.html');
+  serve_html(res, '/web/fb-grabber.html');
+  //res.send('')  
 });
 
 app.post('/', function(req, res, next) {
@@ -150,5 +160,4 @@ function resize(res, img_path) {
     console.log('Command Executed.');
   });
 }
-
 
