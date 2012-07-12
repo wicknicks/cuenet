@@ -2,7 +2,9 @@
 <title>Emme</title>
 <head>
 <link type="text/css" href = "style.css" rel="stylesheet" />
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <script src='jquery-1.6.2.js'></script>
+<script src='http://code.jquery.com/ui/1.8.21/jquery-ui.min.js'></script>
 <script src='urlparams.js'></script>
 <script type = 'text/javascript'>
   var eresp = null;
@@ -48,6 +50,9 @@
         }, {scope: fb_permissions.join(',')});
       }
     }, {scope: fb_permissions.join(',')});
+    
+     $("#tr-pics").hide();
+     $("#tr-friends").hide();
   };
   
   ( function(d) {
@@ -58,7 +63,7 @@
   } (document));
   
   function fetchData() {
-     //FB.api('/me/events/not_replied?since=0', eventResponseHandler);
+     FB.api('/me/events/not_replied?since=0', eventResponseHandler);
      FB.api('/me', function(response) {
         console.log('Good to see you, ' + response.name + '.');
         if (response.name) {
@@ -69,6 +74,9 @@
      FB.api('/me/friends', friendsListResponseHandler);
      //FB.api('/me/likes', userLikesResponseHandler);
      FB.api('/me/photos?limit=100', photoResponseHandler);
+     $("#progressbar-pics").progressbar({value: 0});
+     
+     $("#tr-pics").show();
   }
   
   function photoResponseHandler(response) {
@@ -80,6 +88,7 @@
        $('#fb-pic-results').append('<img src="' + response.data[i].picture + '"></img> ');
      }
      
+     $("#progressbar-pics").progressbar({value: 100});
      photos = response.data;
   }
   
@@ -102,7 +111,6 @@
      }
      
      //save friend relationships
-     
   }
   
   var verifyCompletionOfPersonResponses = null;
@@ -125,8 +133,12 @@
   
   function startFriendsPhotoGrabber() {
      console.log('Getting Photos of ' + friends.length + ' Friends');
-     if (friends.length > 0)
-       FB.api('/' + friends[0].id + '/photos?limit=100', grabFriendsPhotos);
+     if (friends.length <= 0) return;
+     
+     FB.api('/' + friends[0].id + '/photos?limit=100', grabFriendsPhotos);
+
+     $("#tr-friends").show();
+     $("#progressbar-friends").progressbar({value: 0});
   }
   
   function grabFriendsPhotos(rsp) {
@@ -136,6 +148,8 @@
     rsp.user_id = profile.id;
     
     friends_photos.push(rsp);
+    
+    $( "#progressbar-friends").progressbar({value: (100*friends_photos.length/friends.length)});
     grabFriendsPhotosNext();
   }
   
@@ -154,6 +168,7 @@
     for (var i=0; i<friends_photos.length; i++) {
       count += friends_photos[i];
     }
+    $( "#progressbar-friends").progressbar({value: 100});
     console.log('Finished friends photos sync: ' +  friends_photos.length);
   }
   
@@ -170,7 +185,7 @@
       $('#fb-events').html("<font color=RED>Events downloaded: </font>" + events.length);
       console.log("Events Found: " + events.length);
       $('#fb-submit').html('<a class="button" href="#" onclick="javascript:postFB();">' + 
-          "<span> Submit </span> </a>");
+          "<span> Upload to Server </span> </a>");
       
       prev_until = 0
       FB.api('/me/events?since=0', attendingUnsureEventResponseHandler);
@@ -337,6 +352,19 @@
 <div id="fb-events"></div>
 
 <div id="fb-submit" style="margin-top:20px"></div>
+
+<br><br>
+
+<table id="pb-fb">
+  <tr id="tr-pics">
+    <td>Your Photos:</td>
+    <td width="400px"><div id="progressbar-pics"></div></td>
+  </tr>
+  <tr id="tr-friends">
+    <td>Photos from Friends:</td>
+    <td width="400px"><div id="progressbar-friends"></div></td>
+  </tr>
+</table>
 
 <div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div>
 

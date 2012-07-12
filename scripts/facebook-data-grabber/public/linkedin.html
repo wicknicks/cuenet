@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Login/Registration Example</title>
+<title>LinkedIn Data Grabber</title>
  
 <script type="text/javascript" src="http://platform.linkedin.com/in.js">
   api_key: z8grnpfv72y1
@@ -8,36 +8,49 @@
 </script>
 
 <script type="text/javascript">
- 
+var me, connections;
+var connectionProfiles=[];
+
 function loadData() {
-  IN.API.Profile("me")
-    .fields(["id", "firstName", "lastName", "pictureUrl","headline"])
-    .result(function(result) {
-      profile = result.values[0];
-      profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
-      profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";     
-      profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
-      profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
-      profHTML += "<span class=myheadline>" + profile.headline + "</span>";
-      $("#profile").html(profHTML);
-    });
-    
+  
+  getCompleteProfile("me", function(result) {
+    profile = result.values[0];
+    profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
+    profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";     
+    profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
+    profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
+    profHTML += "<span class=myheadline>" + profile.headline + "</span>";
+    $("#profile").html(profHTML);
+    me = profile;
+  });
+  
   IN.API.Connections("me")
     .result(function(result) {
-        $("#connections").html(result.values.map(function(e){return e.firstName+' '+e.lastName;}).join('<br>'))
-    } )
+      connections = result.values;
+      $("#connections").html(result.values.map(function(e){return e.firstName+' '+e.lastName;}).join('<br>'));
+      /*result.values.map(function(e) {
+        getCompleteProfile(e.id, function(result) {
+          connectionProfiles.push(result);
+        })
+      });*/
+  });
+}
+
+function getCompleteProfile(id, cb) {
+  IN.API.Profile("me")
+    .fields(["id", "firstName", "lastName", "headline", "twitter-accounts", "im-accounts", "location", "pictureUrl", "educations", "positions"])
+    .result(cb);
 }
 
 </script>
 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link media="all" type="text/css" href="http://developer.linkedinlabs.com/tutorials/css/jqueryui.css" rel="stylesheet"/>
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.5b1.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js"></script>
 </head>
 <body class="yui3-skin-sam  yui-skin-sam">
-<script type="IN/Login" data-onAuth="loadData">
-</script>
+<script type="IN/Login" data-onAuth="loadData"></script>
 <div id="profile"></div>
 <div id="connections"></div>
 </body>
