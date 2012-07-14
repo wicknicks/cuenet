@@ -238,16 +238,25 @@
     sourceInfo.type = "gc";
     sourceInfo.username = $('#gc_username').val();
     sourceInfo.password = $('#gc_pass').val();
-    sourceInfo.month = $('#month').val();
+    $.post('/gcal', sourceInfo, function(data) {
+      console.log(data)
+      $('#loading').hide();
+      $('#gcaloauth a')[0].href = data.ourl
+      $('#gcaloauth a')[0].innerHTML = 'Click here to authorize CueNet' ;
+    });
+    $('#loading').show();
+    /*sourceInfo.month = $('#month').val();
     sourceInfo.year = $('#year').val();
     $.post('/psources', sourceInfo, function (data) {
       $('#loading').hide();
       if (data.rsp == 'ERROR')
         alert (data.message);
       else if (data.rsp == 'OK')
-        $('#gResult').html('Records synced for ' + $('#month').val() + ', ' + $('#year').val() + ': ' + data.count);
+        $('#gResult').html('Records synced for ' + 
+            $('#month').val() + ', ' + $('#year').val() + ': ' + data.count);
     });
     $('#loading').show();
+    */
   }
   
   $(document).ready (function () {
@@ -302,7 +311,7 @@
 <td>Password: </td>
 <td><input id="gc_pass" type="password" name="pwd" /></td>
 </tr>
-<tr>
+<!-- <tr>
 <td>Month: </td>
 <td>
 <select id="month" name="months">
@@ -328,13 +337,18 @@
 <option value="2010">2010</option>
 <option value="2011">2011</option>
 </select>
-</tr>
+</tr>  -->
 <tr>
 <td>
 <a class='button' href='#' onclick="javascript:doSend('gc');"> <span> Submit </span> </a>
 </td>
 </tr>
 </table>
+
+<div style="margin-top:25px;margin-bottom:25px;" id='gcaloauth'>
+  <a target="_blank" href='#'></a>
+</div>
+
 </form>
 <div id='gResult'></div>
 <img id="loading" style="position:absolute;right:5px;top:5px;" src="img/loading.gif"></img>
