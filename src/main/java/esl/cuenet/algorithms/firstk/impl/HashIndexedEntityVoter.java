@@ -245,7 +245,6 @@ public class HashIndexedEntityVoter {
     private void discover(EntityContext ecx) {
         CandidateVotingTable<String> votingTable = new CandidateVotingTable<String>(ecx.name);
         for (IResultSet resultSet : query(ecx)) {
-            logger.info(resultSet.printResults());
             IResultIterator resultIterator = resultSet.iterator();
             while(resultIterator.hasNext()) {
                 Map<String, List<Individual>> result = resultIterator.next(projectVarURIs);
