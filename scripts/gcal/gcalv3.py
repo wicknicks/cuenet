@@ -42,6 +42,7 @@ def getAuthURL():
   return oauthURL, FLOW
   
 def sync(FLOW, code, email):
+  
   http = httplib2.Http()
   s2=OAuth2WebServerFlow.step2_exchange(FLOW, code, http=http)
 
@@ -50,21 +51,29 @@ def sync(FLOW, code, email):
   service = build(serviceName='calendar', version='v3', http=http, \
       developerKey='AIzaSyCcT484gf2or7lsOzcOnGolRWRg4c_JJGI')
   
-  events=service.events().list(calendarId='arjun.satish@gmail.com').execute()
-
-  j=0
+  calendar = service.calendars().get(calendarId='primary').execute()
+  
+  fp = None
+  if 'id' in calendar: 
+    fp = open('/data/calendars/' + calendar['id'], 'w')
+  else: fp = open('/data/calendars/tmp', 'w')
+  
+  events=service.events().list(calendarId='primary').execute()
+  
+  j=0 
   while True:
     for event in events['items']: 
-      if 'summary' in event: 
-        j+=1
-        print event['summary']
-        
+      j += 1
+      fp.write(json.dumps(event))
+      fp.write('\n')
+    
     pt = events.get('nextPageToken')
     if pt: 
-      events = service.events().list( \
-                      calendarId = email, \
-                      pageToken = pt).execute()
+      events = service.events().list(calendarId = 'primary',pageToken = pt).execute()
     else: break
+
+  print 'Wrote', j, 'events into ', '/data/calendars/' + calendar['id']
+  fp.flush()
 
 if __name__ == "__main__":
   client, pubsub = initRedis()
@@ -81,8 +90,8 @@ if __name__ == "__main__":
       jdata['ourl']=authURL
       client.publish('gcal_results', json.dumps(jdata)) 
     elif jdata['op'] == 'sync':
-      print 'Starting sync'
       ci = cache[jdata['session']]
+      print 'Syncing', ci.EMAIL, '@gmail.com'
       if ci == None:
         print 'Session not found'
       else:

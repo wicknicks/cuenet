@@ -1,6 +1,82 @@
 <html>
 <title>Emme</title>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+<script type="text/javascript" src="http://platform.linkedin.com/in.js">
+  api_key: z8grnpfv72y1
+  authorize: true
+</script>
+
+<script type="text/javascript">
+var me, connections;
+var connectionProfiles=[];
+
+function lin_loadData() {
+  $("#lin-upload-button").hide();
+  $('#tr-lin').hide();
+  
+  getCompleteProfile("me", function(result) {
+    profile = result.values[0];
+    profHTML = "<p><a href=\"" + profile.publicProfileUrl + "\">";
+    profHTML += "<img class=img_border align=\"left\" src=\"" + profile.pictureUrl + "\"></a>";     
+    profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
+    profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
+    profHTML += "<span class=myheadline>" + profile.headline + "</span>";
+    $("#lin-profile").html(profHTML);
+    me = profile;
+    
+    profHTML = "<a class='button' href='#' ";
+    profHTML += "onclick=javascript:sync_lin_contacts()>";
+    profHTML += "<span>Sync LinkedIn</span></a>"
+    
+    $("#lin-sync").html(profHTML);
+    
+  });
+}
+
+function sync_lin_contacts() {
+  $('#tr-lin').show();
+  $("#progressbar-linkedin").progressbar({value: 0});
+  
+  IN.API.Connections("me").result(function(result) {
+    connections = result.values;
+    $("#lin-connections").html(result.values.map(function(e){
+      return e.firstName+' '+e.lastName;
+    }).join('<br>'));
+    result.values.map(function(e) {
+      getCompleteProfile(e.id, function(result) {
+        connectionProfiles.push(result);
+        var c = (100*connectionProfiles.length)/result.values.length
+        $("#progressbar-linkedin").progressbar({value: c});
+        if (c == 100) showlinkedInUploadButton();
+      });
+    });
+  });
+  
+}
+
+function showlinkedInUploadButton() {
+  $("#lin-upload-button").show();
+}
+
+function getCompleteProfile(id, cb) {
+  IN.API.Profile("me")
+    .fields(["id", "firstName", "lastName", "headline", "twitter-accounts", "im-accounts", "location", "pictureUrl", "educations", "positions"])
+    .result(cb);
+}
+
+function post_lin() {
+  var linkedin = new Object();
+  linkedin.me = me;
+  linkedin.connections = connections
+  linkedin.connectionProfiles = connectionProfiles
+  $.post('/linkedin', linkedin, function(data) {
+    console.log('posted linkedin data')
+    $('#lin-upload-button').html("<span>Done!</span>")
+  })
+}
+
+</script>
 <link type="text/css" href = "style.css" rel="stylesheet" />
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <script src='jquery-1.6.2.js'></script>
@@ -15,6 +91,9 @@
   var photos = [];     /* user photos */
   var friends_photos = [];  /* friends photos */
   var friends = [];    /* user friends */
+  
+  var eventSyncComplete = false;
+  var friendsPhotoSyncComplete = false;
   
   var fb_permissions = ["email", "user_about_me", "friends_about_me",
                         "user_relationships", "friends_relationships",
@@ -31,6 +110,9 @@
                        ];
   
   window.fbAsyncInit = function() {
+    
+    $('#fb-sync-button').attr('scope', fb_permissions.join(','))
+  
     FB.init({
       appId      : '155907141107201', // App ID
       channelURL : 'http://tracker.ics.uci.edu/channel.html', // Channel File
@@ -43,17 +125,40 @@
     FB.getLoginStatus(function(response) {
       if (response.authResponse) {
         console.log('Welcome!');
+        showFBButtons();
       } else {
-        console.log('User cancelled login or did not fully authorize.');
-        FB.login(function (response) {
-          console.log('Welcome!  Fetching your information.... after login ');
-        }, {scope: fb_permissions.join(',')});
+        FB.Event.subscribe('auth.login', function(resp) {
+           if (resp.authResponse) showFBButtons();
+           console.log('Login event triggered');
+        });
+        fb_login()
       }
     }, {scope: fb_permissions.join(',')});
     
-     $("#tr-pics").hide();
-     $("#tr-friends").hide();
+    $("#tr-pics").hide();
+    $("#tr-friends").hide();
+    $("#tr-friend-profiles").hide();
   };
+
+  function fb_login() {
+    FB.login(function (response) {
+      if (response.authResponse) {
+        console.log('Welcome!  Fetching your information.... after login ');
+        //showFBButtons();
+      }
+    }, {scope: fb_permissions.join(',')});
+  }
+
+/*  
+*/
+
+  function showFBButtons() {
+    var content = '<a class="button" href="#" onclick="fetchData()">' +
+                   '<span> Start FB Sync </span> </a>'
+    $('#fb-root').append( content );
+    $('#fb-sync-button').hide();
+    console.log( 'content changed' )
+  }
   
   ( function(d) {
      var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
@@ -68,7 +173,7 @@
         console.log('Good to see you, ' + response.name + '.');
         if (response.name) {
           profile = response;
-          $('#fb-user').html("<font color=RED>Acquired Personal Data for: </font>" + response.name);
+          $('#fb-user').html("<font color=RED>Acquired Profile Information for: </font>" + response.name);
         }
      });
      FB.api('/me/friends', friendsListResponseHandler);
@@ -86,6 +191,7 @@
      
      for (var i=0; i<response.data.length; i++) {
        $('#fb-pic-results').append('<img src="' + response.data[i].picture + '"></img> ');
+       if (i>5) break;
      }
      
      $("#progressbar-pics").progressbar({value: 100});
@@ -97,6 +203,7 @@
      console.log('Likes: ' + response.data.length);
   }
   
+  var __count = 0
   function friendsListResponseHandler(response) {
      if (!response || !response.data) return;
      
@@ -104,13 +211,17 @@
        return friends.length == response.data.length;
      });   
      
+     __count = response.data.length;
+     
+     $("#tr-friend-profiles").show();
+     $("#progressbar-friend-profiles").progressbar({value: 0});
+     
      console.log ('User has: ' + response.data.length + ' friends.');
      for (var i=0; i<response.data.length; i++) {
        var friend = response.data[i];
        FB.api('/' + response.data[i].id, personInfoResponseHandler);
      }
      
-     //save friend relationships
   }
   
   var verifyCompletionOfPersonResponses = null;
@@ -121,6 +232,7 @@
   
   function personInfoResponseHandler(person) {
      friends.push(person);
+     $("#progressbar-friend-profiles").progressbar({value: (100*friends.length)/__count});
      if (verifyCompletionOfPersonResponses()) flushPersonResponseHandler();
   }
   
@@ -136,7 +248,7 @@
      if (friends.length <= 0) return;
      
      FB.api('/' + friends[0].id + '/photos?limit=100', grabFriendsPhotos);
-
+     
      $("#tr-friends").show();
      $("#progressbar-friends").progressbar({value: 0});
   }
@@ -159,7 +271,9 @@
     if (friends_photos.length == friends.length) grabFriendsPhotosComplete();
     else {
       var ix = friends_photos.length;
-      FB.api('/' + friends[ix].id + '/photos?limit=100', grabFriendsPhotos);
+      if (ix < 10)
+        FB.api('/' + friends[ix].id + '/photos?limit=100', grabFriendsPhotos);
+      else grabFriendsPhotosComplete()
     }
   }
   
@@ -170,15 +284,28 @@
     }
     $( "#progressbar-friends").progressbar({value: 100});
     console.log('Finished friends photos sync: ' +  friends_photos.length);
+    friendsPhotoSyncComplete = true;
+    fb_complete()
   }
   
-
+  function fb_complete() {
+    if (eventSyncComplete == false || friendsPhotoSyncComplete == false) return
+    
+    var content = '<a class="button" href="#" onclick="postFB()">' +
+                   '<span> Upload FB Info </span> </a>'
+    $('#fb-submit').html(content)
+  }
+  
   function eventResponseHandler(response) {
     console.log('[EventResponseHandler]: Got ' + response.data.length + ' records.');
     $('#fb-events').html("<font color=RED>Found: " + events.length +  " events so far</font>");
     eresp = response;
     
-    if (typeof eresp.paging == "undefined") return;
+    if (!eresp.paging) {
+      eventSyncComplete = true;
+      fb_complete();
+      return;
+    }
     
     var until = getParams(eresp.paging.next)["until"];
     if (until == prev_until) {
@@ -236,8 +363,8 @@
   function postGC() {
     var sourceInfo = new Object();
     sourceInfo.type = "gc";
-    sourceInfo.username = $('#gc_username').val();
-    sourceInfo.password = $('#gc_pass').val();
+    sourceInfo.username = "_u"; //$('#gc_username').val();
+    sourceInfo.password = "_p"; //$('#gc_pass').val();
     $.post('/gcal', sourceInfo, function(data) {
       console.log(data)
       $('#loading').hide();
@@ -266,10 +393,14 @@
   function postFB() {
     var sourceInfo = new Object();
     sourceInfo.type = "fb";
-    sourceInfo.events = JSON.stringify(events);
+    sourceInfo.events = events;
     sourceInfo.profile = profile;
+    sourceInfo.friends_photos = friends_photos
     $.post('/psources', sourceInfo, function(data) {
       console.log ('posted');
+      var content = '<a class="button" href="#" onclick="postFB()">' +
+                   '<span> Done! </span> </a>'
+    $('#fb-submit').html(content)
     });
   }
   
@@ -300,6 +431,7 @@
 </script>
 </head>
 <body>
+<!--
 <p><font color="green">Please Enter your Google Username and Password</font></p>
 <form name='gcForm' onSubmit="return doSend('gc');">
 <table>
@@ -311,7 +443,7 @@
 <td>Password: </td>
 <td><input id="gc_pass" type="password" name="pwd" /></td>
 </tr>
-<!-- <tr>
+ <tr>
 <td>Month: </td>
 <td>
 <select id="month" name="months">
@@ -338,14 +470,16 @@
 <option value="2011">2011</option>
 </select>
 </tr>  -->
+<p><font color="green">Click here to sync you Calendar Info</font></p>
+<table>
 <tr>
 <td>
-<a class='button' href='#' onclick="javascript:doSend('gc');"> <span> Submit </span> </a>
+<a class='button' href='#' onclick="javascript:doSend('gc');"> <span> Sync G-Cal </span> </a>
 </td>
 </tr>
 </table>
 
-<div style="margin-top:25px;margin-bottom:25px;" id='gcaloauth'>
+<div style="margin-top:25px;margin-bottom:5px;" id='gcaloauth'>
   <a target="_blank" href='#'></a>
 </div>
 
@@ -355,17 +489,16 @@
 
 <div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div>
 
-<p><font color="green">Connect to Facebook</font></p>
+<p><font color="green">Sync with Facebook</font></p>
 
-<div id="fb-root">
-<div class="fb-login-button" onclick="fetchData();">Sync Personal Data from Facebook </div>
+<div id="fb-root"></div>
+<div id="fb-sync-button" class="fb-login-button" scope="">
+Sync Information from Facebook
 </div>
 
 <div style="margin-top:10px;margin-bottom:10px;"></div>
 <div id="fb-user"></div>
 <div id="fb-events"></div>
-
-<div id="fb-submit" style="margin-top:20px"></div>
 
 <br><br>
 
@@ -374,15 +507,37 @@
     <td>Your Photos:</td>
     <td width="400px"><div id="progressbar-pics"></div></td>
   </tr>
+  <tr id="tr-friend-profiles">
+    <td>Profies of Friends:</td>
+    <td width="400px"><div id="progressbar-friend-profiles"></div></td>
+  </tr>
   <tr id="tr-friends">
     <td>Photos from Friends:</td>
     <td width="400px"><div id="progressbar-friends"></div></td>
   </tr>
 </table>
 
+<div id="fb-submit" style="margin-top:20px"></div>
+
+<!-- <div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div> --->
+
+<br><br>
+<div id="fb-pic-results"></div>
+
 <div style="margin-top:50px;margin-bottom:50px;"><hr width=50%></div>
 
-<div id="fb-pic-results"></div>
+<p><font color="green">Sync with LinkedIn</font></p>
+<script type="IN/Login" data-onAuth="lin_loadData"></script>
+<div id="lin-sync"></div>
+<br></br>
+<table>
+  <tr id="tr-lin">
+    <td>LinkedIn Colleague Profiles:</td>
+    <td width="400px"><div id="progressbar-linkedin"></div></td>
+  </tr>
+</table>
+
+<a id='lin-upload-button' class='button' href='#' onclick=javascript:post_lin()><span>Upload!</span></a>
 
 </body>
 </html>

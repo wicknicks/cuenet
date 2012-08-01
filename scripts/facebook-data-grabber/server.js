@@ -88,6 +88,39 @@ app.get('/uploader', function(req, res, next) {
   console.log(req.body)
 });
 
+app.post('/psources', function(req, res, next) {
+  console.log("Received: " + Object.keys(req.body));
+  var content = JSON.stringify(req.body);
+  
+  var file = '/data/facebook/';
+  
+  var profile = req.body.profile
+  if (profile == null) return
+  if (profile.email) file += profile.email;
+  else if (profile.username) file += profile.username
+  else file = 'tmp__' + (new Date());
+  
+  res.send('')
+  
+  fs.writeFileSync(file, content, 'utf-8')
+  console.log('[Facebook] Wrote file... ' + file)
+  
+});
+
+
+app.post('/linkedin', function(req, res, next) {
+  console.log("Received: " + Object.keys(req.body));
+  var content = JSON.stringify(req.body);
+  res.send('');
+  
+  var file = '/data/linkedin/';
+  if (req.body.me.firstName) file += req.body.me.firstName
+  if (req.body.me.lastName) file += '.' + req.body.me.lastName
+  
+  fs.writeFileSync(file, content, 'utf-8')
+  console.log('[LinkedIn] Wrote file... ' + file)
+})
+
 app.post('/uploader', function(req, res, next) {
   console.log(format('Received upload %s (%d Kb) to %s'
     , req.files.image.name

@@ -11,7 +11,7 @@
 var me, connections;
 var connectionProfiles=[];
 
-function loadData() {
+function lin_loadData() {
   
   getCompleteProfile("me", function(result) {
     profile = result.values[0];
@@ -20,20 +20,29 @@ function loadData() {
     profHTML += "<a href=\"" + profile.publicProfileUrl + "\">";
     profHTML += "<h2 class=myname>" + profile.firstName + " " + profile.lastName + "</a> </h2>";
     profHTML += "<span class=myheadline>" + profile.headline + "</span>";
-    $("#profile").html(profHTML);
+    $("#lin-profile").html(profHTML);
     me = profile;
+    
+    profHTML = "<a href='#' onclick=javascript:sync_lin_contacts()>Sync</a>"
+    $("#lin-sync").html(profHTML);
+    
+  });
+}
+
+function sync_lin_contacts() {
+
+  IN.API.Connections("me").result(function(result) {
+    connections = result.values;
+    $("#lin-connections").html(result.values.map(function(e){
+      return e.firstName+' '+e.lastName;
+    }).join('<br>'));
+    result.values.map(function(e) {
+      getCompleteProfile(e.id, function(result) {
+        connectionProfiles.push(result);
+      });
+    });
   });
   
-  IN.API.Connections("me")
-    .result(function(result) {
-      connections = result.values;
-      $("#connections").html(result.values.map(function(e){return e.firstName+' '+e.lastName;}).join('<br>'));
-      /*result.values.map(function(e) {
-        getCompleteProfile(e.id, function(result) {
-          connectionProfiles.push(result);
-        })
-      });*/
-  });
 }
 
 function getCompleteProfile(id, cb) {
@@ -47,11 +56,11 @@ function getCompleteProfile(id, cb) {
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 <link media="all" type="text/css" href="http://developer.linkedinlabs.com/tutorials/css/jqueryui.css" rel="stylesheet"/>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.7/jquery-ui.min.js"></script>
 </head>
-<body class="yui3-skin-sam  yui-skin-sam">
-<script type="IN/Login" data-onAuth="loadData"></script>
-<div id="profile"></div>
-<div id="connections"></div>
+<body>
+<script type="IN/Login" data-onAuth="lin_loadData"></script>
+<div id="lin-profile"></div>
+<div id="lin-connections"></div>
+<div id="lin-sync"></div>
 </body>
 </html>

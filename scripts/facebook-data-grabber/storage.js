@@ -2,7 +2,7 @@ var Db = require('mongodb').Db,
     Connection = require('mongodb').Connection,
     Server = require('mongodb').Server;
     
-var client = new Db('test', new Server("127.0.0.1", 27017, {}));
+var client = new Db('arjun', new Server("127.0.0.1", 27017, {}));
 
 client.open(function(err, p_client) {
   if (!err) console.log('Connection to DB established ');
