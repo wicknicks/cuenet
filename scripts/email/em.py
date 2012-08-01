@@ -6,18 +6,19 @@ from pymongo import Connection
 
 mparser = parser.Parser();
 
+USERNAME = 'cuenetemailtest'
+
 connection = Connection('128.195.54.27', 27017)
 db = connection['test']
 collection = db['gmail']
 
 def login(username):
   mail = imaplib.IMAP4_SSL('imap.gmail.com', 993)
-  rc = mail.login(username, getpass.getpass())
+  rc = mail.login(username, "cuenetemailtest")
   print 'Login Response', rc
   # mail.select ('INBOX')    #Inbox
   mail.select ('[Gmail]/All Mail')  #[Gmail]/All Mail
   return mail
-
 
 def get_uids(mail, since):
   rc, data = mail.uid('search', since);
@@ -29,6 +30,7 @@ def get_uids(mail, since):
 def store_payload(message):
   directory = './data/'
   filename = uuid.uuid4().get_hex()
+  """
   fd = open(directory + filename, 'w');
 
   for part in message.walk():
@@ -36,6 +38,7 @@ def store_payload(message):
       filename =fd.write(part.get_payload())
 
   fd.close()
+  """
   return filename
 
 def sync(uid):
@@ -62,10 +65,12 @@ def sync(uid):
 
   header['payload'] = store_payload(message)
 
-  try:
-    collection.insert(header)
-  except:
-    print 'Bad insert request %s: %s at %s' % (uid, rc, header['filename'])
+  print header
+
+  #try:
+  #  collection.insert(header)
+  #except:
+  #  print 'Bad insert request %s: %s at %s' % (uid, rc, header['filename'])
 
 def close(mail):
   mail.close()
@@ -73,8 +78,8 @@ def close(mail):
 
 
 if __name__ == "__main__":
-  mail = login('cuenetemailtest')
-  uids = get_uids(mail, '(SINCE 1-Jan-2010)')
+  mail = login(USERNAME)
+  uids = get_uids(mail, '(SINCE 1-Jan-2008)')
   print 'Got', len(uids), 'uids'
   ix=0
   for uid in uids:
