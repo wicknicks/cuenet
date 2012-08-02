@@ -107,6 +107,102 @@ app.post('/psources', function(req, res, next) {
   
 });
 
+/* ******** */
+// FB POSTS //
+/* ******** */
+
+var fbUser = null;
+var fp = 0;
+
+app.post('/fb/profile', function (req, res, next) {
+  console.log("[Facebook] Received Profile ");
+  res.send('');
+
+  fbUser = new Object();
+  fp = 0;
+  fbUser.profile = req.body;
+});
+
+app.post('/fb/events', function (req, res, next) {
+  console.log("[Facebook] Received Events ");
+  res.send('');
+  
+  if (!fbUser) {
+    console.log('out of order post: events')
+    return;
+  }
+
+  fbUser.events = req.body
+});
+
+app.post('/fb/family', function (req, res, next) {
+  console.log("[Facebook] Received Family");
+  res.send('');
+
+  if (!fbUser) {
+    console.log('out of order post: family')
+    return;
+  }
+
+  fbUser.family = req.body
+});
+
+app.post('/fb/upics', function (req, res, next) {
+  console.log("[Facebook] Received User Photos ");
+  res.send('');
+  
+  if (!fbUser) {
+    console.log('out of order post: upics')
+    return;
+  }
+
+  fbUser.photos = req.body
+});
+
+app.post('/fb/fpics', function (req, res, next) {
+  console.log("[Facebook] Received Friend Photos " + (fp++));
+  res.send('');
+  
+  if (!fbUser) {
+    console.log('out of order post: fpics')
+    return;
+  }
+
+  if (!fbUser.friend_photos) fbUser.friend_photos = []
+  fbUser.friend_photos.push(req.body)
+
+});
+
+var fc = 0
+app.post('/fb/friends', function (req, res, next) {
+  console.log("[Facebook] Received Friends Information ");
+  res.send('');
+  
+  if (!fbUser) {
+    console.log('out of order post: friends')
+    return;
+  }
+  
+  fbUser.friends = req.body;
+  
+});
+
+app.post('/fb/flush', function (req, res, next) {
+  var content = JSON.stringify(fbUser);
+  
+  var tfile = '/data/facebook/';
+  
+  var profile = fbUser.profile
+  if (profile == null) return
+  if (profile.email) tfile += profile.email;
+  else if (profile.username) tfile += profile.username
+  else tfile = 'tmp__' + (new Date());
+
+  console.log("[Facebook] Writing File .... " + content.length + " bytes @ " + tfile);
+  fs.writeFileSync(tfile, content, 'utf-8')
+  
+  res.send('');
+});
 
 app.post('/linkedin', function(req, res, next) {
   console.log("Received: " + Object.keys(req.body));

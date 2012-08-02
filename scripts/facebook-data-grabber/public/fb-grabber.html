@@ -46,7 +46,7 @@ function sync_lin_contacts() {
     result.values.map(function(e) {
       getCompleteProfile(e.id, function(result) {
         connectionProfiles.push(result);
-        var c = (100*connectionProfiles.length)/result.values.length
+        var c = (100*connectionProfiles.length)/connections.length
         $("#progressbar-linkedin").progressbar({value: c});
         if (c == 100) showlinkedInUploadButton();
       });
@@ -86,12 +86,12 @@ function post_lin() {
   var eresp = null;
   var prev_until = 0;
   
-  var events = [];     /* user events */
+  //var events = [];     /* user events */
   var profile = null;  /* user profile */
   var photos = [];     /* user photos */
   var friends_photos = [];  /* friends photos */
   var friends = [];    /* user friends */
-  var family = [];     /* user family */
+  //var family = [];     /* user family */
   
   var eventSyncComplete = false;
   var friendsPhotoSyncComplete = false;
@@ -152,7 +152,7 @@ function post_lin() {
 
 
   function showFBButtons() {
-    var content = '<a class="button" href="#" onclick="fetchData()">' +
+    var content = '<a id="fbstartsyncbutton" class="button" href="#" onclick="fetchData()">' +
                    '<span> Start FB Sync </span> </a>'
     $('#fb-root').append( content );
     $('#fb-sync-button').hide();
@@ -168,17 +168,26 @@ function post_lin() {
   } (document));
   
   
+  function postFB(url, obj) {
+    $.post(url, obj, function (response) {
+      console.log('posted to ' + url);
+    });
+  }
+  
   function fetchData() {
+     $("#fbstartsyncbutton").hide();
      FB.api('/me', function(response) {
         console.log('Good to see you, ' + response.name + '.');
         if (response.name) {
           profile = response;
-          $('#fb-user').html("<font color=RED>Acquired Profile Information for: </font>" + response.name);
-          fbEventsGrabber(response)
+          $('#fb-user').html("<font color=RED>Acquired Profile " + 
+          "Information for: </font>" + response.name);
+          postFB('/fb/profile', response);
+          fbEventsGrabber(response);
         }
      });
+     
      FB.api('/me/friends', friendsListResponseHandler);
-     //FB.api('/me/likes', userLikesResponseHandler);
      FB.api('/me/photos?limit=100', photoResponseHandler);
      $("#progressbar-pics").progressbar({value: 0});
      
@@ -195,9 +204,9 @@ function post_lin() {
     url += FB.getAccessToken();
     
     $.getJSON(url, function(resp) {
-      for(var a in resp.data) events.push(a);
-      $('#fb-events').html("<font color=RED>Found: " + events.length +  " events.</font>");
+      $('#fb-events').html("<font color=RED>Found: " + resp.data.length +  " events.</font>");
       eventSyncComplete = true;
+      postFB('/fb/events', resp);
       fb_complete();
     });
     
@@ -215,11 +224,7 @@ function post_lin() {
      
      $("#progressbar-pics").progressbar({value: 100});
      photos = response.data;
-  }
-  
-  function userLikesResponseHandler(response) {
-     if (!response || !response.data) return;
-     console.log('Likes: ' + response.data.length);
+     postFB('/fb/upics', response.data);
   }
   
   var __count = 0
@@ -227,7 +232,7 @@ function post_lin() {
      if (!response || !response.data) return;
      
      FB.api('/me/family', function(fam) {
-       for (var d in fam.data) family.push(fam.data[d])
+       postFB('/fb/family', fam);
      })
      
      initPersonResponseHandler(function() {
@@ -261,7 +266,7 @@ function post_lin() {
   
   function flushPersonResponseHandler() {
      console.log('Found information about ' + friends.length + ' people.');
-     
+     postFB('/fb/friends', friends);
      //save all friends information
      startFriendsPhotoGrabber();
   }
@@ -283,6 +288,7 @@ function post_lin() {
     rsp.user_id = profile.id;
     
     friends_photos.push(rsp);
+    postFB('/fb/fpics', rsp);
     
     $( "#progressbar-friends").progressbar({value: (100*friends_photos.length/friends.length)});
     grabFriendsPhotosNext();
@@ -314,8 +320,9 @@ function post_lin() {
   function fb_complete() {
     if (eventSyncComplete == false || friendsPhotoSyncComplete == false) return
     
-    var content = '<a class="button" href="#" onclick="postFB()">' +
-                   '<span> Upload FB Info </span> </a>'
+    postFB('/fb/flush', {})
+    
+    var content = '<span><strong>Uploaded FB Info!</strong></span> </a>'
     $('#fb-submit').html(content)
   }
   
@@ -356,7 +363,7 @@ function post_lin() {
     $('#loading').hide();
   });
   
-  function postFB() {
+  function post_FB() {
     var sourceInfo = new Object();
     sourceInfo.type = "fb";
     sourceInfo.events = events;
