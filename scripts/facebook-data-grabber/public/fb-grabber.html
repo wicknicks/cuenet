@@ -169,10 +169,8 @@ function post_lin() {
   
   
   function postFB(url, obj) {
-    if (url == "/fb/friends") 
-      console.log('asdasd');
     $.post(url, obj, function (response) {
-      console.log('posted to ' + url);
+      //console.log('posted to ' + url);
     });
   }
   
@@ -297,7 +295,7 @@ function post_lin() {
   }
   
   function grabFriendsPhotosNext() {
-    if (friends_photos.length % 20 === 0) 
+    if (friends_photos.length % 50 === 0) 
        console.log('Grabbed photos from: ' + friends_photos.length + ' friends.');
     if (friends_photos.length == friends.length) grabFriendsPhotosComplete();
     else {
