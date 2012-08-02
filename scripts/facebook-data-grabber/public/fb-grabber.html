@@ -91,6 +91,7 @@ function post_lin() {
   var photos = [];     /* user photos */
   var friends_photos = [];  /* friends photos */
   var friends = [];    /* user friends */
+  var family = [];     /* user family */
   
   var eventSyncComplete = false;
   var friendsPhotoSyncComplete = false;
@@ -112,7 +113,7 @@ function post_lin() {
   window.fbAsyncInit = function() {
     
     $('#fb-sync-button').attr('scope', fb_permissions.join(','))
-  
+    
     FB.init({
       appId      : '155907141107201', // App ID
       channelURL : 'http://tracker.ics.uci.edu/channel.html', // Channel File
@@ -149,8 +150,6 @@ function post_lin() {
     }, {scope: fb_permissions.join(',')});
   }
 
-/*  
-*/
 
   function showFBButtons() {
     var content = '<a class="button" href="#" onclick="fetchData()">' +
@@ -160,6 +159,7 @@ function post_lin() {
     console.log( 'content changed' )
   }
   
+  
   ( function(d) {
      var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
      js = d.createElement('script'); js.id = id; js.async = true;
@@ -167,13 +167,14 @@ function post_lin() {
      d.getElementsByTagName('head')[0].appendChild(js);
   } (document));
   
+  
   function fetchData() {
-     FB.api('/me/events/not_replied?since=0', eventResponseHandler);
      FB.api('/me', function(response) {
         console.log('Good to see you, ' + response.name + '.');
         if (response.name) {
           profile = response;
           $('#fb-user').html("<font color=RED>Acquired Profile Information for: </font>" + response.name);
+          fbEventsGrabber(response)
         }
      });
      FB.api('/me/friends', friendsListResponseHandler);
@@ -182,6 +183,24 @@ function post_lin() {
      $("#progressbar-pics").progressbar({value: 0});
      
      $("#tr-pics").show();
+  }
+  
+  function fbEventsGrabber(resp) {
+  
+    var query = "SELECT+eid,+name,+description,+start_time,+end_time,"+
+            "+location,+venue,+pic_big+FROM+event+WHERE+eid+IN+(SELECT" +
+            "+eid+FROM+event_member+WHERE+uid+=+'" + resp.id +  "'+AND+start_time"+
+            "+>+0)+ORDER+BY+start_time+DESC"
+    var url = 'https://graph.facebook.com/fql?q=' + query + '&access_token='
+    url += FB.getAccessToken();
+    
+    $.getJSON(url, function(resp) {
+      for(var a in resp.data) events.push(a);
+      $('#fb-events').html("<font color=RED>Found: " + events.length +  " events.</font>");
+      eventSyncComplete = true;
+      fb_complete();
+    });
+    
   }
   
   function photoResponseHandler(response) {
@@ -206,6 +225,10 @@ function post_lin() {
   var __count = 0
   function friendsListResponseHandler(response) {
      if (!response || !response.data) return;
+     
+     FB.api('/me/family', function(fam) {
+       for (var d in fam.data) family.push(fam.data[d])
+     })
      
      initPersonResponseHandler(function() {
        return friends.length == response.data.length;
@@ -271,9 +294,9 @@ function post_lin() {
     if (friends_photos.length == friends.length) grabFriendsPhotosComplete();
     else {
       var ix = friends_photos.length;
-      if (ix < 10)
+      //if (ix < 10)
         FB.api('/' + friends[ix].id + '/photos?limit=100', grabFriendsPhotos);
-      else grabFriendsPhotosComplete()
+      //else grabFriendsPhotosComplete()
     }
   }
   
@@ -294,63 +317,6 @@ function post_lin() {
     var content = '<a class="button" href="#" onclick="postFB()">' +
                    '<span> Upload FB Info </span> </a>'
     $('#fb-submit').html(content)
-  }
-  
-  function eventResponseHandler(response) {
-    console.log('[EventResponseHandler]: Got ' + response.data.length + ' records.');
-    $('#fb-events').html("<font color=RED>Found: " + events.length +  " events so far</font>");
-    eresp = response;
-    
-    if (!eresp.paging) {
-      eventSyncComplete = true;
-      fb_complete();
-      return;
-    }
-    
-    var until = getParams(eresp.paging.next)["until"];
-    if (until == prev_until) {
-      $('#fb-events').html("<font color=RED>Events downloaded: </font>" + events.length);
-      console.log("Events Found: " + events.length);
-      $('#fb-submit').html('<a class="button" href="#" onclick="javascript:postFB();">' + 
-          "<span> Upload to Server </span> </a>");
-      
-      prev_until = 0
-      FB.api('/me/events?since=0', attendingUnsureEventResponseHandler);
-      return ;
-    }
-    
-    for (var i=0; i<eresp.data.length; i++) {
-      events.push(eresp.data[i]);
-    }
-    
-    var ev_url = '/me/events/not_replied?since=0&until=' + until;
-    FB.api(ev_url, eventResponseHandler);
-    prev_until = until;
-  }
-  
-  function attendingUnsureEventResponseHandler(response) {
-    console.log('[EventResponseHandler]: Got ' + response.data.length + ' records.');
-    $('#fb-events').html("<font color=RED>Found: " + events.length +  " events so far</font>");
-    eresp = response;
-    
-    if (typeof eresp.paging == "undefined") return;
-    
-    var until = getParams(eresp.paging.next)["until"];
-    if (until == prev_until) {
-      $('#fb-events').html("<font color=RED>Events downloaded: </font>" + events.length);
-      console.log("Events Found: " + events.length);
-      $('#fb-submit').html("<a class='button' href='#' onclick=\"javascript:postFB();\"> <span> Submit </span> </a>");
-      return ;
-    }
-    
-    for (var i=0; i<eresp.data.length; i++) {
-      events.push(eresp.data[i]);
-    }
-    
-    var ev_url = '/me/events?since=0&until=' + until;
-    FB.api(ev_url, attendingUnsureEventResponseHandler);
-    prev_until = until;
-
   }
   
   function doSend(type) {
@@ -394,14 +360,19 @@ function post_lin() {
     var sourceInfo = new Object();
     sourceInfo.type = "fb";
     sourceInfo.events = events;
+    sourceInfo.photos = photos;
+    sourceInfo.friends = friends;
+    sourceInfo.family = family;
     sourceInfo.profile = profile;
     sourceInfo.friends_photos = friends_photos
     $.post('/psources', sourceInfo, function(data) {
       console.log ('posted');
+      $('#loading').hide();
       var content = '<a class="button" href="#" onclick="postFB()">' +
                    '<span> Done! </span> </a>'
     $('#fb-submit').html(content)
     });
+    $('#loading').show();
   }
   
   //$.post('/profile', profile)
