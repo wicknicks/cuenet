@@ -169,6 +169,8 @@ function post_lin() {
   
   
   function postFB(url, obj) {
+    if (url == "/fb/friends") 
+      console.log('asdasd');
     $.post(url, obj, function (response) {
       console.log('posted to ' + url);
     });
@@ -224,7 +226,7 @@ function post_lin() {
      
      $("#progressbar-pics").progressbar({value: 100});
      photos = response.data;
-     postFB('/fb/upics', response.data);
+     postFB('/fb/upics', {data: response.data});
   }
   
   var __count = 0
@@ -266,7 +268,7 @@ function post_lin() {
   
   function flushPersonResponseHandler() {
      console.log('Found information about ' + friends.length + ' people.');
-     postFB('/fb/friends', friends);
+     postFB('/fb/friends', {data: friends});
      //save all friends information
      startFriendsPhotoGrabber();
   }
