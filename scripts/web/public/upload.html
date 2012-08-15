@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr">
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+
+<title>Upload Photos</title>
+
+<script type="text/javascript" src="http://bp.yahooapis.com/2.4.21/browserplus-min.js"></script>
+
+<script type="text/javascript" src="plupload/js/plupload.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.gears.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.silverlight.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.flash.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.browserplus.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.html4.js"></script>
+<script type="text/javascript" src="plupload/js/plupload.html5.js"></script>
+
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+<script src='jquery-1.6.2.js'></script>
+<script src='http://code.jquery.com/ui/1.8.21/jquery-ui.min.js'></script>
+
+</head>
+<body>
+
+<form id="submit-form" method="post" action="dump.php">
+<h1>Upload Photos</h1>
+
+<div>
+<span class="demo"style="margin-right:20px"> 
+        <a id="pickfiles" href="javascript:;">Add Photos to Queue</a>
+</span>
+
+<span style="margin-right:20px"> 
+ 	  <a id="uploadfiles" href="javascript:;">Upload Queue</a>
+</span>
+
+<span style="margin-right:20px"> 
+	  <a href="/content">Home</a>
+</span>
+
+<br><br>
+
+<table id="table">
+<tr>
+<td> Current File Progress: </td> 
+<td> <div class="demo">
+
+<div id="prog-current"></div> 
+
+</div>
+</td>
+</tr>
+<tr>
+<td> Overall Progress: </td> 
+<td> <div id="prog-all"></div> </td>
+</tr>
+</table>
+
+<br>
+
+<div id="complete"></div>
+
+<p />
+<div id="filelist">No runtime found.</div>
+</div>
+  
+</form>
+
+<script type="text/javascript">
+  // Custom example logic
+  function $(id) {
+    return document.getElementById(id);	
+  }
+
+  jQuery('#table').hide();
+  jQuery('#filelist').hide();
+  
+  var uploader = new plupload.Uploader({
+    runtimes : 'html5,flash',
+    browse_button : 'pickfiles',
+    max_file_size : '10mb',
+    url : '/upload',
+    flash_swf_url : '../js/plupload.flash.swf',
+    silverlight_xap_url : '../js/plupload.silverlight.xap',
+    filters : [
+      {title : "Image files", extensions : "jpg,gif,png,jpeg"}
+    ]
+  });
+
+  uploader.bind('Init', function(up, params) {
+    $('filelist').innerHTML = "<div>Current runtime: " + params.runtime + "</div>";
+  });
+
+
+  var fileQueue = {};
+  uploader.bind('FilesAdded', function(up, files) {
+    for (var i in files) {
+      fileQueue[files[i].name] = files[i];
+      fileQueue[files[i].name].completed = false;
+    }
+  });
+
+  uploader.bind('UploadFile', function(up, file) {
+    $('submit-form').innerHTML += '<input type="hidden" name="file-' 
+              + file.id + '" value="' + file.name + '" />';
+    jQuery('#table').show();
+    jQuery('#prog-current').width("500px");
+    jQuery('#prog-current').progressbar({value: 0});
+    jQuery('#prog-all').width("500px");
+    jQuery('#prog-all').progressbar({value: 0});
+  });
+
+  uploader.bind('UploadProgress', function(up, file) {
+    //$(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+    //console.log(file);
+    if (file.percent == 100) {
+      fileQueue[file.name].completed = true;
+      jQuery('#prog-all').progressbar({value: 0});
+      jQuery('#prog-current').progressbar({value: 0});
+    }
+    var length = Object.keys(fileQueue).length;
+    var c = 0;
+    for (key in fileQueue) if (fileQueue[key].completed == true) c++;
+    console.log(c + " " + length + " " + (100*c)/length + " " + file.percent);
+    //jQuery('#prog-all').progressbar({value: (100*c)/length});
+    //jQuery('#prog-current').progressbar({value: file.percent});
+    jQuery('#prog-current').progressbar({value: Math.random()*100});
+    jQuery('#prog-all').progressbar({value: Math.random()*100});
+  });
+
+  uploader.bind('UploadComplete', function(up, files) {
+    jQuery('#complete').html("<strong>Upload Complete!</strong>")
+  });
+
+  $('uploadfiles').onclick = function() {
+    uploader.start();
+    return false;
+  };
+
+  uploader.init();
+</script>
+</body>
+</html>
