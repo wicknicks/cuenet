@@ -52,11 +52,13 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 7;
+    private int k = 4;
 
     private Event photoCaptureEvent = null;
 
     List<String> projectVarURIs = new ArrayList<String>();
+
+    private AggSocNet aggSocNet = new AggSocNet();
 
     public FirstKDiscoverer() throws IOException, ParseException {
         super();
@@ -160,8 +162,13 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         String email = null;
 
         if (entity.containsLiteralEdge(Constants.Name)) {
-            logger.info(entity.getLiteralValue(Constants.Name));
             name = (String) entity.getLiteralValue(Constants.Name);
+//            logger.info(name);
+        }
+
+        if (aggSocNet.isSkippable(name)) {
+//            logger.info("Skipping: " + name);
+            return;
         }
 
         expLogger.discoveryStart("entity", name);
