@@ -49,6 +49,9 @@ jQuery(document).ready( function() {
 
   var fileQueue = {};
   uploader.bind('FilesAdded', function(up, files) {
+    jQuery('#complete').html("");
+    jQuery('#prog-current').progressbar({value: 0});
+    jQuery('#prog-all').progressbar({value: 0});
     for (var i in files) {
       fileQueue[files[i].name] = files[i];
       fileQueue[files[i].name].completed = false;
