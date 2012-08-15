@@ -50,6 +50,7 @@ jQuery(document).ready( function() {
   var fileQueue = {};
   uploader.bind('FilesAdded', function(up, files) {
     jQuery('#complete').html("");
+    jQuery('#queueSize').html(files.length + " items added to the queue. Press Upload Queue.");
     jQuery('#prog-current').progressbar({value: 0});
     jQuery('#prog-all').progressbar({value: 0});
     for (var i in files) {
@@ -113,6 +114,9 @@ jQuery(document).ready( function() {
 </span>
 
 <br><br>
+<div id="queueSize" style="color:#9000A1;">Click on the <strong>"Add Photos"</strong> link above</div>
+
+<br>
 
 <table id="table" border=0>
 <tr>
@@ -131,10 +135,10 @@ jQuery(document).ready( function() {
 </table>
 
 <br>
-
 <div id="complete"></div>
 
 <p />
+
 <div id="filelist">No runtime found.</div>
 </div>
   
