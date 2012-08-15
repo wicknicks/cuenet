@@ -1,7 +1,7 @@
 var redis = require('redis'),
     channels = require("./channels"),
     express = require('express'),
-    app = express.createServer(),
+    app = express(),
     fs = require('fs'),
     storage = require('./storage'),
     format = require('util').format,
@@ -16,7 +16,7 @@ app.configure(function() {
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
   app.use(express.logger('dev'));
-  app.use(app.error);
+  //app.use(app.error);
 });
 
 channels.register('gcal_results', gcal_results)
@@ -276,9 +276,9 @@ function clean_up() {
   process.exit();
 }
 
-app.error(function(err, req, res, next) {
-  res.send('stop scanning my server!!\n', 404);
-});
+//app.error(function(err, req, res, next) {
+//  res.send('stop scanning my server!!\n', 404);
+//});
 
 function redirect_to(res, url) {
   res.statusCode = 302;
