@@ -83,6 +83,27 @@ app.post('/sfu', function (req, res, next) {
   console.log('Original filename: ' + req.files.image.filename);
 });
 
+
+/* ************ */
+//   UPLOADER   //
+/* ************ */
+
+app.get('/upload', function(req, res, next) {
+  serve_html(res, '/public/upload.html');
+});
+
+app.post('/upload', function(req, res, next) {
+  res.send('');
+  console.log(format('Received upload %s (%d Kb) to %s'
+    , req.files.file.name
+    , req.files.file.size / 1024 | 0
+    , req.files.file.path));
+  var ix = req.files.file.path.lastIndexOf('/');
+  var newPath = '/data/uploads/' + req.files.file.path.substr(ix+1);
+  fs.rename(req.files.file.path, newPath);
+  console.log('Renamed to: ' + newPath);
+});
+
 app.get('/uploader', function(req, res, next) {
   res.send('Hello, Android')
   console.log(req.body)
@@ -270,9 +291,9 @@ process.on ('SIGINT', clean_up);
 process.on ('SIGTERM', clean_up);
 
 function clean_up() {
-  console.log('shutting down server');
+  console.log(' Shutting down server');
   storage.close();
-  app.close();
+  if (app.close) app.close();
   process.exit();
 }
 

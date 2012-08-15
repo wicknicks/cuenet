@@ -19,54 +19,8 @@
 <script src='jquery-1.6.2.js'></script>
 <script src='http://code.jquery.com/ui/1.8.21/jquery-ui.min.js'></script>
 
-</head>
-<body>
-
-<form id="submit-form" method="post" action="dump.php">
-<h1>Upload Photos</h1>
-
-<div>
-<span class="demo"style="margin-right:20px"> 
-        <a id="pickfiles" href="javascript:;">Add Photos to Queue</a>
-</span>
-
-<span style="margin-right:20px"> 
- 	  <a id="uploadfiles" href="javascript:;">Upload Queue</a>
-</span>
-
-<span style="margin-right:20px"> 
-	  <a href="/content">Home</a>
-</span>
-
-<br><br>
-
-<table id="table">
-<tr>
-<td> Current File Progress: </td> 
-<td> <div class="demo">
-
-<div id="prog-current"></div> 
-
-</div>
-</td>
-</tr>
-<tr>
-<td> Overall Progress: </td> 
-<td> <div id="prog-all"></div> </td>
-</tr>
-</table>
-
-<br>
-
-<div id="complete"></div>
-
-<p />
-<div id="filelist">No runtime found.</div>
-</div>
-  
-</form>
-
 <script type="text/javascript">
+jQuery(document).ready( function() {
   // Custom example logic
   function $(id) {
     return document.getElementById(id);	
@@ -88,6 +42,7 @@
   });
 
   uploader.bind('Init', function(up, params) {
+    console.log('Current Runtime ' + params.runtime);
     $('filelist').innerHTML = "<div>Current runtime: " + params.runtime + "</div>";
   });
 
@@ -101,31 +56,28 @@
   });
 
   uploader.bind('UploadFile', function(up, file) {
-    $('submit-form').innerHTML += '<input type="hidden" name="file-' 
-              + file.id + '" value="' + file.name + '" />';
+    //$('submit-form').innerHTML += '<input type="hidden" name="file-' 
+    //          + file.id + '" value="' + file.name + '" />';
+    //console.log("up'ing");
     jQuery('#table').show();
-    jQuery('#prog-current').width("500px");
-    jQuery('#prog-current').progressbar({value: 0});
-    jQuery('#prog-all').width("500px");
-    jQuery('#prog-all').progressbar({value: 0});
+    //jQuery('#prog-current').progressbar({value: Math.random()*100});
+    //jQuery('#prog-all').progressbar({value: Math.random()*100});
   });
 
   uploader.bind('UploadProgress', function(up, file) {
-    //$(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
-    //console.log(file);
     if (file.percent == 100) {
       fileQueue[file.name].completed = true;
-      jQuery('#prog-all').progressbar({value: 0});
-      jQuery('#prog-current').progressbar({value: 0});
     }
     var length = Object.keys(fileQueue).length;
     var c = 0;
     for (key in fileQueue) if (fileQueue[key].completed == true) c++;
-    console.log(c + " " + length + " " + (100*c)/length + " " + file.percent);
-    //jQuery('#prog-all').progressbar({value: (100*c)/length});
-    //jQuery('#prog-current').progressbar({value: file.percent});
-    jQuery('#prog-current').progressbar({value: Math.random()*100});
-    jQuery('#prog-all').progressbar({value: Math.random()*100});
+    
+    //console.log(c + " " + length + " " + (100*c)/length + " " + file.percent);
+    
+    jQuery('#prog-all').progressbar({value: Math.ceil((100*c)/length)});
+    jQuery('#prog-current').progressbar({value: file.percent});
+    //jQuery('#prog-current').progressbar({value: Math.random()*100});
+    //jQuery('#prog-all').progressbar({value: Math.random()*100});
   });
 
   uploader.bind('UploadComplete', function(up, files) {
@@ -138,6 +90,53 @@
   };
 
   uploader.init();
+  
+});
 </script>
+
+</head>
+<body>
+
+<form id="submit-form" method="post" action="dump.php">
+<h1>Upload Photos</h1>
+
+<div>
+<span class="demo"style="margin-right:20px"> 
+        <a id="pickfiles" href="javascript:;">Add Photos to Queue</a>
+</span>
+
+<span style="margin-right:20px"> 
+ 	  <a id="uploadfiles" href="javascript:;">Upload Queue</a>
+</span>
+
+<br><br>
+
+<table id="table" border=0>
+<tr>
+<td> Current File Progress: </td> 
+<td width="500px">  <div class="demo">
+
+<div id="prog-current"></div> 
+
+</div>
+</td>
+</tr>
+<tr>
+<td> Overall Progress: </td> 
+<td width="500px"> <div id="prog-all"></div> </td>
+</tr>
+</table>
+
+<br>
+
+<div id="complete"></div>
+
+<p />
+<div id="filelist">No runtime found.</div>
+</div>
+  
+</form>
+
+
 </body>
 </html>
