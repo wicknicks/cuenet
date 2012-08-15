@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Scratch extends TestBase {
@@ -26,16 +27,16 @@ public class Scratch extends TestBase {
 
     public void doSingleFileTest() {
         try {
-            singleFileTest("IMG_20111228_205759.jpg");
+            singleFileTest("DSC_0406.JPG");
         } catch (Exception e) {
             exceptionHandler.handle(e);
         }
     }
 
     public void singleFileTest(String photo) throws IOException, ParseException, EventGraphException {
-        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/dinner/" + photo + ".log");
+        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/dinner/" + "photo" + ".log");
 
-        File file = new File("/home/arjun/Dataset/dinner/" + photo);
+        File file = new File("/home/arjun/Dataset/vldb/" + photo);
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
 
         long st = System.currentTimeMillis();
