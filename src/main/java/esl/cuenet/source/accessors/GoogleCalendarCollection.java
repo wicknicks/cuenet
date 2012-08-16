@@ -21,7 +21,11 @@ import esl.cuenet.source.IAccessor;
 import esl.cuenet.source.SourceQueryException;
 import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
+import esl.system.JsonUtils;
 import org.apache.log4j.Logger;
+import org.apache.log4j.helpers.ISO8601DateFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -37,6 +41,9 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private int errorMargin = 0;
     private OntModel model = null;
     private TimeInterval timeInterval = null;
+
+    //JODA
+    private DateTimeFormatter isoDateTimeFormatter = ISODateTimeFormat.dateTimeNoMillis();
 
     public GoogleCalendarCollection() {
         super(AccessorConstants.DBNAME);
@@ -71,6 +78,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         int c=0;
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
+            if ( !object.containsField("start-time") ) object = reformat((BasicDBObject) object);
             result.add(object);
             c++;
         }
@@ -78,6 +86,30 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         logger.info("Found " + c + " calendar entries.");
 
         return convertResults(result);
+    }
+
+    private DBObject reformat(BasicDBObject object) {
+        BasicDBObject formatted = new BasicDBObject();
+
+        if (object.containsField("summary")) formatted.put("title", object.getString("summary"));
+
+        if (JsonUtils.contains(object, "creator.displayName"))
+            formatted.put("name", JsonUtils.unnest(object, "creator.displayName", String.class));
+
+        if (JsonUtils.contains(object, "creator.email"))
+            formatted.put("email", JsonUtils.unnest(object, "creator.email", String.class));
+
+        if (JsonUtils.contains(object, "start.dateTime")) {
+            long t = isoDateTimeFormatter.parseMillis(JsonUtils.unnest(object, "start.dateTime", String.class));
+            formatted.put("start-time", t);
+        }
+
+        if (JsonUtils.contains(object, "end.dateTime")) {
+            long t = isoDateTimeFormatter.parseMillis(JsonUtils.unnest(object, "end.dateTime", String.class));
+            formatted.put("end-time", t);
+        }
+
+        return formatted;
     }
 
     private IResultSet convertResults(BasicDBList result) {
