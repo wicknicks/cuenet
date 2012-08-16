@@ -10,7 +10,7 @@ var redis = require('redis'),
 app.configure(function() {
   app.use(express.cookieParser());
   app.use(express.session({ secret: "godel, escher, bach" }));
-  app.use(express.favicon(__dirname + '/public/img/emme.png'))
+  app.use(express.favicon(__dirname + '/public/me/emme.png'))
   app.use(express.methodOverride());
   app.use(express.bodyParser());
   app.use(app.router);
