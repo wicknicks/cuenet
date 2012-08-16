@@ -36,7 +36,7 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     private SimpleDateFormat rfc2822DateFormatter = new SimpleDateFormat("");
 
     public EmailAccessor(OntModel model) {
-        super("test");
+        super(AccessorConstants.DBNAME);
         this.model = model;
     }
 

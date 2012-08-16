@@ -3,8 +3,6 @@ package esl.cuenet.source.accessors;
 import com.hp.hpl.jena.ontology.*;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
@@ -32,7 +30,7 @@ public class AcademixRelationAccessor extends MongoDB implements IAccessor {
     private DatatypeProperty nameProperty = null;
 
     public AcademixRelationAccessor() {
-        super("test");
+        super(AccessorConstants.DBNAME);
     }
 
     public AcademixRelationAccessor(OntModel model) {

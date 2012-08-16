@@ -34,7 +34,7 @@ public class ConferenceAccessor extends MongoDB implements IAccessor {
     private Logger logger = Logger.getLogger(ConferenceAccessor.class);
 
     public ConferenceAccessor(OntModel model) {
-        super("test");
+        super(AccessorConstants.DBNAME);
         this.model = model;
     }
 

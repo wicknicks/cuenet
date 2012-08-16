@@ -31,7 +31,7 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
     private OntModel model = null;
 
     public FacebookUserAccessor() {
-        super("test");
+        super(AccessorConstants.DBNAME);
     }
 
     public FacebookUserAccessor(OntModel model) {

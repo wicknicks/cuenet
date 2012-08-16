@@ -39,7 +39,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     private TimeInterval timeInterval = null;
 
     public GoogleCalendarCollection() {
-        super("test");
+        super(AccessorConstants.DBNAME);
     }
 
     public GoogleCalendarCollection(OntModel model) {

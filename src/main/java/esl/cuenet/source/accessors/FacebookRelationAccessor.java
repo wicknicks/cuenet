@@ -33,7 +33,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     private OntModel model = null;
 
     public FacebookRelationAccessor() {
-        super("test");
+        super(AccessorConstants.DBNAME);
     }
 
     public FacebookRelationAccessor(OntModel model) {

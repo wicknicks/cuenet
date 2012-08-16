@@ -27,7 +27,7 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
     private OntModel model = null;
 
     public LocalSimpleGeoPlaceDB() {
-        super("test");
+        super(AccessorConstants.DBNAME);
     }
 
     public LocalSimpleGeoPlaceDB(OntModel model) {
