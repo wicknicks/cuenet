@@ -39,6 +39,7 @@ public class JsonUtils {
 
     public synchronized static <T> T unnest(BasicDBObject json, String expr, Class<T> type) {
         Object o = unnest(json, expr);
+        if (o == null) return null;
         return ((T)o);
     }
 
