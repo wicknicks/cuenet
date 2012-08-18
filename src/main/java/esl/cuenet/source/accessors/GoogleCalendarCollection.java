@@ -63,24 +63,35 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         if (setFlags[2]) {
             query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
             query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
+            query.put("start-time", startTime);
+            query.put("end-time", endTime);
         }
 
         if (timeInterval != null) {
             startTime = timeInterval.getStart();
             endTime = timeInterval.getEnd();
-            query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
-            query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
+            query.put("start-time", startTime);
+            query.put("end-time", endTime);
+            //query.put("start-time", new BasicDBObject("$lt", startTime+(errorMargin *60*1000)));
+            //query.put("end-time", new BasicDBObject("$gt", endTime-(errorMargin *60*1000)));
         }
 
-        cursor.query(query);
+        cursor.query(new BasicDBObject());
+        //cursor.query(query);
         BasicDBList result = new BasicDBList();
 
         int c=0;
         while (cursor.hasNext()) {
             DBObject object = cursor.next();
             if ( !object.containsField("start-time") ) object = reformat((BasicDBObject) object);
-            result.add(object);
-            c++;
+            if ( !object.containsField("start-time") ) continue;
+
+            if (  ((BasicDBObject)object).getLong("start-time") < query.getLong("start-time") &&
+                  ((BasicDBObject)object).getLong("end-time") > query.getLong("end-time")) {
+                logger.info("Gott itttttttttt! " + object.get("title"));
+                result.add(object);
+                c++;
+            }
         }
 
         logger.info("Found " + c + " calendar entries.");
