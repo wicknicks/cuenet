@@ -2,6 +2,7 @@ package esl.cuenet.source.accessors;
 
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.ontology.*;
+import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.util.PrintUtil;
 import com.hp.hpl.jena.vocabulary.RDF;
@@ -103,6 +104,8 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         BasicDBObject formatted = new BasicDBObject();
 
         if (object.containsField("summary")) formatted.put("title", object.getString("summary"));
+        if (object.containsField("type")) formatted.put("type", object.getString("type"));
+        if (object.containsField("link")) formatted.put("link", object.getString("link"));
 
         if (JsonUtils.contains(object, "creator.displayName"))
             formatted.put("name", JsonUtils.unnest(object, "creator.displayName", String.class));
@@ -143,7 +146,12 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
             BasicDBObject entry = (BasicDBObject) o;
             String title = null;
 
-            if (entry.containsField("title")) {
+            if (entry.containsField("type")) {
+                event = model.getOntClass(Constants.CuenetNamespace + entry.getString("type"));
+                if (event == null) throw new RuntimeException("Invalid type: " + entry.getString("type"));
+                title = entry.getString("title");
+            }
+            else if (entry.containsField("title")) {
                 title = entry.getString("title");
                 event = getOntologyClass(entry.getString("title"));
             } else {
@@ -161,6 +169,10 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
                 TimeInterval interval = TimeInterval.createFromInterval(entry.getLong("start-time"),
                         entry.getLong("end-time"), model);
                 ev.addProperty(occursDuring, interval);
+            }
+            if (entry.containsField("link")) {
+                Property urlProperty = model.getProperty(Constants.CuenetNamespace + "url");
+                ev.addProperty(urlProperty, entry.getString("link"));
             }
 
             List<Individual> resultEntry = new ArrayList<Individual>();

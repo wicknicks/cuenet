@@ -28,7 +28,7 @@ public class Scratch extends TestBase {
     public void doSingleFileTest() {
         try {
             //singleFileTest("DSC_0406.JPG");
-            singleFileTest("1715b570e1c011e18be00019b92f7b9d");
+            singleFileTest("17164616e1c011e18be00019b92f7b9d");
         } catch (Exception e) {
             exceptionHandler.handle(e);
         }
