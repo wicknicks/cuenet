@@ -221,10 +221,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private void discover(Event event) throws EventGraphException {
-        OntClass ontClass = event.getIndividual().getOntClass();
-        List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
-        if (subevents.size() == 0) logger.info("No subevents for: " + ontClass.getURI());
-        else logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
+
+        discoverAndMergeSubevents(event);
 
         StringBuilder builder = new StringBuilder("");
 
@@ -253,6 +251,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         logger.info("Adding Triples: \n" + builder.substring(0));
 
+        OntClass ontClass = event.getIndividual().getOntClass();
         String sparqlQuery = "SELECT ?p \n" +
                 "WHERE { \n" +
                 "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
@@ -282,6 +281,39 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 //                mergeEvents(associatableEvents);
 //            }
 //        }
+    }
+
+    private void discoverAndMergeSubevents(Event event) {
+        OntClass ontClass = event.getIndividual().getOntClass();
+        List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
+        if (subevents.size() == 0) {
+            logger.info("No subevents for: " + ontClass.getURI());
+            return;
+        }
+
+        logger.info(subevents.size() + " subevents for: " + ontClass.getURI());
+
+        for (OntClass subevent: subevents) {
+            StringBuilder builder = new StringBuilder();
+
+            String url = getLiteralValue(event.getIndividual(), urlProperty);
+            if (url == null) return;
+
+            append(builder, urlProperty.getURI(), url);
+
+            String sparqlQuery = "SELECT ?s \n" +
+                    "WHERE { \n" +
+                    "?x <" + RDF.type + "> <" + ontClass.getURI() + "> .\n" +
+                    "?s <" + Constants.CuenetNamespace + "subevent-of> ?x .\n" +
+                    (( builder.length() == 0) ? "" : builder.substring(0)) +
+                    "?s <" + RDF.type + "> <" + subevent.getURI() + "> .\n" +
+                    "}";
+
+            logger.info("Executing Sparql Query: \n" + sparqlQuery);
+            List<IResultSet> results = queryEngine.execute(sparqlQuery);
+            logger.info("Got results from " + results.size() + " sources.");
+
+        }
     }
 
     private void append(StringBuilder builder, String propertyURI, String temp) {

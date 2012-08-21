@@ -132,6 +132,60 @@
       (:map attendee.name name)))
 
 
+(:source keynotes
+   (:attrs url time location title name)
+   (:rel conf type-of conference)
+   (:rel k type-of keynote)
+   (:rel k subevent-of conf)
+   (:rel attendee participant-in k)
+   (:axioms
+      (:map conf.url url)
+      (:map attendee.name name)
+      (:map k.location location)
+      (:map k.time time)
+      (:map k.title title)))
+
+(:source sessions
+   (:attrs url time location title name)
+   (:rel conf type-of conference)
+   (:rel k type-of session)
+   (:rel k subevent-of conf)
+   (:rel attendee participant-in k)
+   (:axioms
+      (:map conf.url url)
+      (:map attendee.name name)
+      (:map k.location location)
+      (:map k.time time)
+      (:map k.title title)))
+
+
+(:source talks
+   (:attrs url time location title name)
+   (:rel conf type-of conference)
+   (:rel k type-of talk)
+   (:rel k subevent-of conf)
+   (:rel attendee participant-in k)
+   (:axioms
+      (:map conf.url url)
+      (:map attendee.name name)
+      (:map k.location location)
+      (:map k.time time)
+      (:map k.title title)))
+
+(:source conflunches
+   (:attrs url time location title name)
+   (:rel conf type-of conference)
+   (:rel k type-of lunch)
+   (:rel k subevent-of conf)
+   (:rel attendee participant-in k)
+   (:axioms
+      (:map conf.url url)
+      (:map attendee.name name)
+      (:map k.location location)
+      (:map k.time time)
+      (:map k.title title)))
+
+
 //(:source fb-user-old
 //        (:attrs id dob name location work[] email)
 //        (:rel person works-at named-place)

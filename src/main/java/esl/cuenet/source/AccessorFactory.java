@@ -69,6 +69,26 @@ public class AccessorFactory {
             return new AcademixRelationAccessor(model);
         }
 
+        else if (name.compareTo("keynotes") == 0) {
+            logger.info("Initializing Keynote Subevent Relations Accessor");
+            return new KeynoteAccessor(model);
+        }
+
+        else if (name.compareTo("talks") == 0) {
+            logger.info("Initializing Keynote Subevent Relations Accessor");
+            return new ConferenceTalkAccessor(model);
+        }
+
+        else if (name.compareTo("sessions") == 0) {
+            logger.info("Initializing Keynote Subevent Relations Accessor");
+            return new SessionAccessor(model);
+        }
+
+        else if (name.compareTo("conflunches") == 0) {
+            logger.info("Initializing Keynote Subevent Relations Accessor");
+            return new ConferenceLunchAccessor(model);
+        }
+
         return null;
     }
 

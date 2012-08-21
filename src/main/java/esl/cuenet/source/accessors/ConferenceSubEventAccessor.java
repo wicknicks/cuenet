@@ -96,6 +96,8 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
         for (Object o: results) {
             BasicDBObject obj = (BasicDBObject) o;
 
+            logger.info(obj);
+
             String title = null;
             if (obj.containsField("title")) title = obj.getString("title");
 
