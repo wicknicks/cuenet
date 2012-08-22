@@ -112,6 +112,7 @@ public class HashIndexedEntityVoter {
     private void orderByLocation(List<LocationContext> lcxCandidates, final Location l0) {
         logger.info("Order by Location: " + lcxCandidates.size());
 
+        if (lcxCandidates.size() == 0) return;
 
         PriorityQueue<LocationContext> pq = new PriorityQueue<LocationContext>(lcxCandidates.size(), new Comparator<LocationContext>() {
             @Override
@@ -225,12 +226,22 @@ public class HashIndexedEntityVoter {
 
     private void updateScoresForEventAttendees(List<Entity> entities) {
         String name;
+
+        String[] names = new String[entities.size()];
+        int i=0;
+
         for (Entity entity: entities) {
             name = getLiteralValue(entity.getIndividual(), nameProperty);
+
+            names[i] = name; i++;
+
             if ( !candidateTable.contains(name) )
                 candidateTable.addToCandidateTable(name, entity.getIndividual());
             updateScoresForEventAttendee(name);
         }
+
+        Arrays.sort(names);
+        for (String s: names) logger.info("--------------------> " + s);
     }
 
     private void updateScoresForEventAttendee(String name) {

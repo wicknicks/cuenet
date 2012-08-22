@@ -36,6 +36,7 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
     private OntClass personClass = null;
     private Property occursAt = null;
     private Property occursDuring = null;
+    private Property nameProperty = null;
 
     private SimpleDateFormat sdformatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
 
@@ -48,6 +49,7 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
         personClass = model.getOntClass(Constants.CuenetNamespace + "person");
         occursAt = model.getProperty(Constants.CuenetNamespace + "occurs-at");
         occursDuring = model.getProperty(Constants.CuenetNamespace + "occurs-during");
+        nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
     }
 
     @Override
@@ -129,6 +131,7 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
                 BasicDBList parts = (BasicDBList) obj.get("participants");
                 for (Object p: parts) {
                     Individual participant = personClass.createIndividual(personClass.getURI() + "_" + ((String)p).replaceAll(" ", "_"));
+                    participant.addProperty(nameProperty, p.toString());
                     participants.add(participant);
                 }
             }

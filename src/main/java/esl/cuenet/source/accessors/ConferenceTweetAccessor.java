@@ -30,19 +30,23 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
 
     OntModel model = null;
     private Attribute[] attributes;
-    private boolean[] setFlags = new boolean[1];
+    private boolean[] setFlags = new boolean[2];
     private String url = null;
+    private String name = null;
     private SimpleDateFormat sdformatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     private Property titleProperty = null;
     private OntClass personClass = null;
+    private Property nameProperty = null;
 
     private Logger logger = Logger.getLogger(ConferenceTweetAccessor.class);
+
 
     public ConferenceTweetAccessor(OntModel model) {
         super(AccessorConstants.DBNAME);
         this.model = model;
         titleProperty = model.getProperty(Constants.CuenetNamespace + "title");
         personClass = model.getOntClass(Constants.CuenetNamespace + "person");
+        nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
     }
 
     @Override
@@ -55,6 +59,7 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
     public void start() {
         for (int i=0; i<setFlags.length; i++) setFlags[i] = false;
         url = null;
+        name = null;
     }
 
     @Override
@@ -62,6 +67,9 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
         if (attribute.compareTo(attributes[0])==0) {
             this.url = value;
             setFlags[0] = true;
+        } else if (attribute.compareTo(attributes[1]) == 0) {
+            this.name = value;
+            setFlags[1] = true;
         }
         else throw new AccesorInitializationException("Incorrect Assignment: String attributes in "
                 + ConferenceTweetAccessor.class.getName());
@@ -93,14 +101,16 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
 
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
+        ResultSetImpl resultSet = new ResultSetImpl("Tweets accessed for: " + url);
+        if (url == null) return resultSet;
+
         BasicDBObject query = new BasicDBObject();
-        if (url != null) query.put("ev_url", url);
+        query.put("ev_url", url);
         HashSet<String> usernames = new HashSet<String>(5);
 
         DBReader reader = startReader("tweets");
         reader.query(query);
 
-        ResultSetImpl resultSet = new ResultSetImpl("Tweets accessed for: " + url);
         while(reader.hasNext()) {
             BasicDBObject o = (BasicDBObject) reader.next();
             if (JsonUtils.contains(o, "user.name")) {
@@ -133,6 +143,7 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
         if (JsonUtils.contains(object, "user.name")) {
             String name = JsonUtils.unnest(object, "user.name", String.class);
             user = personClass.createIndividual(personClass.getURI() + "_" + name.replaceAll(" ", "_"));
+            user.addProperty(nameProperty, name);
         }
 
         if (conference != null) inds.add(conference);
@@ -154,16 +165,15 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
         }
         else return null;
 
-        Individual conference = model.createIndividual(conferenceClass);
+        Individual conference;
         Property occursAt = model.getProperty(Constants.CuenetNamespace + "occurs-at");
         Property occursDuring = model.getProperty(Constants.CuenetNamespace + "occurs-during");
 
         String title = null;
         if (co.containsField("title")) title = co.getString("title");
 
-        Individual event;
-        if (title != null) event = conferenceClass.createIndividual(conferenceClass.getURI() + "_" + title.replaceAll(" ", "_"));
-        else event = conferenceClass.createIndividual();
+        if (title != null) conference = conferenceClass.createIndividual(conferenceClass.getURI() + "_" + title.replaceAll(" ", "_"));
+        else conference = conferenceClass.createIndividual();
 
         TimeInterval interval = null;
         if (co.containsField("interval")) {
@@ -179,9 +189,9 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
             location = Location.createFromGPS(JsonUtils.unnest(co, "location.geo.lat", Double.class), JsonUtils.unnest(co, "location.geo.lon", Double.class), model);
         }
 
-        if (location != null) event.addProperty(occursAt, location);
-        if (interval != null) event.addProperty(occursDuring, interval);
-        if (title != null) event.addProperty(titleProperty, title);
+        if (location != null) conference.addProperty(occursAt, location);
+        if (interval != null) conference.addProperty(occursDuring, interval);
+        if (title != null) conference.addProperty(titleProperty, title);
 
         return conference;
     }

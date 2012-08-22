@@ -89,6 +89,11 @@ public class AccessorFactory {
             return new ConferenceLunchAccessor(model);
         }
 
+        else if (name.compareTo("tweets") == 0) {
+            logger.info("Initializing Tweet Accessor");
+            return new ConferenceTweetAccessor(model);
+        }
+
         return null;
     }
 

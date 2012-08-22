@@ -283,7 +283,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 //        }
     }
 
-    private void discoverAndMergeSubevents(Event event) {
+    private void discoverAndMergeSubevents(Event event) throws EventGraphException {
         OntClass ontClass = event.getIndividual().getOntClass();
         List<OntClass> subevents = getPossibleSubeventClasses(ontClass.getURI());
         if (subevents.size() == 0) {
@@ -313,6 +313,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             List<IResultSet> results = queryEngine.execute(sparqlQuery);
             logger.info("Got results from " + results.size() + " sources.");
 
+            mergeQueryResults(results);
         }
     }
 

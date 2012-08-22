@@ -186,6 +186,15 @@
       (:map k.title title)))
 
 
+(:source tweets
+   (:attrs url name)
+   (:rel conf type-of conference)
+   (:rel attendee type-of person)
+   (:rel attendee participant-in conf)
+   (:axioms
+      (:map conf.url url)
+      (:map attendee.name name)))
+
 //(:source fb-user-old
 //        (:attrs id dob name location work[] email)
 //        (:rel person works-at named-place)
