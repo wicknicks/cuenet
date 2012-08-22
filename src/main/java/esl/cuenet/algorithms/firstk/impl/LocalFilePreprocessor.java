@@ -69,6 +69,8 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
                     model.createTypedLiteral(exif.height));
             io.addResource(model.getProperty(Constants.CuenetNamespace + Constants.OccursDuring),
                     TimeInterval.createFromMoment(exif.timestamp, model));
+            io.getIndividual().addProperty(model.getProperty(Constants.CuenetNamespace + "title"),
+                    "photo-capture-event");
 
             Entity author = null;
             if (username != null || email != null) {

@@ -52,7 +52,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 4;
+    private int k = 2;
 
     private Event photoCaptureEvent = null;
 
@@ -127,18 +127,27 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         if (terminate(graph)) return;
         expLogger.incrementIteration();
 
+        int gnc = graph.getNodeCount();
+
         discoveryQueue.clear();
         graphTraverser.start();
         logger.info("Size of DQ: " + discoveryQueue.size());
 
-        int gnc = graph.getNodeCount();
-
+        int n = 0;
         while(discoveryQueue.size() > 0) {
             EventGraphNode node = discoveryQueue.remove();
-            if (node.getType() == EventGraph.NodeType.EVENT) discover((Event) node);
-            else if (node.getType() == EventGraph.NodeType.ENTITY) discover((Entity) node);
+            if (node.getType() == EventGraph.NodeType.EVENT) {
+                discover((Event) node);
+                System.out.println(++n + " " + node.getIndividual().getProperty(titleProperty).getObject().asLiteral().getString());
+            }
+            else if (node.getType() == EventGraph.NodeType.ENTITY) {
+                discover((Entity) node);
+                System.out.println(++n + " " + node.getIndividual().getProperty(nameProperty).getObject().asLiteral().getString());
+            }
             if (terminate(graph)) return;
         }
+
+        System.out.println(" =========================================== ");
 
         if (gnc == graph.getNodeCount()) {
             logger.info("Initiating Impulse Response");
@@ -410,13 +419,13 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
                 Event node = (Event) graph.addIndividual(event, EventGraph.NodeType.EVENT);
                 graph.addSubevent(node, eventInGraph);
                 addParticipants(node, participatingEntities);
-                discoveryQueue.add(node);
+                //discoveryQueue.add(node);
             }
             else if (itvl.contains(eItvl)) {
                 Event node = (Event) graph.addIndividual(event, EventGraph.NodeType.EVENT);
                 graph.addSubevent(eventInGraph, node);
                 addParticipants(node, participatingEntities);
-                discoveryQueue.add(node);
+                //discoveryQueue.add(node);
             }
         }
 

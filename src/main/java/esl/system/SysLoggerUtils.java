@@ -10,8 +10,8 @@ public class SysLoggerUtils {
 
     public static void initLogger() {
         if ( !isLoggerInitialized ) {
-            BasicConfigurator.configure();
-            Logger.getRootLogger().setLevel(Level.INFO);
+            //BasicConfigurator.configure();
+            //Logger.getRootLogger().setLevel(Level.INFO);
             isLoggerInitialized = true;
         }
     }

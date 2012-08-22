@@ -164,7 +164,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
 
             if (entry.containsField("name")) owner.addLiteral(nameProperty, entry.getString("name"));
             if (entry.containsField("email")) owner.addLiteral(emailProperty, entry.getString("email"));
-            if (entry.containsField("title")) owner.addLiteral(titleProperty, entry.getString("title"));
+            if (entry.containsField("title")) ev.addLiteral(titleProperty, entry.getString("title"));
             if (entry.containsField("start-time") && entry.containsField("end-time")) {
                 TimeInterval interval = TimeInterval.createFromInterval(entry.getLong("start-time"),
                         entry.getLong("end-time"), model);
