@@ -138,11 +138,11 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
             EventGraphNode node = discoveryQueue.remove();
             if (node.getType() == EventGraph.NodeType.EVENT) {
                 discover((Event) node);
-                System.out.println(++n + " " + node.getIndividual().getProperty(titleProperty).getObject().asLiteral().getString());
+                logger.info(++n + " " + node.getIndividual().getProperty(titleProperty).getObject().asLiteral().getString());
             }
             else if (node.getType() == EventGraph.NodeType.ENTITY) {
                 discover((Entity) node);
-                System.out.println(++n + " " + node.getIndividual().getProperty(nameProperty).getObject().asLiteral().getString());
+                logger.info(++n + " " + node.getIndividual().getProperty(nameProperty).getObject().asLiteral().getString());
             }
             if (terminate(graph)) return;
         }
@@ -518,41 +518,41 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 //    }
 
     public int verify(String person) {
-        logger.info("Running Verification on" + person);
-        return (int)(Math.random() * 100);
+        logger.info("Running Verification on " + person);
+        //return (int)(Math.random() * 100);
 
-//        File file = dataset.item();
-//
-//        String uid = EntityVoter.getUIDs(person);
-//
-//        String url = "http://api.face.com/faces/recognize.json?api_key=72b454f5b9b9fb7c83a6f7b6bfda3e59&" +
-//                "api_secret=a8f9877166d42fc73a1dda1a7d8704e5&urls=" +
-//                "http://tracker.ics.uci.edu/content/" + file.getName() + "&uids=" + uid;//voter.getUIDs(person);
-//
-//        HttpDownloader downloader = new HttpDownloader();
-//        int conf = -1;
-//        byte[] sa = null;
-//        try {
-//            sa = downloader.get(url);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        if (sa == null) return conf;
-//
-//        BasicDBObject obj = (BasicDBObject) JSON.parse(new String(sa));
-//        logger.info("Face.com response: "+ obj);
-//        String confidence = getUIDConfidence(obj);
-//        try {
-//            conf = Integer.parseInt(confidence);
-//            logger.info("Verification Results: (" + person + ") --> " + conf);
-//            expLogger.recognized(person, conf);
-//        } catch (NumberFormatException nfe) {
-//            logger.info("Verification Results: (" + person + ") --> " + " NOT RECOG'D ");
-//            expLogger.recognized(person, -1);
-//        }
-//
-//        return conf;
+        File file = dataset.item();
+
+        String uid = EntityVoter.getUIDs(person);
+
+        String url = "http://api.face.com/faces/recognize.json?api_key=72b454f5b9b9fb7c83a6f7b6bfda3e59&" +
+                "api_secret=a8f9877166d42fc73a1dda1a7d8704e5&urls=" +
+                "http://tracker.ics.uci.edu/content/" + file.getName() + "&uids=" + uid;//voter.getUIDs(person);
+
+        HttpDownloader downloader = new HttpDownloader();
+        int conf = -1;
+        byte[] sa = null;
+        try {
+            sa = downloader.get(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (sa == null) return conf;
+
+        BasicDBObject obj = (BasicDBObject) JSON.parse(new String(sa));
+        logger.info("Face.com response: "+ obj);
+        String confidence = getUIDConfidence(obj);
+        try {
+            conf = Integer.parseInt(confidence);
+            logger.info("Verification Results: (" + person + ") --> " + conf);
+            expLogger.recognized(person, conf);
+        } catch (NumberFormatException nfe) {
+            logger.info("Verification Results: (" + person + ") --> " + " NOT RECOG'D ");
+            expLogger.recognized(person, -1);
+        }
+
+        return conf;
     }
 
     private String getUIDConfidence(BasicDBObject obj) {

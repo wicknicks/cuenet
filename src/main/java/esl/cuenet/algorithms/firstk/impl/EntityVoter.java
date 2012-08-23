@@ -211,6 +211,7 @@ public class EntityVoter implements Voter {
         else if (name.compareTo("Galen Reeves") == 0) return "fb_1230757@wicknicks";
         else if (name.compareTo("Nicola Onose") == 0) return "fb_3312053@wicknicks";
         else if (name.compareTo("Ramesh Jain") == 0) return "fb_6028816@wicknicks";
+        else if (name.compareTo("Mohan C Mohan") == 0) return "fb_1040704767@wicknicks";
         else return "fb_717562539@wicknicks";
     }
 
