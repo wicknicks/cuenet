@@ -278,8 +278,8 @@ public class HashIndexedEntityVoter {
 
     private String getLiteralValue(Individual individual, Property property) {
         Statement statement = individual.getProperty(property);
-        if (statement == null) return null;
-        if (!statement.getObject().isLiteral()) return null;
+        if (statement == null) return "unknown@u.com";
+        if (!statement.getObject().isLiteral()) return "unknown@u.com";
         return statement.getObject().asLiteral().getString();
     }
 

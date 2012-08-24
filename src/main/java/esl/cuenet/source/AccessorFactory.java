@@ -75,17 +75,17 @@ public class AccessorFactory {
         }
 
         else if (name.compareTo("talks") == 0) {
-            logger.info("Initializing Keynote Subevent Relations Accessor");
+            logger.info("Initializing Talks Subevent Relations Accessor");
             return new ConferenceTalkAccessor(model);
         }
 
         else if (name.compareTo("sessions") == 0) {
-            logger.info("Initializing Keynote Subevent Relations Accessor");
+            logger.info("Initializing Sessions Subevent Relations Accessor");
             return new SessionAccessor(model);
         }
 
         else if (name.compareTo("conflunches") == 0) {
-            logger.info("Initializing Keynote Subevent Relations Accessor");
+            logger.info("Initializing Conference Lunch Subevent Relations Accessor");
             return new ConferenceLunchAccessor(model);
         }
 

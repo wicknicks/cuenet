@@ -212,7 +212,33 @@ public class EntityVoter implements Voter {
         else if (name.compareTo("Nicola Onose") == 0) return "fb_3312053@wicknicks";
         else if (name.compareTo("Ramesh Jain") == 0) return "fb_6028816@wicknicks";
         else if (name.compareTo("Mohan C Mohan") == 0) return "fb_1040704767@wicknicks";
-        else return "fb_717562539@wicknicks";
+        /* Turing Award Event */
+        else if (name.compareTo("Butler Lampson") == 0) return "ButlerLampson@wicknicks";
+        else if (name.compareTo("Alan C. Kay") == 0) return "AlanCKey@wicknicks";
+        else if (name.compareTo("E. Allen Emerson") == 0) return "AllenEmerson@wicknicks";
+        else if (name.compareTo("Andrew C. Yao") == 0) return "AndrewCYao@wicknicks";
+        else if (name.compareTo("Barbara Grosz") == 0) return "BarbaraGrosz@wicknicks";
+        else if (name.compareTo("Charles W. Bachman") == 0) return "CharlesWBachman@wicknicks";
+        else if (name.compareTo("Dahlia Malkhi") == 0) return "DalhiaMalkhi@wicknicks";
+        else if (name.compareTo("Edward A. Feigenbaum") == 0) return "EdFeigenbaum@wicknicks";
+        else if (name.compareTo("Fernando J Corbato") == 0) return "FernandoCorbato@wicknicks";
+        else if (name.compareTo("Joseph Sifakis") == 0) return "JosephSifakis@wicknicks";
+        else if (name.compareTo("Judea Pearl") == 0) return "JudeaPearl@wicknicks";
+        else if (name.compareTo("Juris Hartmanis") == 0) return "JurisHartmanis@wicknicks";
+        else if (name.compareTo("Keith Van Rijsbergen") == 0) return "KeithVanRijsbergen@wicknicks";
+        else if (name.compareTo("Ken Thomspon") == 0) return "KenThompson@wicknicks";
+        else if (name.compareTo("Marvin Minsky") == 0) return "MarvinMinsky@wicknicks";
+        else if (name.compareTo("Raj Reddy") == 0) return "RajReddy@wicknicks";
+        else if (name.compareTo("Richard E. Stearns") == 0) return "RichardStearns@wicknicks";
+        else if (name.compareTo("Stephen Cook") == 0) return "StephenCook@wicknicks";
+        else if (name.compareTo("Wendy Hall") == 0) return "WendyHall@wicknicks";
+        else if (name.compareTo("William Kahan") == 0) return "WilliamKahan@wicknicks";
+        else if (name.compareTo("Vint Cerf") == 0) return "VintCerf@wicknicks";
+        else if (name.compareTo("John White") == 0) return "JohnRWhite@wicknicks";
+        else if (name.compareTo("Kelly Gotlieb") == 0) return "KellyGotlieb@wicknicks";
+
+        else
+            return "fb_717562539@wicknicks";
     }
 
     public static String getEmail(String name) {

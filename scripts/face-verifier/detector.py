@@ -12,7 +12,6 @@ def get_and_print(url):
   a=json.loads(rsp.text)
   print json.dumps(a, sort_keys=True, indent=2) + '\n'
 
-
 connection = Connection('127.0.0.1', 27017)
 db = connection['test']
 
@@ -119,7 +118,6 @@ def match_faces(test_pic):
 
   detection_results = detect_faces(url)
   
-  
   width = detection_results['width']
   height = detection_results['height']
 
@@ -140,43 +138,44 @@ def match_faces(test_pic):
     pos += 1
     if (tag['id'] == user_id and ix != -1): count = count+1
   
-user_ids = get_all_user_ids()
-prior_result_count = detection_results_count()
-uindex = {}
-for user_id in user_ids:
-  uindex[user_id] = True
-
-
-ix = 0
-for user_id in user_ids:
-#for i in range(0, 10):
-#  user_id = user_ids[i]
-  print 'Tagging user:', user_id, str(ix+1) + '/'  + str(len(user_ids))
-  ix += 1
-  #if ix < 196: continue;
-  if ix < 374: continue;
-  stats = {}
-  count = 0
-  stats['id'] = user_id
-  stats['name'] = get_user_name(user_id)
-  pics = list_photos(user_id)
-  # prior_result_count = prior_result_count - (41 if len(pics) > 40 else len(pics))
-  # if (prior_result_count <= 0):
-  for p in pics: 
-    match_faces(p)
-    if (count > 40): break
-    time.sleep(.1)
   
-  stats['count'] = count
-  training_stats.append(stats)
-  print stats
+def main():
 
-"""
-print training_stats
+  user_ids = get_all_user_ids()
+  prior_result_count = detection_results_count()
+  uindex = {}
+  for user_id in user_ids:
+    uindex[user_id] = True
 
-pkl = open('train.stats', 'w')
-pickle.dump(training_stats, pkl)
-"""
+  ix = 0
+  for user_id in user_ids:
+  #for i in range(0, 10):
+  #  user_id = user_ids[i]
+    print 'Tagging user:', user_id, str(ix+1) + '/'  + str(len(user_ids))
+    ix += 1
+    #if ix < 196: continue;
+    if ix < 374: continue;
+    stats = {}
+    count = 0
+    stats['id'] = user_id
+    stats['name'] = get_user_name(user_id)
+    pics = list_photos(user_id)
+    # prior_result_count = prior_result_count - (41 if len(pics) > 40 else len(pics))
+    # if (prior_result_count <= 0):
+    for p in pics: 
+      match_faces(p)
+      if (count > 40): break
+      time.sleep(.1)
+    
+    stats['count'] = count
+    training_stats.append(stats)
+    print stats
 
+  """
+  print training_stats
 
+  pkl = open('train.stats', 'w')
+  pickle.dump(training_stats, pkl)
+  """
 
+if __name__ == "__main__": main()

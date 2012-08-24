@@ -65,6 +65,7 @@ def save_tag(uid, tid, img_url):
   rsp = json.loads(rsp.text)
   if (rsp['status'] != "success"): 
     print rsp
+  return rsp
     
   
 def save_pid (tag_save_response):
@@ -135,6 +136,13 @@ def tag(photo):
     pos += 1
     
     
+def train_uid(user_id):
+  if type(user_id) is not str: user_id = str(user_id)
+  url = 'http://api.face.com/faces/train.json?api_key=' + key + '&api_secret=' + secret + \
+        '&uids=fb_' + user_id
+  rsp = requests.get(url)
+  return rsp
+    
 def train(user_id):  
   url = 'http://api.face.com/faces/train.json?api_key=' + key + '&api_secret=' + secret + \
         '&uids=fb_' + str(user_id) + '@wicknicks' + '&callback_url=http://tracker.ics.uci.edu'
@@ -142,23 +150,27 @@ def train(user_id):
   print rsp.text
   
 
-load()
+def main():
 
+  load()
 
-p=0
-for photo in photos:
-  tag(photo)
-  # print '-----------------'
-  if (p % 25 == 0): print 'p:', p
-  if (p > 2500): sys.exit()
-  p += 1
+  p=0
+  for photo in photos:
+    tag(photo)
+    # print '-----------------'
+    if (p % 25 == 0): print 'p:', p
+    if (p > 2500): sys.exit()
+    p += 1
 
-print p, ignored
+  print p, ignored
 
-"""
-for uid in all_user_ids: 
-  print 'Training:', uid
-  train(uid);
-  time.sleep(3)
+  """
+  for uid in all_user_ids: 
+    print 'Training:', uid
+    train(uid);
+    time.sleep(3)
+    
+  """
   
-"""
+if __name__ == "__main__": main()
+

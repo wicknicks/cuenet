@@ -52,7 +52,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     private LocalFileDataset dataset = null;
 
     private int discoveryCount = 0;
-    private int k = 2;
+    private int k = 3;
 
     private Event photoCaptureEvent = null;
 
@@ -419,6 +419,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
                 Event node = (Event) graph.addIndividual(event, EventGraph.NodeType.EVENT);
                 graph.addSubevent(node, eventInGraph);
                 addParticipants(node, participatingEntities);
+                tryGreedPushDown(eventInGraph, participatingEntities);
                 //discoveryQueue.add(node);
             }
             else if (itvl.contains(eItvl)) {
@@ -430,6 +431,23 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         }
 
         logger.info("Merging event");
+    }
+
+    private void tryGreedPushDown(Event eventInGraph, List<Individual> participatingEntities) throws EventGraphException {
+        if (!eventInGraph.getIndividual().getOntClass().getURI().equals(Constants.CuenetNamespace + Constants.PhotoCaptureEvent))
+            return;
+
+        if (participatingEntities.size() > 10) {
+            logger.info("Too many entities to try greedy pushdown");
+            return;
+        }
+
+        for (Individual entity: participatingEntities) {
+            String name = getLiteralValue(entity, nameProperty);
+            int conf = verify(name);
+            confirm(conf, entity);
+        }
+
     }
 
     private List<Entity> addParticipants(Event event, List<Individual> participatingEntities) throws EventGraphException {
@@ -498,6 +516,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
                 graph.dropParticipantEdge(ae, verifiedPerson);
                 graph.addParticipant(photoCaptureEvent, verifiedPerson);
             }
+
 
         }
 
