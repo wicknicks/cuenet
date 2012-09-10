@@ -97,13 +97,13 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
         DBReader reader = this.startReader("fb_relationships");
-        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor for : " + id);
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor for : " + id, model);
 
         BasicDBList clauses = new BasicDBList();
 
         if ( !setFlags[0] )  {
             logger.info("Empty");
-            return new ResultSetImpl("Facebook Relation Accessor");
+            return new ResultSetImpl("Facebook Relation Accessor", model);
         }
 
         BasicDBObject inputPersonPredicates = new BasicDBObject("id", id);
@@ -185,7 +185,7 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
 
     private IResultSet convertResults(BasicDBObject result) {
 
-        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor");
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook Relation Accessor", model);
 
         Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
 
@@ -202,25 +202,6 @@ public class FacebookRelationAccessor extends MongoDB implements IAccessor {
         return executeQuery();
     }
 
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
 
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-    }
 
 }

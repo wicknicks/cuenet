@@ -127,7 +127,7 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
     }
 
     private IResultSet convertResults(BasicDBList result) {
-        ResultSetImpl resultSet = new ResultSetImpl("Google Calendar Results");
+        ResultSetImpl resultSet = new ResultSetImpl("Google Calendar Results", model);
 
         OntClass event = null;
         OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
@@ -283,25 +283,5 @@ public class GoogleCalendarCollection extends MongoDB implements IAccessor {
         return query();
     }
 
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-    }
 }
 

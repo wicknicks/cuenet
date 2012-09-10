@@ -181,7 +181,7 @@ public class UpcomingEventsAPI implements IAccessor {
             throw new SourceQueryException("Internal IOException: " + e.getMessage());
         }
 
-        if (result != null) return new ResultSetImpl(result.toString());
+        if (result != null) return new ResultSetImpl(result.toString(), model);
         return null;
     }
 
@@ -193,24 +193,4 @@ public class UpcomingEventsAPI implements IAccessor {
         return searchUpcoming();
     }
 
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-    }
 }

@@ -139,7 +139,7 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
 
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
-        return new ResultSetImpl(nearbyPlaces().toString());
+        return new ResultSetImpl(nearbyPlaces().toString(), model);
     }
 
     public BasicDBList nearbyPlaces(double lat, double lon) {
@@ -148,24 +148,4 @@ public class LocalSimpleGeoPlaceDB extends MongoDB implements IAccessor {
         return nearbyPlaces();
     }
 
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-    }
 }

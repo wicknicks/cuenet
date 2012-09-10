@@ -91,13 +91,13 @@ public class AcademixRelationAccessor extends MongoDB implements IAccessor {
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
         MongoDB.DBReader reader = this.startReader("academix_relationships");
-        ResultSetImpl resultSet = new ResultSetImpl("Academix Relation Accessor for : " + name);
+        ResultSetImpl resultSet = new ResultSetImpl("Academix Relation Accessor for : " + name, model);
 
         BasicDBList clauses = new BasicDBList();
 
         if ( !setFlags[0] )  {
             logger.info("Empty");
-            return new ResultSetImpl("Academix Relation Accessor");
+            return new ResultSetImpl("Academix Relation Accessor", model);
         }
 
         ObjectProperty knowsProperty = model.getObjectProperty(Constants.CuenetNamespace + "knows");
@@ -146,27 +146,6 @@ public class AcademixRelationAccessor extends MongoDB implements IAccessor {
         this.name = name;
         setFlags[0] = true;
         return executeQuery();
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
     }
 
 }

@@ -127,7 +127,7 @@ public class ConferenceAccessor extends MongoDB implements IAccessor {
         Property urlProperty = model.getProperty(Constants.CuenetNamespace + "url");
         Property nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
 
-        ResultSetImpl queryResultSet = new ResultSetImpl("Conference Results");
+        ResultSetImpl queryResultSet = new ResultSetImpl("Conference Results", model);
 
         while(reader.hasNext()) {
             BasicDBObject conf = (BasicDBObject) reader.next();
@@ -186,27 +186,6 @@ public class ConferenceAccessor extends MongoDB implements IAccessor {
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
         return query();
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
     }
 
 }

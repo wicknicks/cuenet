@@ -121,7 +121,7 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
     }
 
     private IResultSet convertResults(BasicDBObject result) {
-        ResultSetImpl resultSet = new ResultSetImpl("Facebook User Accessor");
+        ResultSetImpl resultSet = new ResultSetImpl("Facebook User Accessor", model);
         if (result == null) return resultSet;
 
         Individual personIndividual = Utils.createPersonFromFacebookRecord(result, model);
@@ -133,27 +133,6 @@ public class FacebookUserAccessor extends MongoDB implements IAccessor {
         return resultSet;
     }
 
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-    }
-    
     public IResultSet executeQuery (String name, String birthday) throws SourceQueryException {
         if (name != null) {
             this.name = name;

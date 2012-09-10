@@ -167,7 +167,7 @@ public class YahooPlaceFinderAPI implements IAccessor {
 
         else throw new SourceQueryException("Invalid Combination of Parameters");
 
-        return new ResultSetImpl(result.toString());
+        return new ResultSetImpl(result.toString(), model);
     }
 
     public BasicDBObject findAddress(double lat, double lon) throws IOException {
@@ -179,28 +179,6 @@ public class YahooPlaceFinderAPI implements IAccessor {
     public BasicDBObject findLatLon(String address) throws IOException {
         this.address = address;
         return findLatLon();
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
-
     }
 
 }

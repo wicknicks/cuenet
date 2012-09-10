@@ -101,7 +101,7 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
 
     @Override
     public IResultSet executeQuery() throws SourceQueryException {
-        ResultSetImpl resultSet = new ResultSetImpl("Tweets accessed for: " + url);
+        ResultSetImpl resultSet = new ResultSetImpl("Tweets accessed for: " + url, model);
         if (url == null) return resultSet;
 
         BasicDBObject query = new BasicDBObject();
@@ -194,26 +194,5 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
         if (title != null) conference.addProperty(titleProperty, title);
 
         return conference;
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
     }
 }

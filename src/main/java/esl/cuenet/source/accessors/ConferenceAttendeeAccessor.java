@@ -148,7 +148,7 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
 
         }
 
-        ResultSetImpl resultSet = new ResultSetImpl("Conference Attendee Results");
+        ResultSetImpl resultSet = new ResultSetImpl("Conference Attendee Results", model);
 
         for (Map.Entry<String, List<String>> entry: urlNameMap.entrySet()) {
             Individual confIndividual = getConference(entry.getKey());
@@ -232,26 +232,5 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
         if (url != null) this.url = url;
         if (name != null) this.personNames.add(name);
         query();
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
     }
 }

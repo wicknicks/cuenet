@@ -91,7 +91,7 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
     }
 
     public ResultSetImpl convert(BasicDBList results, OntClass subeventClass) throws IOException {
-        ResultSetImpl resultSet = new ResultSetImpl("Results from: " + subeventClass.getURI());
+        ResultSetImpl resultSet = new ResultSetImpl("Results from: " + subeventClass.getURI(), model);
 
         logger.info("Converting " + results.size() + " records.");
 
@@ -148,26 +148,5 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
         }
 
         return resultSet;
-    }
-
-    private class ResultSetImpl implements IResultSet {
-        private String result;
-        private ResultIterator resultIterator = new ResultIterator(model);
-
-        public ResultSetImpl (String result) {this.result = result;}
-
-        public void addResult(List<Individual> individuals) {
-            this.resultIterator.add(individuals);
-        }
-
-        @Override
-        public String printResults() {
-            return result;
-        }
-
-        @Override
-        public IResultIterator iterator() {
-            return resultIterator;
-        }
     }
 }
