@@ -27,23 +27,31 @@ public class Scratch extends TestBase {
 
     public void doSingleFileTest() {
         try {
+            //VLDB CONFERENCE
             //singleFileTest("DSC_0406.JPG");
-            singleFileTest("17164616e1c011e18be00019b92f7b9d");
+
+            //TURING AWARD PHOTOS
+            /////singleFileTest("17164616e1c011e18be00019b92f7b9d");
             //singleFileTest("17160c5ae1c011e18be00019b92f7b9d");
             //singleFileTest("17165da4e1c011e18be00019b92f7b9d");
             //singleFileTest("17161f60e1c011e18be00019b92f7b9d");
             //singleFileTest("17169378e1c011e18be00019b92f7b9d");
             //singleFileTest("1715a03ae1c011e18be00019b92f7b9d");
+
+            //SETAREH PARTY PHOTOS
+            singleFileTest("af948a5ae64411e195ea0019b92f7b9d");
         } catch (Exception e) {
             exceptionHandler.handle(e);
         }
     }
 
     public void singleFileTest(String photo) throws IOException, ParseException, EventGraphException {
-        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/jain/turing/" + photo + ".log");
+        //ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/jain/turing/" + photo + ".log");
+        ExperimentsLogger el = ExperimentsLogger.getInstance("/home/arjun/Dataset/logs/setareh/party/" + photo + ".log");
 
         //File file = new File("/home/arjun/Dataset/vldb/" + photo);
-        File file = new File("/data/test_photos/jain/c1/" + photo);
+        //File file = new File("/data/test_photos/jain/c1/" + photo);
+        File file = new File("/data/test_photos/setareh/" + photo);
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
 
         long st = System.currentTimeMillis();
