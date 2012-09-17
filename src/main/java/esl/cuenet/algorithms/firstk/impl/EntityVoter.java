@@ -212,6 +212,7 @@ public class EntityVoter implements Voter {
         else if (name.compareTo("Nicola Onose") == 0) return "fb_3312053@wicknicks";
         else if (name.compareTo("Ramesh Jain") == 0) return "fb_6028816@wicknicks";
         else if (name.compareTo("Mohan C Mohan") == 0) return "fb_1040704767@wicknicks";
+
         /* Turing Award Event */
         else if (name.compareTo("Butler Lampson") == 0) return "ButlerLampson@wicknicks";
         else if (name.compareTo("Alan C. Kay") == 0) return "AlanCKey@wicknicks";
@@ -236,6 +237,10 @@ public class EntityVoter implements Voter {
         else if (name.compareTo("Vint Cerf") == 0) return "VintCerf@wicknicks";
         else if (name.compareTo("John White") == 0) return "JohnRWhite@wicknicks";
         else if (name.compareTo("Kelly Gotlieb") == 0) return "KellyGotlieb@wicknicks";
+
+        /* Setareh Farewell Party */
+        else if (name.compareTo("Setareh Rad") == 0) return "fb_570206500@setoreh";
+        else if (name.compareTo("Hooman Homayoun") == 0) return "fb_545161407@setoreh";
 
         else
             return "fb_717562539@wicknicks";
