@@ -177,7 +177,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         if (aggSocNet.isSkippable(name)) {
 //            logger.info("Skipping: " + name);
-            return;
+//            return;
         }
 
         expLogger.discoveryStart("entity", name);
