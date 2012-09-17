@@ -26,8 +26,11 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
     private ExifExtractor extractor = new ExifExtractor();
     private EventGraph graph = null;
     private OntModel model = null;
-    private String username = "Ramesh Jain";
-    private String email = "jain49@gmail.com";
+
+    private String username = "Setareh Rad";
+    private String email = "setareh.rafatirad@gmail.com";
+//    private String username = "Ramesh Jain";
+//    private String email = "jain49@gmail.com";
 
     public LocalFilePreprocessor(OntModel model, String username, String email) {
         this.model = model;
