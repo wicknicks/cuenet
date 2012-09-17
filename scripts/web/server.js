@@ -23,7 +23,8 @@ channels.register('gcal_results', gcal_results)
 responseCache = new Object()
 
 app.get('/content/:pic', function (req, res, next) {
-  var fname = '/data/test_photos/jain/c1/' + req.params.pic;
+  var fname = '/data/test_photos/setareh/' + req.params.pic;
+  //var fname = '/data/test_photos/jain/c1/' + req.params.pic;
   var content = fs.readFileSync(fname);
   res.header ('Content-Type', 'image/jpeg');
   res.send(content); 
