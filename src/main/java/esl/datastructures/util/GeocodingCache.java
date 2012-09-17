@@ -8,7 +8,7 @@ import java.util.HashMap;
 public class GeocodingCache extends MongoDB {
 
     public GeocodingCache() {
-        super("test");
+        super("geo");
     }
 
     public void addToCache(String location, BasicDBObject gcInfo) {
