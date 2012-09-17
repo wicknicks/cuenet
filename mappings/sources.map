@@ -26,7 +26,7 @@
       (:map address.street-address address F)))
 
 
-(:source google-calendar 
+(:source google-calendar
    (:attrs event email time location title description attendee)
    (:rel ev type-of event)
    (:rel owner type-of person)
@@ -194,6 +194,19 @@
    (:axioms
       (:map conf.url url)
       (:map attendee.name name)))
+
+(:source fb-events
+   (:attrs event name time)
+   (:rel ev type-of event)
+   (:rel p1 type-of person)
+   (:rel ti type-of time-interval)
+   (:rel ev occurs-during ti)
+   (:rel p1 participant-of ev)
+   (:axioms
+      (:map p1.name name)
+      (:map ev event)
+      (:map ev.occurs-during time)
+      (:map ti time)))
 
 //(:source fb-user-old
 //        (:attrs id dob name location work[] email)

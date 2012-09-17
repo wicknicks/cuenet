@@ -94,6 +94,11 @@ public class AccessorFactory {
             return new ConferenceTweetAccessor(model);
         }
 
+        else if (name.compareTo("fb-events") == 0) {
+            logger.info("Initializing Facebook Events Accessor");
+            return new FacebookEventAccessor(model);
+        }
+
         return null;
     }
 
