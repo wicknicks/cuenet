@@ -31,7 +31,7 @@ class Network:
   def propagate(self, time=0, participants=[]):
     current = Graph(data={'type': 'temporal', 'time': time})
     for p in participants: current.node(Node(p))
-    #self.graphs.append(current)
+    self.graphs.append(current)
 
     timeSortedList = self.buildTimeIndex(self.graphs)
     #print timeSortedList[0].data['time'], timeSortedList[-1].data['time']
@@ -40,18 +40,34 @@ class Network:
 
     propagationNet = Graph()
     for t in timeSortedList: propagationNet.node(t)
-    for e in dict.keys(entityIndex): propagationNet.node(e)
+    for e in dict.keys(entityIndex):
+      e.data['wt'] = 0
+      propagationNet.node(e)
 
     ec = 0
+    c = 0
     for t in timeSortedList:
       nodes = t.getAllNodes()
       for n in nodes:
         ref = entityIndex[n]
+        weight = 0.0;
+        if ref in current.getAllNodes():
+          weight = 1.0
+          c += 1
+        ref.data['wt']=weight
+        #print ref, ref.data['wt']
         propagationNet.edge(Edge(t, ref))
         propagationNet.edge(Edge(ref, t))
         ec += 2
 
-    print ec, 'edges created'
+    print ec, 'edges created', c
+    self.rank(propagationNet, current)
+
+  def rank(self, net, current):
+    for n in net.getAllNodes():
+      if 'wt' in n.data:
+        if n.data['wt'] == 1.0:
+          print 'Weighted Entity: ', n, n.data['wt']
 
   def printStats(self):
     times = []

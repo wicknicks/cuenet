@@ -33,7 +33,7 @@ def loadFBPhotos():
 
     photoNet.append((photo, u))
     _count += 1
-    if _count > 1000: break
+    if _count > 10000: break
 
   return photoNet
 
@@ -66,8 +66,8 @@ def loadData():
     #else: dnf += 1
     g = Graph(data=data)
     for pair in itertools.permutations(pic, 2):
-      n1 = Node(pair[0]['name'])
-      n2 = Node(pair[1]['name'])
+      n1 = Node(pair[0]['name'], data={'wt': 0})
+      n2 = Node(pair[1]['name'], data={'wt': 0})
       if (pair[0]['name'] not in dups) and (pair[1]['name'] not in dups):
         g.node(n1)
         g.node(n2)
