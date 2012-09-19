@@ -101,11 +101,11 @@ class Network:
       edges = net.getOutgoingEdges(n)
       for event in edges:
         participants = event.getAllNodes()
-        up = self.average(n.score, participants, damper=0.5*(ic+1))
+        up = self.average(n.score, participants, damper=0.1**(ic+1))
         #print n, n.score, len(participants), up
         for part in participants:
           pNode = net.getNode(part)
-          if pNode.fired: continue
+          #if pNode.fired: continue
           pNode.score += up
           if pNode.score > 100.0: pNode.score = 100.0
           if pNode.queued == True: continue
@@ -122,7 +122,8 @@ class Network:
     print '------------------'
     f = open('results.txt', 'w')
     ranks.sort(lambda a,b: 1 if b[1] > a[1] else -1)
-    for r in range(len(ranks)): f.write(str(ranks[r][0]) + " " + str(ranks[r][1]) + "\n")
+    for r in range(len(ranks)):
+      f.write(str(r) + ". " + str(ranks[r][0]) + " " + str(ranks[r][1]) + "\n")
     f.close()
 
   def average(self, score, participants, damper=1):
