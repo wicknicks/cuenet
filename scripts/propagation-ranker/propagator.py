@@ -1,4 +1,5 @@
 from graph import *
+from collections import deque
 
 class Network:
   def __init__(self, label='default', data={}):
@@ -38,36 +39,66 @@ class Network:
 
     entityIndex = self.unifyEntities(self.graphs)
 
+    c = 0
     propagationNet = Graph()
-    for t in timeSortedList: propagationNet.node(t)
+    for t in timeSortedList:
+      if 'Setareh Rad' in t.getAllNodes(): c += 1
+      propagationNet.node(t)
+    print 'Setareh in', c, 'graphs'
+
     for e in dict.keys(entityIndex):
-      e.data['wt'] = 0
+      e.data['wt'] = 0.0
+      e.score  = 0.0
+      e.fired = False
+      if e in current.getAllNodes():
+        e.data['wt'] = 1.0
+        e.score = 1.0
       propagationNet.node(e)
 
-    ec = 0
-    c = 0
-    for t in timeSortedList:
-      nodes = t.getAllNodes()
-      for n in nodes:
-        ref = entityIndex[n]
-        weight = 0.0;
-        if ref in current.getAllNodes():
-          weight = 1.0
-          c += 1
-        ref.data['wt']=weight
-        #print ref, ref.data['wt']
-        propagationNet.edge(Edge(t, ref))
-        propagationNet.edge(Edge(ref, t))
-        ec += 2
+    for entity in dict.keys(entityIndex):
+      for graph in timeSortedList:
+        for participant in graph.getAllNodes():
+          if participant == entity:
+            propagationNet.edge(Edge(entity, graph))
+            propagationNet.edge(Edge(graph, entity))
 
-    print ec, 'edges created', c
-    self.rank(propagationNet, current)
+    print 'Ranking....'
+    self.rank(propagationNet)
 
-  def rank(self, net, current):
+  def rank(self, net):
+    queue = deque()
     for n in net.getAllNodes():
-      if 'wt' in n.data:
-        if n.data['wt'] == 1.0:
-          print 'Weighted Entity: ', n, n.data['wt']
+      if 'wt' not in n.data: continue
+      if n.data['wt'] == 1.0: queue.append(n)
+
+    while len(queue) > 0:
+      n = queue.popleft()
+      n.fired = True
+      edges = net.getOutgoingEdges(n)
+      for event in edges:
+        participants = event.getAllNodes()
+        up = self.average(n.score, participants)
+        #print n, n.score, len(participants), up
+        for part in participants:
+          pNode = net.getNode(part)
+          if pNode.fired: continue
+          pNode.score += up
+          if pNode.score > 1: pNode.score = 1.0
+          queue.append(pNode)
+
+    ranks = []
+    for entity in net.getAllNodes():
+      if isinstance(entity, Graph): continue
+      ranks.append( (entity, entity.score) )
+
+    print '------------------'
+    print '    RESULTS      '
+    print '------------------'
+    ranks.sort(lambda a,b: 1 if b[1] > a[1] else -1)
+    for r in range(21): print ranks[r][0], ranks[r][1]
+
+  def average(self, score, participants):
+    return score/len(participants)
 
   def printStats(self):
     times = []
@@ -76,6 +107,5 @@ class Network:
       times.append(graph.data['time'])
 
     times.sort()
-    #print times[0], times[len(times)-1]
 
     print 'Aggregate Network contains', len(self.graphs), 'graphs.'

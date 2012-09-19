@@ -8,6 +8,7 @@ class Node:
 
   def __eq__(self, other):
     if type(other) == str: return other == self.label
+    if isinstance(other, Node) is False: return False
     return self.label == other.label
 
   def __str__(self):
@@ -18,6 +19,11 @@ class Edge:
     self.start = node1;
     self.end = node2;
     self.data = data
+
+  def __str__(self):
+    print 'sa'
+    return self.node1.__str__() + ' -> ' + \
+      self.node1.__str__()
 
 class Graph:
   def __init__(self, data={}):
@@ -34,10 +40,15 @@ class Graph:
       edges[edge.end] = edge
 
   def getNode(self, label):
-    return self.nodes[label]
+    for node in dict.keys(self.nodes):
+      if node == label: return node
+    return None
 
   def getAllNodes(self):
-    return self.nodes
+    return dict.keys(self.nodes)
+
+  def getOutgoingEdges(self, node):
+    return self.nodes[node]
 
   def getEdge(self, n1, n2):
     if n2 in self.nodes[n1]:
@@ -48,11 +59,11 @@ class Graph:
 
   def printStats(self):
     print 'Number of Nodes', len(self.nodes)
-    """
+
     c = 1
     for n in self.nodes:
       print ' ' + str(c)+')', n
       if len(dict.keys(self.nodes[n])) > 0:
         print '  ',  ['( -> '+str(e)+' )' for e in self.nodes[n]]
       c += 1
-    """
+

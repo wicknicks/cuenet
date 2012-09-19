@@ -33,7 +33,7 @@ def loadFBPhotos():
 
     photoNet.append((photo, u))
     _count += 1
-    if _count > 10000: break
+    if _count > 10: break
 
   return photoNet
 
