@@ -39,30 +39,40 @@ class Network:
 
     entityIndex = self.unifyEntities(self.graphs)
 
+    """for t in timeSortedList:
+      if 'id' not in t.data: continue
+      print 'TSL', t.data['id'], [str(u) for u in t.getAllNodes()]
+    return
+    """
+
     c = 0
     propagationNet = Graph()
     for t in timeSortedList:
-      if 'Setareh Rad' in t.getAllNodes(): c += 1
+      #if 'Setareh Rad' in t.getAllNodes(): c += 1
       propagationNet.node(t)
-    print 'Setareh in', c, 'graphs'
+    #print 'Setareh in', c, 'graphs'
+
 
     for e in dict.keys(entityIndex):
       e.data['wt'] = 0.0
       e.score  = 0.0
       e.fired = False
+      e.queued = False
       if e in current.getAllNodes():
         e.data['wt'] = 1.0
         e.score = 1.0
       propagationNet.node(e)
 
+    ec = 0
     for entity in dict.keys(entityIndex):
       for graph in timeSortedList:
         for participant in graph.getAllNodes():
           if participant == entity:
             propagationNet.edge(Edge(entity, graph))
             propagationNet.edge(Edge(graph, entity))
+            ec += 2
 
-    print 'Ranking....'
+    print 'Ranking....', ec
     self.rank(propagationNet)
 
   def rank(self, net):
@@ -71,20 +81,36 @@ class Network:
       if 'wt' not in n.data: continue
       if n.data['wt'] == 1.0: queue.append(n)
 
-    while len(queue) > 0:
+    tqueue = deque()
+    ic = 0
+    while True:
+      if len(queue) == 0:
+        if len(tqueue) == 0: break
+        queue = tqueue
+        tqueue = deque()
+        ic += 1
+        print 'Starting iteration', ic, len(queue)
+        if ic == 3: break
+
       n = queue.popleft()
+      n.queued = False
       n.fired = True
+
+      if len(queue)%20==0: print 'Q Size', len(queue)
+
       edges = net.getOutgoingEdges(n)
       for event in edges:
         participants = event.getAllNodes()
-        up = self.average(n.score, participants)
+        up = self.average(n.score, participants, damper=0.5*(ic+1))
         #print n, n.score, len(participants), up
         for part in participants:
           pNode = net.getNode(part)
           if pNode.fired: continue
           pNode.score += up
-          if pNode.score > 1: pNode.score = 1.0
-          queue.append(pNode)
+          if pNode.score > 100.0: pNode.score = 100.0
+          if pNode.queued == True: continue
+          pNode.queued = True
+          tqueue.append(pNode)
 
     ranks = []
     for entity in net.getAllNodes():
@@ -94,11 +120,13 @@ class Network:
     print '------------------'
     print '    RESULTS      '
     print '------------------'
+    f = open('results.txt', 'w')
     ranks.sort(lambda a,b: 1 if b[1] > a[1] else -1)
-    for r in range(21): print ranks[r][0], ranks[r][1]
+    for r in range(len(ranks)): f.write(str(ranks[r][0]) + " " + str(ranks[r][1]) + "\n")
+    f.close()
 
-  def average(self, score, participants):
-    return score/len(participants)
+  def average(self, score, participants, damper=1):
+    return damper*score/len(participants)
 
   def printStats(self):
     times = []

@@ -20,8 +20,8 @@ def loadFBRelationships():
 def loadFBPhotos():
   photoNet = [];
   _count = 0
-
-  for photo in DB['fb_photos'].find():
+  c = 0
+  for photo in DB['fb_photos'].find({'tags.data.name':'Setareh Rad'}):
     u = []
     for tag in photo['tags']['data']:
       tDict = {}
@@ -30,10 +30,10 @@ def loadFBPhotos():
       if 'name' in tag: tDict['name'] = tag['name']
       else: tDict['name'] = '__UNKNOWN__'
       u.append(tDict)
-
+      if tag['name'] == 'Setareh Rad': c+=1
     photoNet.append((photo, u))
     _count += 1
-    if _count > 10: break
+    if _count > 1000: break
 
   return photoNet
 
@@ -55,11 +55,10 @@ def loadData():
   network.load(g)
 
   pics = loadFBPhotos()
-  _count = 0
   #dnf = 0
   for u in pics:
     pic = u[1]
-    data = {'type': 'temporal'}
+    data = {'type': 'temporal', 'id': u[0]['id']}
     if 'created_time' in u[0]:
       ct = dateparser.parse(u[0]['created_time'])
       data['time'] = int(ct.strftime('%s'))
@@ -74,7 +73,7 @@ def loadData():
         g.edge(Edge(n1, n2, {'weight': 1}))
     network.load(g)
 
-  print 'Photos Loaded'
+  print len(pics), 'Photos Loaded'
   return network
 
 
@@ -110,5 +109,6 @@ def findDups():
 if __name__ == "__main__":
   #simpleTest()
   network = loadData()
+  connection.disconnect()
   network.propagate(time=1344749324, participants=['Setareh Rad'])
   network.printStats()
