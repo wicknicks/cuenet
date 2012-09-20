@@ -1,5 +1,6 @@
 from graph import *
 from collections import deque
+import conf, pickle
 
 class Network:
   def __init__(self, label='default', data={}):
@@ -48,9 +49,9 @@ class Network:
     c = 0
     propagationNet = Graph()
     for t in timeSortedList:
-      #if 'Setareh Rad' in t.getAllNodes(): c += 1
+      #if conf.NAME in t.getAllNodes(): c += 1
       propagationNet.node(t)
-    #print 'Setareh in', c, 'graphs'
+    #print conf.NAME, 'in', c, 'graphs'
 
 
     for e in dict.keys(entityIndex):
@@ -96,7 +97,7 @@ class Network:
       n.queued = False
       n.fired = True
 
-      if len(queue)%20==0: print 'Q Size', len(queue)
+      if len(queue) % 20 == 0: print 'Q Size', len(queue), str(n)
 
       edges = net.getOutgoingEdges(n)
       for event in edges:
@@ -125,6 +126,12 @@ class Network:
     for r in range(len(ranks)):
       f.write(str(r) + ". " + str(ranks[r][0]) + " " + str(ranks[r][1]) + "\n")
     f.close()
+
+    """
+    f=open('prop1.net', 'w')
+    pickle.dump(net, f)
+    f.close()
+    """
 
   def average(self, score, participants, damper=1):
     return damper*score/len(participants)

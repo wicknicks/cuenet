@@ -1,17 +1,18 @@
 from graph import *
 from propagator import *
 import sys, itertools
-from pymongo import Connection
+import pymongo
 from dateutil import parser as dateparser
+import conf
 
-connection = Connection('127.0.0.1', 27017)
-DB = connection['setareh']
+connection = pymongo.Connection('127.0.0.1', 27017)
+DB = connection[conf.DB]
 
 def loadFBRelationships():
   socNet = []
   for rel in DB['fb_relationships'].find():
     u = []
-    u.append({'id': rel['id'], 'name': u'Setareh Rad'});
+    u.append({'id': rel['id'], 'name': conf.NAME});
     u.append({'id': rel['relation'], 'name': rel['relation_name']});
     socNet.append(u)
   return socNet
@@ -21,7 +22,7 @@ def loadFBPhotos():
   photoNet = [];
   _count = 0
   c = 0
-  for photo in DB['fb_photos'].find({'tags.data.name':'Setareh Rad'}):
+  for photo in DB['fb_photos'].find({'tags.data.name':conf.NAME}).sort("id", pymongo.ASCENDING):
     u = []
     for tag in photo['tags']['data']:
       tDict = {}
@@ -30,7 +31,7 @@ def loadFBPhotos():
       if 'name' in tag: tDict['name'] = tag['name']
       else: tDict['name'] = '__UNKNOWN__'
       u.append(tDict)
-      if tag['name'] == 'Setareh Rad': c+=1
+      if tag['name'] == conf.NAME: c+=1
     photoNet.append((photo, u))
     _count += 1
     if _count > 1000: break
@@ -40,7 +41,7 @@ def loadFBPhotos():
 
 def loadData():
   dups = findDups()
-  network = Network(label='Setareh-Test-Net')
+  network = Network(label=conf.PROPNET)
   g = Graph(data={'type': 'social'})
   rels = loadFBRelationships()
   for pair in rels:
@@ -59,6 +60,7 @@ def loadData():
   for u in pics:
     pic = u[1]
     data = {'type': 'temporal', 'id': u[0]['id']}
+    data['rid'] = u[0]['id']
     if 'created_time' in u[0]:
       ct = dateparser.parse(u[0]['created_time'])
       data['time'] = int(ct.strftime('%s'))
@@ -108,7 +110,8 @@ def findDups():
 
 if __name__ == "__main__":
   #simpleTest()
+  print 'Testing dataset', conf.NAME
   network = loadData()
   connection.disconnect()
-  network.propagate(time=1344749324, participants=['Setareh Rad'])
+  network.propagate(time=1344749324, participants=[conf.NAME])
   network.printStats()

@@ -1,3 +1,5 @@
+import uuid
+
 class Node:
   def __init__(self, label, data={}):
     self.label = label
@@ -29,6 +31,8 @@ class Graph:
   def __init__(self, data={}):
     self.nodes = {}
     self.data = data;
+    if 'rid' not in self.data:
+      self.data['rid'] = uuid.uuid4().hex
 
   def node(self, node):
     if node not in self.nodes:
@@ -56,6 +60,13 @@ class Graph:
     else:
       print 'Nodes not found'
       return None
+
+  def __hash__(self):
+    return self.data['rid'].__hash__()
+
+  def __eq__(self, other):
+    if not isinstance(other, Graph): return False
+    return self.data['rid'] == other.data['rid']
 
   def printStats(self):
     print 'Number of Nodes', len(self.nodes)
