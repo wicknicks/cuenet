@@ -74,7 +74,7 @@ def construct(dups, entities, photos):
         continue
       net.add_edge(entityIndex[parts['name']], p['id'])
       
-  print 'EIX:', entityIndex['Mahi Mir']
+  #print 'EIX:', entityIndex['Mahi Mir']
   return net
 
 if __name__ == "__main__":

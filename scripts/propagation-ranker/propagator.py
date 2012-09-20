@@ -3,6 +3,14 @@ class propagator:
     self.net = net
 
   def propagate(self, time, participants):
-    print 'Propagating'
+    timeSortedEvents = []
+    net = self.net
+    print len(net.nodes())
+    for node in net.nodes():
+      if net.node[node]['class'] == 'photo-capture-event':
+        timeSortedEvents.append (net.node[node])
 
-  
+    print len(timeSortedEvents)
+    timeSortedEvents.sort(lambda a,b: a['time']-b['time'])
+
+
