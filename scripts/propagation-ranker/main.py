@@ -73,7 +73,7 @@ def construct(dups, entities, photos):
       if parts['name'] not in entityIndex:
         continue
       net.add_edge(entityIndex[parts['name']], p['id'])
-      
+
   #print 'EIX:', entityIndex['Mahi Mir']
   return net
 
@@ -84,4 +84,13 @@ if __name__ == "__main__":
   #print len(dict.keys(net.edge['1389742343']))
   #print len(net.edges())
   p = propagator(net)
-  p.propagate(time=1344749324, participants=[{'id':conf.ID, 'name': conf.NAME}])
+  ranks = p.propagate(time=1344749324,
+                      participants=[{'id':conf.ID,
+                                     'name': conf.NAME}])
+
+  f = codecs.open(conf.DB + '_results.txt', 'w', 'utf-8')
+  for x in xrange(0, len(ranks)):
+    f.write(ranks[x]['name'] + " " + str(ranks[x]['score']) + "\n")
+  f.close()
+
+

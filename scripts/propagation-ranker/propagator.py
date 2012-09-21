@@ -28,7 +28,6 @@ class propagator:
         net.add_edge(node, newEvent['id'])
         net.node[node]['score'] = 1.0
         queue.append(node)
-        print 't', type(node)
 
     timeSortedEvents = []
     net = self.net
@@ -40,7 +39,7 @@ class propagator:
     timeSortedEvents.sort(lambda a, b: a['time'] - b['time'])
 
     print 'Ranking....'
-    self.rank(net, queue)
+    return self.rank(net, queue)
 
   def rank(self, net, queue):
     tqueue = deque()
@@ -78,13 +77,8 @@ class propagator:
       if net.node[node]['class'] != 'person': continue
       ranks.append(net.node[node])
 
-    f = codecs.open('results0', 'w', 'utf-8')
     ranks.sort(self.rankSorter)
-    for x in xrange(0, len(ranks)):
-      #print ranks[x]['name'], ranks[x]['score']
-      f.write(ranks[x]['name'] + " " + str(ranks[x]['score']) + "\n")
-
-    f.close()
+    return ranks
 
   def average(self, score, participants, damper=1):
     return damper * score/len(participants)
