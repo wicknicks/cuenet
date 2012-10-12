@@ -1,9 +1,11 @@
-import conf
+import conf, geocoder
 from propagator import *
 import networkx as nx
 import sys, itertools
 from dateutil import parser as dateparser
-import pymongo
+import pymongo, pickle
+
+from email.utils import parseaddr
 
 connection = pymongo.Connection('127.0.0.1', 27017)
 DB = connection[conf.DB]
@@ -23,7 +25,7 @@ def loadEntities():
   names.sort()
   for x in xrange(0, len(names)-1):
     if names[x] == names[x+1]: dups.append(names[x])
-  print 'Dups: ', dups
+  #print 'Dups: ', dups
   return dups, entities
 
 def loadFBPhotos(q=None):
@@ -55,6 +57,44 @@ def loadFBPhotos(q=None):
 
   return photoNet
 
+def getAllAddresses(addrstr):
+  tuples = [parseaddr(addr) for addr in addrstr.split(',')]
+  return tuples
+
+def getTime(timestr):
+  return dateparser.parse(timestr).strftime('%s')
+
+def emailToEvent(e):
+  event = {'id': e['uid'], 'class': 'email', 'participants': []}
+  if 'cc' in e: event['participants'].extend(getAllAddresses(e['cc']))
+  if 'from' in e: event['participants'].extend(getAllAddresses(e['from']))
+  if 'to' in e: event['participants'].extend(getAllAddresses(e['to']))
+  if 'time' in e: e['time'] = getTime(e['date'])
+  return event
+
+def loadEmails():
+  emails = [e for e in DB['emails'].find()]
+  events = [emailToEvent(e) for e in emails]
+
+  ## group by email addresses
+  emailDict = {}
+  for ev in events:
+    for part in ev['participants']:
+      if len(part[0]) < 1: continue
+      if part[1] in emailDict:
+        if part[0] not in emailDict[part[1]]:
+          emailDict[part[1]].append(part[0])
+      else:
+        emailDict[part[1]]=[part[0]]
+
+  count = 0
+  for key in emailDict:
+    if len(emailDict[key]) > 1:
+      count += 1
+
+  print count, len(events)
+  return emailDict, events
+
 def construct(dups, entities, photos):
   net = nx.Graph()
   entityIndex = {}
@@ -77,20 +117,138 @@ def construct(dups, entities, photos):
   #print 'EIX:', entityIndex['Mahi Mir']
   return net
 
+def getUserInfo(uid):
+  return DB['fb_users'].find_one({"id": uid})
+
+def computeDistance(gc, address):
+  cache = gc.cache
+  if address in cache:
+    latlon = cache[address]
+  else:
+    #print 'Requesting', address
+    latlon = gc.geocode(address)
+    cache[address] = latlon
+
+  latlon = (float(latlon['latitude']), float(latlon['longitude']))
+  pos = (33.686887, -117.825348)
+  return ((latlon[1]-pos[1])**2 + (latlon[0]-pos[0])**2)**0.5
+
+def joinEntityLists(index1, l2, keyfunc2, valfunc1, valfunc2):
+  inv = {}
+  for k in index1:
+    vals = index1[k]
+    for v in vals:
+      if v.lower() in inv:
+        #print 'Found', v, 'in inverted index'
+        inv[v.lower()]['data'].append(k)
+      else: inv[v] = {'data': [k], 'checked': False}
+
+  result = []
+  for item in l2:
+    keys = keyfunc2(item)
+    tup = ()
+    if isinstance(keys, str):
+      if keys.lower() in inv:
+        ixitem = inv[keys]['data']
+        result.append( preptuple(valfunc2(item), keys, valfunc1(ixitem)) )
+        inv[keys]['checked'] = True
+      else:
+        result.append( preptuple(valfunc2(item), keys.lower(), None) )
+    if isinstance(keys, list):
+      for l in keys:
+        ixitem = inv[l.lower()]['data']
+        result.append( preptuple(valfunc2(item), l.lower(), valfunc1(ixitem)) )
+        inv[l]['checked'] = True
+
+  for v in inv:
+    if inv[v]['checked'] == False:
+      result.append(  preptuple(None, v, valfunc1(inv[v]['data']))  )
+  return result
+
+def preptuple (d1, key, d2):
+  data = {}
+  if d1 != None: data['fb_id'] = d1['fb_id']
+  data['name'] = key
+  if d2 != None: data['em_id'] = d2['em_id']
+  if len(data['em_id']) > 1: print data
+  return data
+
+def fbEntityToStarEntity(fb):
+  return {'fb_id': fb['id']}
+
+def emEntityToStarEntity(em):
+  return {'em_id': em}
+
 if __name__ == "__main__":
   print 'Testing dataset:', conf.NAME
-  dups, entities = loadEntities()
-  net = construct(dups, entities, loadFBPhotos())
-  #print len(dict.keys(net.edge['1389742343']))
-  #print len(net.edges())
-  p = propagator(net)
-  ranks = p.propagate(time=1344749324,
-                      participants=[{'id':conf.ID,
-                                     'name': conf.NAME}])
 
-  f = codecs.open(conf.DB + '_results.txt', 'w', 'utf-8')
-  for x in xrange(0, len(ranks)):
-    f.write(ranks[x]['name'] + " " + str(ranks[x]['score']) + "\n")
+  entityIndex, emails = loadEmails()
+  dups, entities = loadEntities()
+
+  index1 = {}
+  index1['a@a.com'] = ['a', 'AA', 'aaa']
+  index1['b@b.com'] = ['b', 'BB', 'bbb']
+  index1['c@c.com'] = ['c', 'CC']
+
+  list2 = []
+  list2.append( {'nm': 'a', 'id': 1} )
+  list2.append( {'nm':'AA', 'id': 2} )
+  list2.append( {'nm':'aaa', 'id': 3} )
+  list2.append( {'nm':'b', 'id': 4} )
+  list2.append( {'nm':'BB', 'id': 5} )
+  list2.append( {'nm':'bbb', 'id': 6} )
+  list2.append( {'nm':'dDd', 'id': 7} )
+
+  #p = joinEntityLists(index1, list2, lambda t: t['nm'], emEntityToStarEntity, fbEntityToStarEntity)
+  #for pp in p: print pp
+
+  p = joinEntityLists(entityIndex, entities, lambda t: t['name'], emEntityToStarEntity, fbEntityToStarEntity)
+  f = codecs.open('join.txt', 'w', 'utf-8')
+  for pp in p:
+    f.write(str(pp) + "\n")
   f.close()
 
+  """
+  q = {'$or': [
+    {'tags.data.name': conf.NAME},
+    {'from.name': conf.NAME},
+    {"tags.data.name" : "Hooman Homayoun"}
+    ]}
+  net = construct(dups, entities, loadFBPhotos(q))
+  #print len(net.node[conf.ID])
+  #print len(dict.keys(net.edge['1389742343']))
+  #print len(net.edges())
 
+  event = DB['fb_events'].find_one({"eid" : "259950784109104"})
+  print event['attendees']['data'][0]
+
+  p = propagator(net)
+
+  time=1344749324
+  participants = [{'id':conf.ID, 'name': conf.NAME},
+                  {'id':'545161407', 'name': 'Hooman Homayoun'}]
+  ranks = p.propagate(time, participants)
+
+  #ranks = p.propagate(1344749324, event['attendees']['data'])
+
+  f = codecs.open('sethoom' + '_results.txt', 'w', 'utf-8')
+
+  gc = geocoder.Geocoder()
+  gc.cache = pickle.load(open('cache.geo', 'r'))
+
+  for x in xrange(0, len(ranks)):
+    user = getUserInfo(ranks[x]['id'])
+    loc = '""'
+    dist = -1
+    if 'location' in user:
+      loc = '"' + user['location']['name'] + '"'
+      dist = computeDistance(gc, user['location']['name'])
+
+    f.write(ranks[x]['name'] + "," + str(ranks[x]['score']) + \
+            "," + str(dist) + ", " + loc + "\n")
+  f.close()
+
+  #o = open('cache.geo', 'w')
+  #pickle.dump(gc.cache, o)
+  #o.close()
+  """

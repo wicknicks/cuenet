@@ -29,6 +29,13 @@ class propagator:
         net.node[node]['score'] = 1.0
         queue.append(node)
 
+    c = 0
+    for n in net.nodes():
+      if ('score' in net.node[n]) and (net.node[n]['score'] > 0): c += 1
+
+    print 'c =', c
+
+
     timeSortedEvents = []
     net = self.net
 
@@ -57,7 +64,7 @@ class propagator:
       net.node[n]['queued'] = False
       net.node[n]['fired'] = True
 
-      if len(queue) % 20 == 0: print 'Q Size', len(queue)
+      #if len(queue) % 20 == 0: print 'Q Size', len(queue)
 
       edges = net.edge[n]
       for event in dict.keys(edges):
@@ -68,6 +75,7 @@ class propagator:
           pNode = net.node[participant['id']]
           pNode['score'] += up
           if pNode['score'] > 100.0: pNode['score'] = 100.0
+          if pNode['fired'] == True: continue
           if pNode['queued'] == True: continue
           pNode['queued'] = True
           tqueue.append(participant['id'])
