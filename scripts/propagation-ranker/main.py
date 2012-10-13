@@ -1,4 +1,5 @@
 import conf, geocoder
+from collections import deque
 from propagator import *
 import networkx as nx
 import sys, itertools
@@ -79,7 +80,8 @@ def loadEmails():
   ## group by email addresses
   emailDict = {}
   for ev in events:
-    for part in ev['participants']:
+    for parts in ev['participants']:
+      part = (parts[0].lower(), parts[1].lower())
       if len(part[0]) < 1: continue
       if part[1] in emailDict:
         if part[0] not in emailDict[part[1]]:
@@ -92,7 +94,7 @@ def loadEmails():
     if len(emailDict[key]) > 1:
       count += 1
 
-  print count, len(events)
+  #print count, len(events)
   return emailDict, events
 
 def construct(dups, entities, photos):
@@ -143,26 +145,82 @@ def joinEntityLists(index1, l2, keyfunc2, valfunc1, valfunc2):
         inv[v.lower()]['data'].append(k)
       else: inv[v] = {'data': [k], 'checked': False}
 
-  result = []
+  iresult = []
   for item in l2:
     keys = keyfunc2(item)
-    tup = ()
-    if isinstance(keys, str):
+    if isinstance(keys, str) or isinstance(keys, unicode):
       if keys.lower() in inv:
+        #print 'Yes', keys
         ixitem = inv[keys]['data']
-        result.append( preptuple(valfunc2(item), keys, valfunc1(ixitem)) )
+        iresult.append( preptuple(valfunc2(item), keys, valfunc1(ixitem)) )
         inv[keys]['checked'] = True
       else:
-        result.append( preptuple(valfunc2(item), keys.lower(), None) )
+        iresult.append( preptuple(valfunc2(item), keys.lower(), None) )
     if isinstance(keys, list):
       for l in keys:
         ixitem = inv[l.lower()]['data']
-        result.append( preptuple(valfunc2(item), l.lower(), valfunc1(ixitem)) )
+        iresult.append( preptuple(valfunc2(item), l.lower(), valfunc1(ixitem)) )
         inv[l]['checked'] = True
 
   for v in inv:
     if inv[v]['checked'] == False:
-      result.append(  preptuple(None, v, valfunc1(inv[v]['data']))  )
+      iresult.append(  preptuple(None, v, valfunc1(inv[v]['data']))  )
+
+  inv.clear()
+  fbIndex = {}
+  #Aggregate names:
+  for r in iresult:
+    if 'em_id' in r:
+      for em in r['em_id']:
+        if em in inv: inv[em].append(r)
+        else: inv[em] = [r]
+    if 'fb_id' in r:
+      fbIndex[em] = r['fb_id']
+
+  print len(fbIndex), 'entities common to both FB & Email'
+
+  result = []
+  f = codecs.open('sortedmails.txt', 'w', 'utf-8')
+  while len(inv) > 0:
+    key, value = inv.popitem()
+    #print 'POPITEM', key, value
+    kqueue = deque()
+    names = set()
+    emails = set()
+    for v in value:
+      names.add(v['name'])
+      for e in v['em_id']:
+        kqueue.append(e)
+        emails.add(e)
+      if 'fb_id' in v: fbid = v['fb_id']
+    while len(kqueue) > 0:
+      k = kqueue.popleft()
+      if k not in inv: continue
+      data = inv[k]
+      #print data
+      for d in data:
+        names.add(d['name'])
+        for es in d['em_id']:
+          if es not in emails:
+            kqueue.append(es)
+            emails.add(es)
+      del inv[k]
+      #print 'data[', k, '] =>', data, '\n'
+
+    #print '\n\nNames: ', names
+    #print 'Emails: ', emails
+
+
+    xx = {'names': list(names), 'emails': emails}
+    for e in emails:
+      if e in fbIndex:
+        xx['fb_id'] = fbIndex[e]
+        break
+    result.append(xx)
+
+    f.write(str(result[-1]) + '\n')
+
+  f.close()
   return result
 
 def preptuple (d1, key, d2):
@@ -170,7 +228,6 @@ def preptuple (d1, key, d2):
   if d1 != None: data['fb_id'] = d1['fb_id']
   data['name'] = key
   if d2 != None: data['em_id'] = d2['em_id']
-  if len(data['em_id']) > 1: print data
   return data
 
 def fbEntityToStarEntity(fb):
@@ -185,24 +242,15 @@ if __name__ == "__main__":
   entityIndex, emails = loadEmails()
   dups, entities = loadEntities()
 
-  index1 = {}
-  index1['a@a.com'] = ['a', 'AA', 'aaa']
-  index1['b@b.com'] = ['b', 'BB', 'bbb']
-  index1['c@c.com'] = ['c', 'CC']
+  print len(entities), 'entities from FB'
+  print len(entityIndex), 'entities in Email Index'
 
-  list2 = []
-  list2.append( {'nm': 'a', 'id': 1} )
-  list2.append( {'nm':'AA', 'id': 2} )
-  list2.append( {'nm':'aaa', 'id': 3} )
-  list2.append( {'nm':'b', 'id': 4} )
-  list2.append( {'nm':'BB', 'id': 5} )
-  list2.append( {'nm':'bbb', 'id': 6} )
-  list2.append( {'nm':'dDd', 'id': 7} )
+  #print 'EIX', entityIndex['alexander.behm@gmail.com']
 
-  #p = joinEntityLists(index1, list2, lambda t: t['nm'], emEntityToStarEntity, fbEntityToStarEntity)
-  #for pp in p: print pp
+  p = joinEntityLists(entityIndex, entities, \
+                      lambda t: t['name'].lower(), \
+                      emEntityToStarEntity, fbEntityToStarEntity)
 
-  p = joinEntityLists(entityIndex, entities, lambda t: t['name'], emEntityToStarEntity, fbEntityToStarEntity)
   f = codecs.open('join.txt', 'w', 'utf-8')
   for pp in p:
     f.write(str(pp) + "\n")
