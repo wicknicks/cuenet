@@ -178,6 +178,10 @@ def joinEntityLists(index1, l2, keyfunc2, valfunc1, valfunc2):
       fbIndex[em] = r['fb_id']
 
   print len(fbIndex), 'entities common to both FB & Email'
+  fi = codecs.open('fbindex.txt', 'w', 'utf-8')
+  for f in fbIndex:
+    fi.write(f + ' ' + str(fbIndex[f]) + '\n')
+  fi.close()
 
   result = []
   f = codecs.open('sortedmails.txt', 'w', 'utf-8')
@@ -210,12 +214,18 @@ def joinEntityLists(index1, l2, keyfunc2, valfunc1, valfunc2):
     #print '\n\nNames: ', names
     #print 'Emails: ', emails
 
-
     xx = {'names': list(names), 'emails': emails}
+    for ns in names:
+      for item in l2:
+        k = keyfunc2(item)
+        if ns == k:
+          xx['fb_id'] = item['id']
+    """
     for e in emails:
       if e in fbIndex:
         xx['fb_id'] = fbIndex[e]
         break
+    """
     result.append(xx)
 
     f.write(str(result[-1]) + '\n')
