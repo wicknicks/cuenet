@@ -74,7 +74,7 @@ def emailToEvent(e):
   return event
 
 def loadEmails():
-  emails = [e for e in DB['emails'].find()]
+  emails = [e for e in DB['emails'].find()
   events = [emailToEvent(e) for e in emails]
 
   ## group by email addresses
