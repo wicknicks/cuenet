@@ -17,8 +17,8 @@ OUTPUT_FILE = None
 IMAP_PORT = 993                      # for secure connection, otherwise 143
 MAILBOXES = []
 
-START_DATE = '2-Jul-2012'
-END_DATE = '27-Jul-2012'
+START_DATE = '1-Jan-2012'
+END_DATE = '1-Oct-2012'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-i', '--imap', help='IMAP Server (like imap.sdsc.edu)')
