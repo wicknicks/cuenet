@@ -5,29 +5,33 @@ options {
 PARSER_BEGIN( ModelPatternParser )
 package esl.cuenet.model.pattern.parser;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.StringReader;
-import java.io.Reader;
-import java.util.Scanner;
 
 public class ModelPatternParser {
 
     public ModelPatternParser(String s)
     {
-        this((Reader)(new StringReader(s)));
+        this((new StringReader(s)));
     }
 
-    public static void main(String args[])
+    public static void main(String args[]) throws Exception
     {
-        while (true) {
-            String query = (new Scanner(System.in)).nextLine();
-            if (query.equals("quit")) break;
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/javacc/test/patterntests.txt"));
+        String line;
 
-            ModelPatternParser parser = new ModelPatternParser(query);
+        while (true) {
+            line = reader.readLine();
+            if (line == null) break;
+
+            System.out.println("\nPATTERN : " + line);
+            ModelPatternParser parser = new ModelPatternParser(line);
 
             try {
                 parser.parse();
             } catch (ParseException p) {
-                System.err.println("ERROR: " + p.getMessage());
+                System.out.println("ERROR: " + p.getMessage());
             }
         }
     }
@@ -43,18 +47,16 @@ void parse() :
 
 void qclass() :
 {
-  Token t, q=null;
+    Token t, q=null;
 }
 {
     t=<OCLASS> (q=<QUANTIFIER>)? { System.out.println("qclass = " + t.toString() + " " + ((q==null)?"":q.toString()));}
 }
 
 void superEventSpec() :
+{ Token o, p; }
 {
-  Token o, p;
-}
-{
-    ( o=<OCLASS> {System.out.println("oclass = " + o);} <SECONTAINS> pattern() )
+    ( <LEFTBRACK> o=<OCLASS> {System.out.println("oclass = " + o);} <SECONTAINS> pattern() <RIGHTBRACK> )
 }
 
 void pattern():
@@ -82,8 +84,13 @@ TOKEN : { <STRING : (["A"-"Z", "0"-"9"])+ > }
 TOKEN : { <QUOTED_STRING: "\"" (~["\""])+ "\"" > }
 TOKEN : { <OCLASS  : (["a" - "z"]|["A" - "Z"]| ["0"-"9"] | "\"" | "-" | "_" | "#" | "/" | "@" | "." | "]" | "[")+ > }
 TOKEN : { <QUANTIFIER  : "*" | "+" | "?" | "*_T" | "*_S" | "+_T" | "+_S" > }
+
 TOKEN : { <LEFTPAREN : "(" > }
 TOKEN : { <RIGHTPAREN : ")" > }
+
+TOKEN : { <LEFTBRACK : "{" > }
+TOKEN : { <RIGHTBRACK : "}" > }
+
 TOKEN : { <FOLLOWEDBY  : "->" > }
 TOKEN : { <INTERLEAVED : "," > }
 TOKEN : { <SECONTAINS  : ":" > }
