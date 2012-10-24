@@ -1,0 +1,89 @@
+options {
+  STATIC = false;
+}
+
+PARSER_BEGIN( ModelPatternParser )
+package esl.cuenet.model.pattern.parser;
+
+import java.io.StringReader;
+import java.io.Reader;
+import java.util.Scanner;
+
+public class ModelPatternParser {
+
+    public ModelPatternParser(String s)
+    {
+        this((Reader)(new StringReader(s)));
+    }
+
+    public static void main(String args[])
+    {
+        while (true) {
+            String query = (new Scanner(System.in)).nextLine();
+            if (query.equals("quit")) break;
+
+            ModelPatternParser parser = new ModelPatternParser(query);
+
+            try {
+                parser.parse();
+            } catch (ParseException p) {
+                System.err.println("ERROR: " + p.getMessage());
+            }
+        }
+    }
+}
+
+PARSER_END( ModelPatternParser )
+
+void parse() :
+{}
+{
+    (superEventSpec())+   <EOF>       // a query followed by optional sort
+}
+
+void qclass() :
+{
+  Token t, q=null;
+}
+{
+    t=<OCLASS> (q=<QUANTIFIER>)? { System.out.println("qclass = " + t.toString() + " " + ((q==null)?"":q.toString()));}
+}
+
+void superEventSpec() :
+{
+  Token o, p;
+}
+{
+    ( o=<OCLASS> {System.out.println("oclass = " + o);} <SECONTAINS> pattern() )
+}
+
+void pattern():
+{}
+{
+  ( <LEFTPAREN> (atom() (delimiter() atom())*)+ <RIGHTPAREN>)
+}
+
+void atom():
+{}
+{
+  (qclass())
+}
+
+void delimiter():
+{}
+{
+  <INTERLEAVED> | <FOLLOWEDBY>
+}
+
+SKIP    : {  <"//" (~["\n"])* "\n"> }
+SKIP 	: { " " | "\t" | "\n" | "\r" }
+
+TOKEN : { <STRING : (["A"-"Z", "0"-"9"])+ > }
+TOKEN : { <QUOTED_STRING: "\"" (~["\""])+ "\"" > }
+TOKEN : { <OCLASS  : (["a" - "z"]|["A" - "Z"]| ["0"-"9"] | "\"" | "-" | "_" | "#" | "/" | "@" | "." | "]" | "[")+ > }
+TOKEN : { <QUANTIFIER  : "*" | "+" | "?" | "*_T" | "*_S" | "+_T" | "+_S" > }
+TOKEN : { <LEFTPAREN : "(" > }
+TOKEN : { <RIGHTPAREN : ")" > }
+TOKEN : { <FOLLOWEDBY  : "->" > }
+TOKEN : { <INTERLEAVED : "," > }
+TOKEN : { <SECONTAINS  : ":" > }
