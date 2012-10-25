@@ -6,3 +6,5 @@ asd                         //Should throw syntax error
 (a: (p -> b*_S c*_T -> (q: (i -> j)) -> t*_S x))
 (a: (p -> b*_S c*_T -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
 (a: (p -> b*_S , c*_T -> u | v* | w? -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
+(a: (p -> b*_S, c*_T -> u | v* | w? -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
+(a: (p -> b*_S,c*_T -> u | v* | w? -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
