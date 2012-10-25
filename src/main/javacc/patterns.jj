@@ -76,7 +76,7 @@ void atom():
 void delimiter():
 {}
 {
-  <INTERLEAVED> | <FOLLOWEDBY>
+  <INTERLEAVED> | <FOLLOWEDBY> | <UNION>
 }
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }
@@ -90,6 +90,7 @@ TOKEN : { <QUANTIFIER  : "*" | "+" | "?" | "*_T" | "*_S" | "+_T" | "+_S" > }
 TOKEN : { <LEFTPAREN : "(" > }
 TOKEN : { <RIGHTPAREN : ")" > }
 
+TOKEN : { <UNION : "|" > }
 TOKEN : { <FOLLOWEDBY  : "->" > }
 TOKEN : { <INTERLEAVED : "," > }
 TOKEN : { <SECONTAINS  : ":" > }

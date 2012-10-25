@@ -1,7 +1,8 @@
-asd
+asd                         //Should throw syntax error
+(a: ({q: (i -> j)} -> t*_S x))               //Should throw lexical error
 (asd: (a b c))
 (asd: (a -> s -> d))
-(a: ({q: (i -> j)} -> t*_S x))
 (a: (p -> b*_S c*_T -> q -> t*_S x))
 (a: (p -> b*_S c*_T -> (q: (i -> j)) -> t*_S x))
 (a: (p -> b*_S c*_T -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
+(a: (p -> b*_S , c*_T -> u | v* | w? -> (q: (i -> j (pqr: (xx -> yy -> zz)) )) -> t*_S x))
