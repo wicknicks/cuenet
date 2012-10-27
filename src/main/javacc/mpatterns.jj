@@ -1,6 +1,6 @@
 options {
   STATIC = false;
-  LOOKAHEAD = 3;
+  LOOKAHEAD = 300;
 }
 
 PARSER_BEGIN( ModelPatternParser )
@@ -77,13 +77,13 @@ void term():
 void interleaved():
 { Token o; }
 {
-    <LEFTPAREN> o=<OCLASS> {System.out.println("i = " + o.image);} (<QUANTIFIER>)? ( <INTERLEAVED> <OCLASS> (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN> (<OCLASS>|pattern()) (<QUANTIFIER>)? ( <INTERLEAVED> (<OCLASS>|pattern()) (<QUANTIFIER>)? )* <RIGHTPAREN>
 }
 
 void union():
 { Token o; }
 {
-    <LEFTPAREN> term() (<QUANTIFIER>)? ( <UNION> term() (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN> (<OCLASS>|pattern()) (<QUANTIFIER>)? ( <UNION> (<OCLASS>|pattern()) (<QUANTIFIER>)? )* <RIGHTPAREN>
 }
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }
