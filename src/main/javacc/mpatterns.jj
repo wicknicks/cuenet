@@ -83,7 +83,7 @@ void interleaved():
 void union():
 { Token o; }
 {
-    <LEFTPAREN> o=<OCLASS> {System.out.println("u = " + o.image);} (<QUANTIFIER>)? ( <UNION> <OCLASS> (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN> term() (<QUANTIFIER>)? ( <UNION> term() (<QUANTIFIER>)? )* <RIGHTPAREN>
 }
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }
