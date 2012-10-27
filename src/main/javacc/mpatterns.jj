@@ -1,0 +1,106 @@
+options {
+  STATIC = false;
+  LOOKAHEAD = 3;
+}
+
+PARSER_BEGIN( ModelPatternParser )
+package esl.cuenet.model.pattern.parser;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.StringReader;
+
+public class ModelPatternParser {
+
+    public ModelPatternParser(String s)
+    {
+        this((new StringReader(s)));
+    }
+
+    public static void main(String args[]) throws Exception
+    {
+        BufferedReader reader = new BufferedReader(new FileReader("src/main/javacc/test/patterntests.2.txt"));
+        String line;
+
+        while (true) {
+            line = reader.readLine();
+            if (line == null) break;
+
+            System.out.println("\u005cnPATTERN : " + line);
+            ModelPatternParser parser = new ModelPatternParser(line);
+
+            try {
+                parser.parse();
+            } catch (Exception p) {
+                System.out.println("EXCEPT: " + p.getMessage());
+            } catch (Error r) {
+                System.out.println("ERROR: " + r.getMessage());
+            }
+        }
+
+        System.out.println("Ran Tests for mpatterns.jj parser");
+    }
+}
+
+PARSER_END( ModelPatternParser )
+
+void parse():
+{}
+{
+    (pattern()) <EOF>
+}
+
+void pattern():
+{}
+{
+    superEventSpec() | followsSequence()
+}
+
+void superEventSpec():
+{Token o;}
+{
+    <LEFTPAREN> o=<OCLASS>{System.out.println("se = " + o.image);} <SECONTAINS> followsSequence() <RIGHTPAREN> {System.out.println("se end");}
+}
+
+void followsSequence():
+{}
+{
+    <LEFTPAREN> term() ( <FOLLOWEDBY> term() )* <RIGHTPAREN>
+}
+
+void term():
+{ Token o; }
+{
+    interleaved() | union() | (o=<OCLASS> {System.out.println("term = " + o.image);}) | (superEventSpec())
+}
+
+void interleaved():
+{ Token o; }
+{
+    <LEFTPAREN> o=<OCLASS> {System.out.println("i = " + o.image);} (<QUANTIFIER>)? ( <INTERLEAVED> <OCLASS> (<QUANTIFIER>)? )* <RIGHTPAREN>
+}
+
+void union():
+{ Token o; }
+{
+    <LEFTPAREN> o=<OCLASS> {System.out.println("u = " + o.image);} (<QUANTIFIER>)? ( <UNION> <OCLASS> (<QUANTIFIER>)? )* <RIGHTPAREN>
+}
+
+SKIP    : {  <"//" (~["\n"])* "\n"> }
+SKIP 	: { " " | "\t" | "\n" | "\r" }
+
+TOKEN : { <STRING : (["A"-"Z", "0"-"9"])+ > }
+TOKEN : { <QUOTED_STRING: "\"" (~["\""])+ "\"" > }
+TOKEN : { <OCLASS  : (["a" - "z"]|["A" - "Z"]| ["0"-"9"] | "\"" | "-" | "_" | "#" | "/" | "@" | "." | "]" | "[")+ > }
+TOKEN : { <QUANTIFIER  : "*" | "+" | "?" | "*_T" | "*_S" | "+_T" | "+_S" > }
+
+TOKEN : { <LEFTPAREN : "(" > }
+TOKEN : { <RIGHTPAREN : ")" > }
+
+TOKEN : { <UNION : "|" > }
+TOKEN : { <FOLLOWEDBY  : "->" > }
+TOKEN : { <INTERLEAVED : "," > }
+TOKEN : { <SECONTAINS  : ":" > }
+
+TOKEN : { <LEFTCURLY : "{" > }
+TOKEN : { <RIGHTCURLY : "}" > }
