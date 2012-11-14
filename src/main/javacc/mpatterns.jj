@@ -4,7 +4,7 @@ options {
 }
 
 PARSER_BEGIN( ModelPatternParser )
-package esl.cuenet.model.pattern.parser;
+package esl.cuenet.query.pattern.parser;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
