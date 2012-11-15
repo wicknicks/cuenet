@@ -1,26 +1,23 @@
 package esl.cuenet.query.pattern.graph;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntClass;
-
 public class EventStreamToken {
 
-    private Individual individual;
-    private EventStreamToken subEventToken;
+    private String individual = null;
+    private EventStreamToken subEventToken = null;
 
-    public EventStreamToken(Individual individual) {
+    public EventStreamToken(String individual) {
         this.individual = individual;
     }
 
-    public OntClass getOntClass() {
-        return individual.getOntClass();
+    public String getOntClass() {
+        return individual;
     }
 
-    public boolean match(OntClass oc) {
-        return individual.getOntClass().getURI().equals(oc.getURI());
+    public boolean match(String oc) {
+        return individual.equals(oc);
     }
 
-    public EventStreamToken createSubEventToken(Individual subEventInstance) {
+    public EventStreamToken createSubEventToken(String subEventInstance) {
         this.subEventToken = new EventStreamToken(subEventInstance);
         return this.subEventToken;
     }
@@ -30,7 +27,7 @@ public class EventStreamToken {
     }
 
     public String toString() {
-        return "";
+        return individual;
     }
 
 }
