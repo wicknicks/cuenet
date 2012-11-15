@@ -6,6 +6,8 @@ options {
 PARSER_BEGIN( ModelPatternParser )
 package esl.cuenet.query.pattern.parser;
 
+import esl.cuenet.query.pattern.graph.PatternGraphConstructor;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.StringReader;
@@ -27,10 +29,12 @@ public class ModelPatternParser {
             if (line == null) break;
 
             System.out.println("\u005cnPATTERN : " + line);
+
+            PatternGraphConstructor constructor = new PatternGraphConstructor();
             ModelPatternParser parser = new ModelPatternParser(line);
 
             try {
-                parser.parse();
+                parser.parse(constructor);
             } catch (Exception p) {
                 System.out.println("EXCEPT: " + p.getMessage());
             } catch (Error r) {
@@ -44,46 +48,46 @@ public class ModelPatternParser {
 
 PARSER_END( ModelPatternParser )
 
-void parse():
+void parse(PatternGraphConstructor constructor):
 {}
 {
-    (pattern()) <EOF>
+    (pattern(constructor)) <EOF> {constructor.stop();}
 }
 
-void pattern():
+void pattern(PatternGraphConstructor constructor):
 {}
 {
-    superEventSpec() | followsSequence()
+    superEventSpec(constructor) | followsSequence(constructor)
 }
 
-void superEventSpec():
+void superEventSpec(PatternGraphConstructor constructor):
 {Token o;}
 {
-    <LEFTPAREN> o=<OCLASS>{System.out.println("se = " + o.image);} <SECONTAINS> followsSequence() <RIGHTPAREN> {System.out.println("se end");}
+    <LEFTPAREN> o=<OCLASS>{System.out.println("se = " + o.image);constructor.startSubEventPattern(o.image);} <SECONTAINS> followsSequence(constructor) <RIGHTPAREN> {System.out.println("se end");constructor.endSubEventPattern();}
 }
 
-void followsSequence():
+void followsSequence(PatternGraphConstructor constructor):
 {}
 {
-    <LEFTPAREN> term() ( <FOLLOWEDBY> term() )* <RIGHTPAREN>
+    <LEFTPAREN> term(constructor) ( <FOLLOWEDBY> term(constructor) )* <RIGHTPAREN>
 }
 
-void term():
+void term(PatternGraphConstructor constructor):
 { Token o; }
 {
-    interleaved() | union() | (o=<OCLASS> {System.out.println("term = " + o.image);}) | (superEventSpec())
+    interleaved(constructor) | union(constructor) | (o=<OCLASS> {System.out.println("term = " + o.image);constructor.add(o.image);}) | (superEventSpec(constructor))
 }
 
-void interleaved():
+void interleaved(PatternGraphConstructor constructor):
 { Token o; }
 {
-    <LEFTPAREN> (<OCLASS>|pattern()) (<QUANTIFIER>)? ( <INTERLEAVED> (<OCLASS>|pattern()) (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? ( <INTERLEAVED> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? )* <RIGHTPAREN>
 }
 
-void union():
+void union(PatternGraphConstructor constructor):
 { Token o; }
 {
-    <LEFTPAREN> (<OCLASS>|pattern()) (<QUANTIFIER>)? ( <UNION> (<OCLASS>|pattern()) (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? ( <UNION> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? )* <RIGHTPAREN>
 }
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }
