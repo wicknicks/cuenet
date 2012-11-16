@@ -1,5 +1,7 @@
 package esl.cuenet.query.pattern.graph;
 
+import esl.cuenet.query.pattern.exceptions.PatternGraphException;
+
 import java.util.Stack;
 
 public class PatternGraphConstructor {

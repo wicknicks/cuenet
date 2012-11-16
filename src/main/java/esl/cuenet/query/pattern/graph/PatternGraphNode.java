@@ -5,12 +5,14 @@ import java.util.List;
 
 public class PatternGraphNode {
 
-    private MatchBuffer buffer = null;
     private PatternGraph subEventPatternGraph = null;
     private List<PatternGraph> interleavePatternGraphs = new ArrayList<PatternGraph>();
     private List<PatternGraph> unionPatternGraphs = new ArrayList<PatternGraph>();
+
     private Quantifier quantifier = Quantifier.NONE;
     private String label = null;
+    private MatchBuffer buffer = null;
+
     private PatternGraphNodeType nodeType;
 
     public static enum PatternGraphNodeType {

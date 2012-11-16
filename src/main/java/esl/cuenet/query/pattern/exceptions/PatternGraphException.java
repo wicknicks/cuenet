@@ -1,4 +1,4 @@
-package esl.cuenet.query.pattern.graph;
+package esl.cuenet.query.pattern.exceptions;
 
 public class PatternGraphException extends RuntimeException {
 
