@@ -21,12 +21,14 @@ public class ModelPatternParser {
 
     public static void main(String args[]) throws Exception
     {
-        BufferedReader reader = new BufferedReader(new FileReader("src/main/javacc/test/patterntests.2.txt"));
+        String filename = "src/main/javacc/test/patterntests.2.txt";
+        BufferedReader reader = new BufferedReader(new FileReader(filename));
         String line;
 
         while (true) {
             line = reader.readLine();
             if (line == null) break;
+            if (line.length() < 1) continue;
 
             System.out.println("\u005cnPATTERN : " + line);
 
@@ -42,7 +44,7 @@ public class ModelPatternParser {
             }
         }
 
-        System.out.println("Ran Tests for mpatterns.jj parser");
+        System.out.println("\nRan Tests from " + filename);
     }
 }
 
@@ -63,7 +65,16 @@ void pattern(PatternGraphConstructor constructor):
 void superEventSpec(PatternGraphConstructor constructor):
 {Token o;}
 {
-    <LEFTPAREN> o=<OCLASS>{System.out.println("se = " + o.image);constructor.startSubEventPattern(o.image);} <SECONTAINS> followsSequence(constructor) <RIGHTPAREN> {System.out.println("se end");constructor.endSubEventPattern();}
+    <LEFTPAREN> o=<OCLASS>
+    {
+        //System.out.println("se = " + o.image);
+        constructor.startSubEventPattern(o.image);
+    }
+    <SECONTAINS> followsSequence(constructor) <RIGHTPAREN>
+    {
+        //System.out.println("se end");
+        constructor.endSubEventPattern();
+    }
 }
 
 void followsSequence(PatternGraphConstructor constructor):
@@ -75,19 +86,87 @@ void followsSequence(PatternGraphConstructor constructor):
 void term(PatternGraphConstructor constructor):
 { Token o; }
 {
-    interleaved(constructor) | union(constructor) | (o=<OCLASS> {System.out.println("term = " + o.image);constructor.add(o.image);}) | (superEventSpec(constructor))
+    interleaved(constructor) |
+    union(constructor) |
+    (o=<OCLASS>
+    {
+        //System.out.println("term = " + o.image);
+        constructor.add(o.image);
+    }) |
+    (superEventSpec(constructor))
 }
 
 void interleaved(PatternGraphConstructor constructor):
 { Token o; }
 {
-    <LEFTPAREN> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? ( <INTERLEAVED> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN>
+    {
+        //System.out.println("Starting Interleaved");
+        constructor.startInterleaved();
+    }
+    (
+        (o=<OCLASS>
+        {
+            //System.out.println("OCLASS in Interleaved path: " + o.image);
+            constructor.add(o.image);
+        }) |
+        pattern(constructor)
+    )
+    (<QUANTIFIER>)?
+    ( <INTERLEAVED>
+        {
+            //System.out.println("Interleave Op");
+            constructor.switchInterleavePath();
+        }
+        (
+            (o=<OCLASS>
+            {
+                //System.out.println("OCLASS in Interleaved path: " + o.image);
+                constructor.add(o.image);
+            }) |
+            pattern(constructor)) (<QUANTIFIER>)?
+    )*
+    <RIGHTPAREN>
+    {
+        //System.out.println("Ending Interleaved");
+        constructor.endInterleaved();
+    }
 }
 
 void union(PatternGraphConstructor constructor):
 { Token o; }
 {
-    <LEFTPAREN> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? ( <UNION> (<OCLASS>|pattern(constructor)) (<QUANTIFIER>)? )* <RIGHTPAREN>
+    <LEFTPAREN>
+    {
+        //System.out.println("Starting Union");
+        constructor.startUnion();
+    }
+    (
+        (o=<OCLASS>
+        {
+            //System.out.println("OCLASS in Union path: " + o.image);
+            constructor.add(o.image);
+        }) |
+    pattern(constructor))
+    (<QUANTIFIER>)?
+    ( <UNION>
+        {
+            //System.out.println("Union Op");
+            constructor.switchUnionPath();
+        }
+        (
+            (o=<OCLASS>
+            {
+                //System.out.println("OCLASS in Union path: " + o.image);
+                constructor.add(o.image);
+            }) |
+            pattern(constructor)) (<QUANTIFIER>)?
+    )*
+    <RIGHTPAREN>
+    {
+        //System.out.println("Ending Union");
+        constructor.endUnion();
+    }
 }
 
 SKIP    : {  <"//" (~["\n"])* "\n"> }

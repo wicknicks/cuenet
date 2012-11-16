@@ -28,6 +28,64 @@ public class PatternGraphConstructor {
         graphStack.add(subEventPatternGraph);
     }
 
+    public void startInterleaved() {
+        PatternGraph patternGraph = graphStack.peek();
+
+        PatternGraphNode node = new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.INTERLEAVE_START);
+        patternGraph.followedByNodes.add(node);
+
+        PatternGraph firstInterleaveGraphPath = node.createInterleavedGraph();
+        graphStack.add(firstInterleaveGraphPath);
+    }
+
+    public void switchInterleavePath() {
+        graphStack.pop();
+
+        PatternGraph entryGraph = graphStack.peek();
+        PatternGraphNode interleaveStartNode = entryGraph.followedByNodes.getLast();
+        if (interleaveStartNode.type() != PatternGraphNode.PatternGraphNodeType.INTERLEAVE_START)
+            throw new PatternGraphException();
+
+        PatternGraph firstInterleaveGraphPath = interleaveStartNode.createInterleavedGraph();
+        graphStack.add(firstInterleaveGraphPath);
+    }
+
+    public void endInterleaved() {
+        graphStack.pop();
+
+        PatternGraph entryGraph = graphStack.peek();
+        entryGraph.followedByNodes.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.INTERLEAVE_END));
+    }
+
+    public void startUnion() {
+        PatternGraph patternGraph = graphStack.peek();
+
+        PatternGraphNode node = new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.UNION_START);
+        patternGraph.followedByNodes.add(node);
+
+        PatternGraph firstUnionGraphPath = node.createUnionGraph();
+        graphStack.add(firstUnionGraphPath);
+    }
+
+    public void switchUnionPath() {
+        graphStack.pop();
+
+        PatternGraph entryGraph = graphStack.peek();
+        PatternGraphNode unionStartNode = entryGraph.followedByNodes.getLast();
+        if (unionStartNode.type() != PatternGraphNode.PatternGraphNodeType.UNION_START)
+            throw new PatternGraphException();
+
+        PatternGraph firstUnionGraphPath = unionStartNode.createUnionGraph();
+        graphStack.add(firstUnionGraphPath);
+    }
+
+    public void endUnion() {
+        graphStack.pop();
+
+        PatternGraph entryGraph = graphStack.peek();
+        entryGraph.followedByNodes.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.UNION_END));
+    }
+
     public void add(String eventLabel) {
         PatternGraphNode node = new PatternGraphNode(eventLabel);
         PatternGraph patternGraph = graphStack.peek();
