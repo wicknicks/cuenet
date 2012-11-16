@@ -1,0 +1,2 @@
+// will need some changes in mpatterns.jj
+((a : (b -> c)) -> (d -> e -> f) -> (x -> y -> z))
