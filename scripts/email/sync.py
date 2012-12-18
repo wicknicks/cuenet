@@ -16,16 +16,19 @@ IMAP_SERVER = 'imap.gmail.com'
 OUTPUT_FILE = None
 IMAP_PORT = 993                      # for secure connection, otherwise 143
 MAILBOXES = []
+PASSWORD = None
 
-START_DATE = '1-Jan-2012'
-END_DATE = '1-Oct-2012'
+START_DATE = '1-Sep-2012'
+END_DATE = '15-Dec-2012'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-i', '--imap', help='IMAP Server (like imap.sdsc.edu)')
 argparser.add_argument('-o', '--out', help='location of output file.')
-argparser.add_argument('-u', '--user', help='location of output file.')
+argparser.add_argument('-u', '--user', help='username.')
 argparser.add_argument('-s', '--start', help='start date (eg: "25-Jul-2012").')
 argparser.add_argument('-e', '--end', help='end date (eg: "27-Jul-2012").')
+argparser.add_argument('-p', '--pass', help='password')
+argparser.add_argument('-f', '--unsafe', help='will NOT prompt if file already exists')
 args = vars(argparser.parse_args())
 
 if args['imap']: IMAP_SERVER = args['imap']
@@ -34,6 +37,8 @@ if args['user']: USERNAME = args['user']
 if args['start'] and args['end']: 
   START_DATE = args['start']
   END_DATE = args['end']
+if args['pass']:
+  PASSWORD = args['pass']
 
 mparser = parser.Parser();
 cFile = None
@@ -54,7 +59,12 @@ def login(username):
   global MAILBOXES
 
   mail = imaplib.IMAP4_SSL(IMAP_SERVER, IMAP_PORT)
-  pwd = getpass.getpass('Password for ' + USERNAME + ' at ' + IMAP_SERVER + ': ')
+  
+  if PASSWORD == None:
+    pwd = getpass.getpass('Password for ' + USERNAME + ' at ' + IMAP_SERVER + ': ')
+  else:
+    pwd = PASSWORD
+  
   print ('Authenticating...')
   rc = mail.login(username, pwd)
   print ('Login Response', rc)
@@ -124,10 +134,11 @@ if __name__ == "__main__":
 
   if OUTPUT_FILE == None: OUTPUT_FILE = '/data/email/' + USERNAME
   
-  if os.path.exists(OUTPUT_FILE): 
-    print ('The file', OUTPUT_FILE, 'exists.')
-    print ('Press any key if you want to overwrite. Else press Ctrl-C')
-    sys.stdin.read(1)
+  if args['unsafe'] != 'y':
+    if os.path.exists(OUTPUT_FILE): 
+      print ('The file', OUTPUT_FILE, 'exists.')
+      print ('Press any key if you want to overwrite. Else press Ctrl-C')
+      sys.stdin.read(1)
 
   cFile = open(OUTPUT_FILE, 'w')
   mail = login(USERNAME)
