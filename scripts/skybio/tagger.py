@@ -30,12 +30,21 @@ def tag_count (detection):
   return c
   
 def save_tag(uid, tid, img_url):
-  url='http://api.skybiometry.com/fc/save.json?api_key=' + key + '&api_secret=' + secret + '&uid=' \
+  url='http://api.skybiometry.com/fc/tags/save.json?api_key=' + \
+       key + '&api_secret=' + secret + '&uid=' \
       + uid + '&tids=' + tid + '&urls=' + img_url
   rsp = requests.get(url)
   rsp = json.loads(rsp.text)
-  if (rsp['status'] != "success"): 
-    print rsp
+  if rsp['status'] != "success": print rsp
+  return rsp
+  
+def recognize(uids, img_url)
+  url='http://api.skybiometry.com/fc/tags/faces/recognize.json?api_key=' + \
+       key + '&api_secret=' + secret + 
+       '&urls=' + img_url + 'uids=' + uids
+  rsp = requests.get(url)
+  rsp = json.loads(rsp.text)
+  if rsp['status'] != "success": print rsp
   return rsp
   
 def find_detection_result(url):
