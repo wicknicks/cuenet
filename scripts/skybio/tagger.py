@@ -38,10 +38,10 @@ def save_tag(uid, tid, img_url):
   if rsp['status'] != "success": print rsp
   return rsp
   
-def recognize(uids, img_url)
-  url='http://api.skybiometry.com/fc/tags/faces/recognize.json?api_key=' + \
-       key + '&api_secret=' + secret + 
-       '&urls=' + img_url + 'uids=' + uids
+def recognize(uids, img_url):
+  url='http://api.skybiometry.com/fc/faces/recognize.json?api_key=' + \
+       key + '&api_secret=' + secret + \
+       '&urls=' + img_url + '&uids=' + uids
   rsp = requests.get(url)
   rsp = json.loads(rsp.text)
   if rsp['status'] != "success": print rsp

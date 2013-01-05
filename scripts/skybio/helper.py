@@ -1,6 +1,18 @@
 import ImageDraw
 from pymongo import Connection
 
+def get_uids(verify_rsp):
+  a = []
+  for photo in verify_rsp['photos']:
+    if 'tags' not in photo: continue
+    for tag in photo['tags']:
+      if 'uids' not in tag: continue
+      c = []
+      for uid in tag['uids']: 
+        c.append( (uid['uid'], uid['confidence']) )
+      a.append(c)
+  return a
+
 def draw_tags(img, data):
   draw = ImageDraw.Draw(img)
   wScale = data['width'] / 100.0
