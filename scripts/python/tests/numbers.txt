@@ -1,0 +1,57 @@
+arjun@tracker:tests$ python buildDataset.py 
+Results from jain
+People with more than 20 photos: 607
+4 3546
+arjun@tracker:tests$ python buildDataset.py 
+Results from jain
+People with more than 30 photos: 336
+4 3546
+arjun@tracker:tests$ python buildDataset.py 
+Results from jain
+People with more than 40 photos: 219
+4 3546
+
+
+
+arjun@tracker:tests$ python buildDataset.py 
+Results from arjun
+People with more than 20 photos: 263
+145 1466
+arjun@tracker:tests$ python buildDataset.py 
+Results from arjun
+People with more than 30 photos: 181
+145 1466
+arjun@tracker:tests$ python buildDataset.py 
+Results from arjun
+People with more than 40 photos: 144
+145 1466
+
+
+
+arjun@tracker:tests$ python buildDataset.py 
+Results from setareh
+People with more than 20 photos: 174
+0 1265
+arjun@tracker:tests$ python buildDataset.py 
+Results from setareh
+People with more than 30 photos: 98
+0 1265
+arjun@tracker:tests$ python buildDataset.py 
+Results from setareh
+People with more than 40 photos: 77
+0 1265
+
+
+arjun@tracker:tests$ python buildDataset.py 
+Results from shweta
+People with more than 20 photos: 151
+1 524
+arjun@tracker:tests$ python buildDataset.py 
+Results from shweta
+People with more than 30 photos: 111
+1 524
+arjun@tracker:tests$ python buildDataset.py 
+Results from shweta
+People with more than 40 photos: 82
+1 524
+
