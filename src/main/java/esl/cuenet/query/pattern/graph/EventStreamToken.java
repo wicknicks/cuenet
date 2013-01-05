@@ -24,7 +24,7 @@ public class EventStreamToken {
         return individual;
     }
 
-    public boolean match(String oc) {
+    public boolean equal(String oc) {
         return individual.equals(oc);
     }
 

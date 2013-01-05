@@ -26,7 +26,7 @@ public class PatternGraphConstructor {
         PatternGraphNode node = new PatternGraphNode(superEventLabel);
         PatternGraph subEventPatternGraph = node.createSubEventPatternGraph();
 
-        patternGraph.followedByNodes.add(node);
+        patternGraph.add(node);
         graphStack.add(subEventPatternGraph);
     }
 
@@ -34,7 +34,7 @@ public class PatternGraphConstructor {
         PatternGraph patternGraph = graphStack.peek();
 
         PatternGraphNode node = new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.INTERLEAVE_START);
-        patternGraph.followedByNodes.add(node);
+        patternGraph.add(node);
 
         PatternGraph firstInterleaveGraphPath = node.createInterleavedGraph();
         graphStack.add(firstInterleaveGraphPath);
@@ -44,7 +44,7 @@ public class PatternGraphConstructor {
         graphStack.pop();
 
         PatternGraph entryGraph = graphStack.peek();
-        PatternGraphNode interleaveStartNode = entryGraph.followedByNodes.getLast();
+        PatternGraphNode interleaveStartNode = entryGraph.getLast();
         if (interleaveStartNode.type() != PatternGraphNode.PatternGraphNodeType.INTERLEAVE_START)
             throw new PatternGraphException();
 
@@ -56,14 +56,14 @@ public class PatternGraphConstructor {
         graphStack.pop();
 
         PatternGraph entryGraph = graphStack.peek();
-        entryGraph.followedByNodes.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.INTERLEAVE_END));
+        entryGraph.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.INTERLEAVE_END));
     }
 
     public void startUnion() {
         PatternGraph patternGraph = graphStack.peek();
 
         PatternGraphNode node = new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.UNION_START);
-        patternGraph.followedByNodes.add(node);
+        patternGraph.add(node);
 
         PatternGraph firstUnionGraphPath = node.createUnionGraph();
         graphStack.add(firstUnionGraphPath);
@@ -73,7 +73,7 @@ public class PatternGraphConstructor {
         graphStack.pop();
 
         PatternGraph entryGraph = graphStack.peek();
-        PatternGraphNode unionStartNode = entryGraph.followedByNodes.getLast();
+        PatternGraphNode unionStartNode = entryGraph.getLast();
         if (unionStartNode.type() != PatternGraphNode.PatternGraphNodeType.UNION_START)
             throw new PatternGraphException();
 
@@ -85,13 +85,13 @@ public class PatternGraphConstructor {
         graphStack.pop();
 
         PatternGraph entryGraph = graphStack.peek();
-        entryGraph.followedByNodes.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.UNION_END));
+        entryGraph.add(new PatternGraphNode(PatternGraphNode.PatternGraphNodeType.UNION_END));
     }
 
     public void add(String eventLabel) {
         PatternGraphNode node = new PatternGraphNode(eventLabel);
         PatternGraph patternGraph = graphStack.peek();
-        patternGraph.followedByNodes.add(node);
+        patternGraph.add(node);
     }
 
     public void endSubEventPattern() {

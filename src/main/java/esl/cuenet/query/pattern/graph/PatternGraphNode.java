@@ -1,7 +1,9 @@
 package esl.cuenet.query.pattern.graph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class PatternGraphNode {
 
@@ -14,8 +16,32 @@ public class PatternGraphNode {
     private MatchBuffer buffer = null;
 
     private PatternGraphNodeType nodeType;
+    private Set<String> classIndex = new HashSet<String>();
+
+    public void collectAllClasses(List<String> classes) {
+        if (nodeType != PatternGraphNodeType.REGULAR) return;
+
+        if (label != null) classes.add(label);
+        if (subEventPatternGraph != null)
+            for (PatternGraphNode node: subEventPatternGraph) {
+                node.collectAllClasses(classes);
+            }
+
+        for (PatternGraph interleaved: interleavePatternGraphs)
+            for (PatternGraphNode node: interleaved) {
+                node.collectAllClasses(classes);
+            }
+
+        for (PatternGraph union: unionPatternGraphs)
+            for (PatternGraphNode node: union) {
+                node.collectAllClasses(classes);
+            }
+
+        for (int i=0; i<classes.size(); i++) classIndex.addAll(classes);
+    }
 
     public static enum PatternGraphNodeType {
+
         REGULAR(""),
         INTERLEAVE_START("I(S)"),
         INTERLEAVE_END("I(E)"),
@@ -46,6 +72,7 @@ public class PatternGraphNode {
 
     public PatternGraphNode(String label, Quantifier quantifier) {
         this.label = label;
+        this.nodeType = PatternGraphNodeType.REGULAR;
         this.quantifier = quantifier;
     }
 
@@ -87,7 +114,12 @@ public class PatternGraphNode {
 
     public PatternGraph createSubEventPatternGraph() {
         this.subEventPatternGraph = new PatternGraph();
+        this.subEventPatternGraph.setSuperEvent(this);
         return this.subEventPatternGraph;
+    }
+
+    public boolean contains(String ontClass) {
+        return classIndex.contains(ontClass);
     }
 
     public PatternGraph getSubEventPatternGraph() {
@@ -101,4 +133,5 @@ public class PatternGraphNode {
     public List<PatternGraph> getUnionPatternGraphs() {
         return unionPatternGraphs;
     }
+
 }
