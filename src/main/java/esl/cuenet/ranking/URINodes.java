@@ -1,4 +1,4 @@
-package esl.cuenet.ranking.network;
+package esl.cuenet.ranking;
 
 import esl.datastructures.graph.Node;
 
