@@ -33,6 +33,11 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     }
 
     @Override
+    public OntoInstanceFactory ontoInstanceFactory() {
+        return null;
+    }
+
+    @Override
     public void rank(Ranker ranker) {
     }
 

@@ -14,6 +14,8 @@ public interface EventEntityNetwork extends Versioned {
 
     TextIndex textIndex();
 
+    OntoInstanceFactory ontoInstanceFactory();
+
     void rank(Ranker ranker);
 
 }
