@@ -1,5 +1,5 @@
 package esl.cuenet.ranking;
 
-public interface TypedEdges {
+public interface TypedEdge {
 
 }
