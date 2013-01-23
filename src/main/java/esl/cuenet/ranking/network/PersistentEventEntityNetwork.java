@@ -3,6 +3,7 @@ package esl.cuenet.ranking.network;
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.Iterator;
 
@@ -14,6 +15,12 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private final SpatioTemporalIndex stIndex;
     private final TextIndex textIndex;
     private final GraphDatabaseService graphDb;
+
+    private Transaction tx;
+
+    public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
+        this(null, null, null, null, null, graphDb);
+    }
 
     public PersistentEventEntityNetwork(OntModel model, OntoInstanceFactory factory,
                                         NetworkTraverser traverser, SpatioTemporalIndex stIndex,
@@ -28,7 +35,11 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     @Override
     public URINode createNode() {
-        return new NeoURINode();
+        tx = graphDb.beginTx();
+        URINode n = new NeoURINode(graphDb.createNode());
+        tx.success();
+        tx.finish();
+        return n;
     }
 
     @Override

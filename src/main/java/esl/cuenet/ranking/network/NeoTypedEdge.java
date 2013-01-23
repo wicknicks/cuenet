@@ -1,6 +1,7 @@
 package esl.cuenet.ranking.network;
 
 import esl.cuenet.ranking.TypedEdge;
+import esl.cuenet.ranking.URINode;
 import org.neo4j.graphdb.Relationship;
 
 public class NeoTypedEdge implements TypedEdge {
@@ -9,7 +10,27 @@ public class NeoTypedEdge implements TypedEdge {
 
     public NeoTypedEdge(Relationship relationship) {
         this.relationship = relationship;
+        NeoCache.getInstance().putEdge(relationship.getId(), this);
     }
 
+    @Override
+    public URINode getStartNode() {
+        return NeoCache.getInstance().lookupNode(relationship.getStartNode().getId());
+    }
+
+    @Override
+    public URINode getEndNode() {
+        return NeoCache.getInstance().lookupNode(relationship.getEndNode().getId());
+    }
+
+    @Override
+    public void setProperty(String key, Object value) {
+        relationship.setProperty(key, value);
+    }
+
+    @Override
+    public Object getProperty(String key) {
+        return relationship.getProperty(key);
+    }
 
 }
