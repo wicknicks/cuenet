@@ -10,9 +10,9 @@ public interface EventEntityNetwork extends Versioned {
 
     NetworkTraverser traverser();
 
-    SpatioTemporalIndex stIndex();
+    SpatioTemporalIndex stIndex(String indexName);
 
-    TextIndex textIndex();
+    TextIndex textIndex(String indexName);
 
     OntoInstanceFactory ontoInstanceFactory();
 

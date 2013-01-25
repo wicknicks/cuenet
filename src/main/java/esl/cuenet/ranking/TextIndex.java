@@ -1,11 +1,8 @@
 package esl.cuenet.ranking;
 
-import java.util.Iterator;
-
 public interface TextIndex {
 
-    void construct();
+    URINode lookup(String key, Object value);
 
-    Iterator<URINode> lookup(String query);
-
+    void put(URINode node, String key, Object value);
 }

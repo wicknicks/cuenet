@@ -11,12 +11,17 @@ import java.util.List;
 
 public class NeoURINode implements URINode {
 
-    private Node node = null;
+    Node node = null;
     private List<TypedEdge> outgoingEdges = new ArrayList<TypedEdge>(10);
 
     public NeoURINode(Node node) {
         this.node = node;
         NeoCache.getInstance().putNode(node.getId(), this);
+    }
+
+    @Override
+    public long getId() {
+        return node.getId();
     }
 
     @Override

@@ -7,6 +7,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.*;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.graphdb.traversal.Evaluators;
 import org.neo4j.graphdb.traversal.TraversalDescription;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
@@ -101,6 +103,56 @@ public class NeoGraphTest {
 
         //tx.finish();   // Look ma, no transactions!
         graphDb.shutdown();
+    }
+
+
+    @Test
+    public void createIndexedGraph() {
+        tearDown();
+
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
+        Transaction tx = graphDb.beginTx();
+
+        Node n1 = graphDb.createNode();
+        n1.setProperty("name", "Agatha");
+        logger.info("n1.id = " + n1.getId());
+
+        Node n2 = graphDb.createNode();
+        n2.setProperty("name", "Poirot");
+
+        Node n3 = graphDb.createNode();
+        n3.setProperty("name", "Marple");
+
+        n1.createRelationshipTo(n2, MysteriousRelations.CREATED);
+        n1.createRelationshipTo(n3, MysteriousRelations.CREATED);
+        n2.createRelationshipTo(n3, MysteriousRelations.KNOWS);
+        n3.createRelationshipTo(n2, MysteriousRelations.KNOWS);
+
+        Index<Node> nameIx = graphDb.index().forNodes("nameIx");
+        nameIx.add(n1, "name", n1.getProperty("name"));
+        nameIx.add(n2, "name", n2.getProperty("name"));
+        nameIx.add(n2, "fictional", "true");
+        nameIx.add(n3, "name", n3.getProperty("name"));
+        nameIx.add(n3, "fictional", "true");
+
+        tx.success();
+        tx.finish();
+        graphDb.shutdown();
+
+
+        graphDb = new EmbeddedGraphDatabase( directory );
+        nameIx = graphDb.index().forNodes("nameIx");
+        IndexHits<Node> hits = nameIx.get("name", "Agatha");
+        logger.info("hits size = " + hits.size());
+        logger.info("n1.id = " + hits.getSingle().getId());
+
+        hits = nameIx.get("fictional", "true");
+        logger.info("hits size = " + hits.size());
+        logger.info("n2.id = " + hits.next().getId() + ", " + hits.next().getId());
+        graphDb.shutdown();
+
+
+
     }
 
 }

@@ -5,6 +5,7 @@ import esl.cuenet.ranking.*;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class PersistentEventEntityNetwork implements EventEntityNetwork {
@@ -15,6 +16,8 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private final SpatioTemporalIndex stIndex;
     private final TextIndex textIndex;
     private final GraphDatabaseService graphDb;
+
+    private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
 
     private Transaction tx;
 
@@ -53,13 +56,16 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     }
 
     @Override
-    public SpatioTemporalIndex stIndex() {
+    public SpatioTemporalIndex stIndex(String indexName) {
         return stIndex;
     }
 
     @Override
-    public TextIndex textIndex() {
-        return textIndex;
+    public TextIndex textIndex(String indexName) {
+        return new NeoLuceneIndex(graphDb.index().forNodes(indexName));
+//        if ( !textIndexMap.containsKey(indexName) )
+//            textIndexMap.put(indexName, new NeoLuceneIndex(graphDb.index().forNodes(indexName)));
+//        return textIndexMap.get(indexName);
     }
 
     @Override
