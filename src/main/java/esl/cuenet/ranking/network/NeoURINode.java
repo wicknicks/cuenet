@@ -2,6 +2,7 @@ package esl.cuenet.ranking.network;
 
 import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
@@ -16,6 +17,8 @@ public class NeoURINode implements URINode {
 
     public NeoURINode(Node node) {
         this.node = node;
+        for (Relationship rel: this.node.getRelationships(Direction.OUTGOING))
+            outgoingEdges.add(new NeoTypedEdge(rel));
         NeoCache.getInstance().putNode(node, this);
     }
 
