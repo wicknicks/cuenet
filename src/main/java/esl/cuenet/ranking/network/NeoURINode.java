@@ -16,7 +16,7 @@ public class NeoURINode implements URINode {
 
     public NeoURINode(Node node) {
         this.node = node;
-        NeoCache.getInstance().putNode(node.getId(), this);
+        NeoCache.getInstance().putNode(node, this);
     }
 
     @Override

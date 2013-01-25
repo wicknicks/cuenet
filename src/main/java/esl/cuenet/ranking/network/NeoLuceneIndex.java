@@ -18,9 +18,8 @@ public class NeoLuceneIndex implements TextIndex {
     @Override
     public URINode lookup(String key, Object value) {
         IndexHits<Node> hits = nodeIndex.get(key, value);
-        System.out.println("HIT SIZE = " + hits.size());
-        if (hits.size() == 0) return null; // throw new RuntimeException("No nodes corresponding to key: " + key + " " + value);
-        return NeoCache.getInstance().lookupNode(hits.getSingle().getId());
+        if (hits.size() == 0) throw new RuntimeException("No nodes corresponding to key: " + key + " " + value);
+        return NeoCache.getInstance().lookupNode(hits.getSingle());
     }
 
     @Override
