@@ -2,6 +2,7 @@ package esl.cuenet.ranking.network;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.*;
+import esl.cuenet.model.Constants;
 import esl.cuenet.ranking.EventEntityNetwork;
 import esl.cuenet.ranking.TextIndex;
 import esl.cuenet.ranking.TypedEdge;
@@ -35,19 +36,29 @@ public class NeoOntologyImporter {
             loadIntoGraph(network, statement.getSubject(), statement.getPredicate(), statement.getObject());
         }
 
-        //add blank nodes to index
+        //modify blank nodes URIs
+        int i = 0;
+        for (String blankNodeURI: blankNodeMap.keySet()) {
+            URINode bn = blankNodeMap.get(blankNodeURI);
+            String uri = Constants.CuenetNamespace + Constants.BlankNode + i;
+            bn.setProperty(OntProperties.ONT_URI, uri);
+            uriIndex.put(bn, OntProperties.ONT_URI, uri);
+            i++;
+        }
 
     }
 
     private void loadIntoGraph(EventEntityNetwork network, Resource subject, Property predicate, RDFNode object) {
-        if (subject.asNode().isBlank() || object.asNode().isBlank()) {
-//            loadBlank(network, subject, predicate, object);
+        if (subject.isAnon() || object.isAnon()) {
+            loadBlank(network, subject, predicate, object);
+            logger.info("BLANK " + subject + " <=> " + predicate + " <=> " + object);
+            logger.info("BLANK " + subject.isAnon() + " " + object.isAnon());
             return;
         }
 
         if ( !object.isResource() ) return;
 
-//        logger.info(subject + " <=> " + predicate + " <=> " + object);
+        logger.info(subject + " <=> " + predicate + " <=> " + object);
 
         //find Node corresponding to subject
         URINode subjectNode;
@@ -83,7 +94,7 @@ public class NeoOntologyImporter {
         URINode subjectNode;
         String subjectURI;
         HashMap<String, URINode> subjectMap;
-        if (subject.asNode().isBlank()) {
+        if (subject.isAnon()) {
             subjectMap = blankNodeMap;
             subjectURI = "B" + subject.asNode().getBlankNodeLabel();
         }
@@ -95,7 +106,7 @@ public class NeoOntologyImporter {
         if ( !subjectMap.containsKey(subjectURI) ) {
             subjectNode = network.createNode();
             subjectNode.setProperty(OntProperties.ONT_URI, subjectURI);
-            uriIndex.put(subjectNode, OntProperties.ONT_URI, subjectURI);
+            if ( !subject.isAnon() ) uriIndex.put(subjectNode, OntProperties.ONT_URI, subjectURI);
             subjectMap.put(subjectURI, subjectNode);
         }
         else subjectNode = subjectMap.get(subjectURI);
@@ -116,7 +127,7 @@ public class NeoOntologyImporter {
         if ( !objectMap.containsKey(objectURI) ) {
             objectNode = network.createNode();
             objectNode.setProperty(OntProperties.ONT_URI, objectURI);
-            uriIndex.put(objectNode, OntProperties.ONT_URI, objectURI);
+            if ( !object.isAnon() ) uriIndex.put(objectNode, OntProperties.ONT_URI, objectURI);
             objectMap.put(objectURI, objectNode);
         }
         else objectNode = objectMap.get(objectURI);

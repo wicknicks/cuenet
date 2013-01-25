@@ -48,7 +48,8 @@ public class NeoURINode implements URINode {
 
     @Override
     public Object getProperty(String key) {
-        return node.getProperty(key);
+        if (node.hasProperty(key)) return node.getProperty(key);
+        return null;
     }
 
     @Override

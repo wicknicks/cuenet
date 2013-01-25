@@ -8,6 +8,8 @@ public class Constants {
 
     public static String CuenetNamespace = "http://www.semanticweb.org/arjun/cuenet-main.owl#";
 
+    public static String BlankNode = "bn-";
+
     public static String DOLCE_Lite_Namespace = "http://www.loa-cnr.it/ontologies/DOLCE-Lite.owl#";
 
     public static final String SubEvent = "subevent-of";

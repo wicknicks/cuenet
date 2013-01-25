@@ -14,6 +14,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.io.File;
@@ -56,39 +58,36 @@ public class OntImportTests {
 
     @Test
     public void importTest() {
-        NeoOntologyImporter importer = new NeoOntologyImporter( model );
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
 
+        NeoOntologyImporter importer = new NeoOntologyImporter( model );
         importer.loadIntoGraph(network);
 
-        graphDb.shutdown();
+        try {
 
-//        graphDb = new EmbeddedGraphDatabase( directory );
-//        network = new PersistentEventEntityNetwork( graphDb );
-//
-//        HashSet<String> uris = new HashSet<String>();
-//        StmtIterator iter = model.listStatements();
-//        while (iter.hasNext()) {
-//            Statement statement = iter.nextStatement();
-//            uris.add(statement.getSubject().getURI());
-//            if (statement.getObject().isResource()) uris.add(statement.getObject().toString());
-//        }
-//
-//        String[] URIs = new String[uris.size()];
-//        uris.toArray(URIs);
-//
-//        TextIndex index = network.textIndex(NeoOntologyImporter.nodeURIIndexName);
-//        Random generator = new Random();
-//        for (int i=0; i < 10; i++) {
-//            int u = generator.nextInt(URIs.length);
-//            logger.info("Looking up --> " + URIs[u]);
-//            if ( URIs[u].charAt(0) == '-' ) continue;
-//            URINode node = index.lookup(OntProperties.ONT_URI, "B" + URIs[u]);
-//            if (node == null)
-//                logger.info("No nodes corresponding to key: " + OntProperties.ONT_URI + " " + URIs[u]);
-//            else
-//            assert(node.getProperty(OntProperties.ONT_URI) == URIs[u]);
-//        }
+        logger.info(" ---------------------------------- ");
+        logger.info("               URIs                 ");
+        logger.info(" ---------------------------------- ");
+
+        Iterable<Node> nodes = graphDb.getAllNodes();
+        HashSet<String> uriSet = new HashSet<String>();
+        int i = 0;
+        for (Node n: nodes) {
+            try {
+                logger.info((++i) + " " + n.getProperty(OntProperties.ONT_URI));
+                uriSet.add((String) n.getProperty(OntProperties.ONT_URI));
+            } catch (NotFoundException e) {
+                logger.info(e.getMessage());
+            }
+        }
+
+        logger.info("uriSet.size() = " + uriSet.size());
+
+        } catch (Exception e) {
+            logger.info("Exception = " + e.getMessage());
+        } finally {
+            graphDb.shutdown();
+        }
     }
 }

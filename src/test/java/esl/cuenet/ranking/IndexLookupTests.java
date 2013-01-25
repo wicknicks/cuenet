@@ -1,5 +1,8 @@
 package esl.cuenet.ranking;
 
+import com.hp.hpl.jena.ontology.Individual;
+import com.hp.hpl.jena.ontology.ObjectProperty;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
@@ -20,6 +23,8 @@ import org.neo4j.graphdb.index.IndexHits;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -33,6 +38,18 @@ public class IndexLookupTests {
     public static void setUp() {
         SysLoggerUtils.initLogger();
         model = ModelFactory.createOntologyModel();
+        try {
+            model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
+                    "http://www.semanticweb.org/arjun/cuenet-main.owl");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        OntClass person = model.getOntClass("http://www.semanticweb.org/arjun/cuenet-main.owl#person");
+        ObjectProperty knows = model.getObjectProperty("http://www.semanticweb.org/arjun/cuenet-main.owl#knows");
+        Individual i1 = person.createIndividual("Hercule Poirot");
+        Individual i2 = person.createIndividual("Ms. Marple");
+        i1.addProperty(knows, i2);
     }
 
     @Test
@@ -55,6 +72,8 @@ public class IndexLookupTests {
             Statement statement = iter.nextStatement();
             uris.add(statement.getSubject().getURI());
             if (statement.getObject().isResource()) uris.add(statement.getObject().toString());
+            //if (statement.getSubject().toString().contains("#person") || statement.getObject().toString().contains("#person"))
+            //logger.info(statement.getSubject() + " <=> " + statement.getPredicate() + " <=> " + statement.getObject());
         }
 
         String[] URIs = new String[uris.size()];
@@ -69,8 +88,13 @@ public class IndexLookupTests {
             logger.info("Looking up --> " + "http://www.w3.org/2000/01/rdf-schema#Datatype");
             lookup(index, "http://www.w3.org/2000/01/rdf-schema#Datatype");
 
-            for (int i=0; i < 10; i++) {
+            logger.info("Looking up --> " + "http://www.semanticweb.org/arjun/cuenet-main.owl#bn-10");
+            lookup(index, "http://www.semanticweb.org/arjun/cuenet-main.owl#bn-10");
+
+
+            for (int i=0; i < 100; i++) {
                 int u = generator.nextInt(URIs.length);
+                if ( URIs[u] == null || !URIs[u].contains("http://") ) { i--; continue; }
                 logger.info("Looking up --> " + URIs[u]);
                 lookup(index, URIs[u]);
             }
