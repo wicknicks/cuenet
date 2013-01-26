@@ -33,11 +33,11 @@ public class OntImportTests {
     @BeforeClass
     public static void setUp() {
         SysLoggerUtils.initLogger();
-        System.out.println("Deleting Files in " + directory);
-
-        File[] files = (new File(directory)).listFiles();
-        if (files == null) files = new File[]{};
-        for (File file: files) FileUtils.deleteQuietly(file);
+//        System.out.println("Deleting Files in " + directory);
+//
+//        File[] files = (new File(directory)).listFiles();
+//        if (files == null) files = new File[]{};
+//        for (File file: files) FileUtils.deleteQuietly(file);
 
         model = ModelFactory.createOntologyModel();
 
@@ -61,8 +61,8 @@ public class OntImportTests {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
 
-        NeoOntologyImporter importer = new NeoOntologyImporter( model );
-        importer.loadIntoGraph(network);
+//        NeoOntologyImporter importer = new NeoOntologyImporter( model );
+//        importer.loadIntoGraph(network);
 
         try {
 

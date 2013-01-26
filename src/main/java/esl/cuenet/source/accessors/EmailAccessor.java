@@ -31,8 +31,8 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     private Logger logger = Logger.getLogger(EmailAccessor.class);
     private OntModel model = null;
     private Attribute[] attributes = null;
-    private boolean[] setFlags = new boolean[3];
-    private List<String> queryEmails = new ArrayList<String>();
+    protected boolean[] setFlags = new boolean[3];
+    protected List<String> queryEmails = new ArrayList<String>();
     private SimpleDateFormat rfc2822DateFormatter = new SimpleDateFormat("");
 
     public EmailAccessor(OntModel model) {
@@ -133,7 +133,7 @@ public class EmailAccessor extends MongoDB implements IAccessor {
 
         logger.info("Query: " + queryObject);
 
-        int c = 1;
+        int c = 0;
         String date, to, from, cc;
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
