@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.io.File;
@@ -61,8 +62,20 @@ public class OntImportTests {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
 
-//        NeoOntologyImporter importer = new NeoOntologyImporter( model );
-//        importer.loadIntoGraph(network);
+        Transaction tx = graphDb.beginTx();
+        try {
+            NeoOntologyImporter importer = new NeoOntologyImporter( model );
+            importer.loadIntoGraph(network);
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+            logger.error("Exception = " + e.getLocalizedMessage());
+        } finally {
+            tx.finish();
+            graphDb.shutdown();
+        }
+
+        graphDb = new EmbeddedGraphDatabase( directory );
 
         try {
 

@@ -21,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import test.utils.DateTimeParser;
 
@@ -152,7 +153,7 @@ public class SourceMappingTest {
         logger.info("Time Taken: " + (System.currentTimeMillis() - a));
     }
 
-    @Test
+//    @Test
     public void testFacebookPhotoSourceInstantiator() {
         long a = System.currentTimeMillis();
         SourceInstantiator src = new FacebookPhotoSource();
@@ -164,15 +165,20 @@ public class SourceMappingTest {
     public void sourceInstantiationTest() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
+
         NeoOntoInstanceImporter importer = new NeoOntoInstanceImporter(network, new SourceInstantiator[]{
                 new EmailSource(), new FacebookPhotoSource()
         });
 
+        Transaction tx = graphDb.beginTx();
         try {
             importer.populate();
+            tx.success();
         } catch (Exception e) {
-
+            tx.failure();
+            logger.error("Exception = " + e.getClass().getName() + "  " + e.getMessage()) ;
         } finally {
+            tx.finish();
             graphDb.shutdown();
         }
 

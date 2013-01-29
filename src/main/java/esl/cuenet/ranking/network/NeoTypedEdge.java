@@ -4,7 +4,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
+//import org.neo4j.graphdb.Transaction;
 
 public class NeoTypedEdge implements TypedEdge {
 
@@ -28,10 +28,10 @@ public class NeoTypedEdge implements TypedEdge {
 
     @Override
     public void setProperty(String key, Object value) {
-        Transaction tx = relationship.getGraphDatabase().beginTx();
+        //Transaction tx = relationship.getGraphDatabase().beginTx();
         relationship.setProperty(key, value);
-        tx.success();
-        tx.finish();
+        //tx.success();
+        //tx.finish();
     }
 
     @Override

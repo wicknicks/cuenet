@@ -3,7 +3,6 @@ package esl.cuenet.ranking.network;
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,7 +18,7 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
 
-    private Transaction tx;
+    //private Transaction tx;
 
     public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
         this(null, null, null, null, null, graphDb);
@@ -38,10 +37,10 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     @Override
     public URINode createNode() {
-        tx = graphDb.beginTx();
+        //tx = graphDb.beginTx();
         URINode n = new NeoURINode(graphDb.createNode());
-        tx.success();
-        tx.finish();
+        //tx.success();
+        //tx.finish();
         return n;
     }
 

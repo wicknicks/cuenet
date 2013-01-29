@@ -30,11 +30,25 @@ public class NeoOntologyImporter {
         nodeMap = new HashMap<String, URINode>(500);
         uriIndex = network.textIndex(nodeURIIndexName);
 
+//        StmtIterator stmts = model.listStatements();
+//        int c = 0;
+//        while (stmts.hasNext()) {
+//            c++;
+//            Statement s = stmts.next(); //6168255
+//            if (c % 100000 == 0) logger.info(c + " " + s.getSubject() + " <=> " + s.getPredicate() + " <=> " + s.getObject());
+//        }
+//        logger.info("c = " + c);
+//        System.exit(1);
+
         StmtIterator stmts = model.listStatements();
+        int c = 0;
         while (stmts.hasNext()) {
+            c++;
             Statement statement = stmts.next();
             loadIntoGraph(network, statement.getSubject(), statement.getPredicate(), statement.getObject());
+            if (c % 100000 == 0) logger.info(c + " " + statement.getSubject() + " <=> " + statement.getPredicate() + " <=> " + statement.getObject());
         }
+        logger.info("Loaded c = " + c + " triples.");
 
         //modify blank nodes URIs
         int i = 0;
@@ -51,14 +65,14 @@ public class NeoOntologyImporter {
     private void loadIntoGraph(EventEntityNetwork network, Resource subject, Property predicate, RDFNode object) {
         if (subject.isAnon() || object.isAnon()) {
             loadBlank(network, subject, predicate, object);
-            logger.info("BLANK " + subject + " <=> " + predicate + " <=> " + object);
-            logger.info("BLANK " + subject.isAnon() + " " + object.isAnon());
+//            logger.info("BLANK " + subject + " <=> " + predicate + " <=> " + object);
+//            logger.info("BLANK " + subject.isAnon() + " " + object.isAnon());
             return;
         }
 
         if ( !object.isResource() ) return;
 
-        logger.info(subject + " <=> " + predicate + " <=> " + object);
+//        logger.info(subject + " <=> " + predicate + " <=> " + object);
 
         //find Node corresponding to subject
         URINode subjectNode;
@@ -85,7 +99,7 @@ public class NeoOntologyImporter {
         TypedEdge edge = subjectNode.createEdgeTo(objectNode);
         edge.setProperty(OntProperties.ONT_URI, predicate.getURI());
 
-        logger.info(subjectURI + " <=> " + predicate.getURI() + " <=> " + objectURI);
+//        logger.info(subjectURI + " <=> " + predicate.getURI() + " <=> " + objectURI);
     }
 
     private void loadBlank(EventEntityNetwork network, Resource subject, Property predicate, RDFNode object) {
@@ -134,7 +148,7 @@ public class NeoOntologyImporter {
 
         TypedEdge edge = subjectNode.createEdgeTo(objectNode);
         edge.setProperty(OntProperties.ONT_URI, predicate.getURI());
-        logger.info(subjectURI + " <=> " + predicate + " <=> " + objectURI);
+//        logger.info(subjectURI + " <=> " + predicate + " <=> " + objectURI);
     }
 
     public void mapGraph(EventEntityNetwork network) {
