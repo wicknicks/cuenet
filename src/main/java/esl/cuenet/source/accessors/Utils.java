@@ -12,15 +12,15 @@ import org.apache.log4j.Logger;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 public class Utils {
 
     private static Logger logger = Logger.getLogger(Utils.class);
+    private static MailDateFormat format = new MailDateFormat();
 
     public static Individual createPersonFromNameEmail(String email, String name, OntModel model) {
         OntClass person = model.getOntClass(Constants.CuenetNamespace + "person");
@@ -108,6 +108,22 @@ public class Utils {
             e.printStackTrace();
         }
         return entries;
+    }
+
+    public static Date parseEmailDate (String sDate) {
+
+        if (sDate == null) return new Date(0);
+
+        Date dt;
+        try {
+            dt = format.parse(sDate);
+        } catch (ParseException e) {
+            logger.error("Date couldn't be parsed: "  + sDate);
+            logger.error("MESSAGE: " + e.getMessage());
+            dt = new Date(0);
+        }
+
+        return dt;
     }
 
 }

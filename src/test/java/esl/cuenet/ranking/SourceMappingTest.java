@@ -1,41 +1,41 @@
 package esl.cuenet.ranking;
 
-import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import esl.cuenet.mapper.parser.ParseException;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.ranking.network.NeoOntoInstanceImporter;
 import esl.cuenet.ranking.network.NeoOntologyImporter;
 import esl.cuenet.ranking.network.PersistentEventEntityNetwork;
-import esl.cuenet.source.AccesorInitializationException;
+import esl.cuenet.ranking.sources.EmailSource;
+import esl.cuenet.ranking.sources.FacebookPhotoSource;
 import esl.cuenet.source.Attribute;
 import esl.cuenet.source.SourceQueryException;
 import esl.cuenet.source.accessors.EmailAccessor;
 import esl.cuenet.source.accessors.Utils;
-import esl.datastructures.TimeInterval;
 import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
-import test.TestBase;
+import test.utils.DateTimeParser;
 
+import javax.mail.internet.MailDateFormat;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SourceMappingTest {
 
-    private Logger logger = Logger.getLogger(UnifiedEntityList.class);
+    private Logger logger = Logger.getLogger(SourceMappingTest.class);
     private static OntModel model = null;
 
 
@@ -120,10 +120,10 @@ public class SourceMappingTest {
         }
     }
 
-    private static String directory = "/data/graph_db/tp";
+    private static String directory = "/data/graph_db/sources";
 
-    @Test
-    public void doTest() throws IOException, ParseException, AccesorInitializationException, SourceQueryException {
+//    @Test
+    public void doTest() throws Exception {
         RankerEmailAccessor accessor = new RankerEmailAccessor(model);
         accessor.setAttributeNames(new Attribute[]{new Attribute("from"), new Attribute("to"), new Attribute("cc")});
         accessor.associateString(new Attribute("to"), "Fabian.Groffen@cwi.nl");
@@ -134,7 +134,6 @@ public class SourceMappingTest {
             Statement statement = iter.nextStatement();
             logger.info(statement.getSubject() + " <=> " + statement.getPredicate() + " <=> " + statement.getObject());
         }
-
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
 
@@ -142,6 +141,40 @@ public class SourceMappingTest {
         importer.loadIntoGraph(network);
 
         graphDb.shutdown();
+
+    }
+
+//    @Test
+    public void testEmailSourceInstantiator() {
+        long a = System.currentTimeMillis();
+        SourceInstantiator src = new EmailSource();
+        src.populate(model);
+        logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+    }
+
+    @Test
+    public void testFacebookPhotoSourceInstantiator() {
+        long a = System.currentTimeMillis();
+        SourceInstantiator src = new FacebookPhotoSource();
+        src.populate(model);
+        logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+    }
+
+    @Test
+    public void sourceInstantiationTest() {
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
+        EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
+        NeoOntoInstanceImporter importer = new NeoOntoInstanceImporter(network, new SourceInstantiator[]{
+                new EmailSource(), new FacebookPhotoSource()
+        });
+
+        try {
+            importer.populate();
+        } catch (Exception e) {
+
+        } finally {
+            graphDb.shutdown();
+        }
 
     }
 
