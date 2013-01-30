@@ -8,7 +8,6 @@ import esl.cuenet.ranking.OntoInstanceFactory;
 import esl.cuenet.ranking.SourceInstantiator;
 import esl.cuenet.ranking.URINode;
 import org.apache.log4j.Logger;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -43,12 +42,7 @@ public class NeoOntoInstanceImporter implements OntoInstanceFactory {
         int i = 1;
         for (SourceInstantiator srcInst: sourceInstantiators) {
             logger.info("Loading model " + (i++) + " of " + sourceInstantiators.length);
-            srcInst.populate(model);
+            srcInst.populate(network);
         }
-
-        logger.info("Importing model into EEN");
-        NeoOntologyImporter importer = new NeoOntologyImporter(model);
-        importer.loadIntoGraph(network);
     }
-
 }

@@ -1,16 +1,15 @@
 package esl.cuenet.ranking.sources;
 
-import com.hp.hpl.jena.ontology.Individual;
-import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.ontology.OntModel;
-import com.hp.hpl.jena.rdf.model.Property;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
+import esl.cuenet.ranking.EventEntityNetwork;
 import esl.cuenet.ranking.SourceInstantiator;
+import esl.cuenet.ranking.URINode;
+import esl.cuenet.ranking.network.OntProperties;
 import esl.cuenet.source.accessors.AccessorConstants;
 import esl.cuenet.source.accessors.Utils;
-import esl.datastructures.TimeInterval;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +17,14 @@ import java.util.Map;
 
 public class EmailSource extends MongoDB implements SourceInstantiator {
 
+    private Logger logger = Logger.getLogger(EmailSource.class);
+
     public EmailSource() {
         super(AccessorConstants.DBNAME);
     }
 
     @Override
-    public void populate(OntModel model) {
+    public void populate(EventEntityNetwork network) {
 
         DBReader reader = this.startReader("emails");
         BasicDBObject keys = new BasicDBObject();
@@ -32,15 +33,14 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
         reader.getAll(keys);
 
         String date, to, from, cc, uid;
-        TimeInterval messageTimestamp = null;
-        OntClass emailExchangeEventClass = model.getOntClass(Constants.CuenetNamespace + Constants.EmailExchangeEvent);
-        OntClass personClass = model.getOntClass(Constants.CuenetNamespace + Constants.Person);
-        Property occursDuringProperty = model.getProperty(Constants.CuenetNamespace + Constants.OccursDuring);
-        Property participatesInProperty = model.getProperty(Constants.DOLCE_Lite_Namespace + Constants.ParticipantIn);
-        Property nameProperty = model.getProperty(Constants.CuenetNamespace + "name");
-        Property emailProperty = model.getProperty(Constants.CuenetNamespace + "email");
+        String occursDuringPropertyURI = Constants.CuenetNamespace + Constants.OccursDuring;
+        String participatesInPropertyURI = Constants.DOLCE_Lite_Namespace + Constants.ParticipantIn;
+        String namePropertyURI = Constants.CuenetNamespace + "name";
+        String emailPropertyURI = Constants.CuenetNamespace + "email";
 
-        int c = 0;
+        logger.info(" Total number of emails: " + reader.count());
+
+        int c = 0; int ix = 0;
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
             List<Map.Entry<String, String>> entries = new ArrayList<Map.Entry<String, String>>();
@@ -57,20 +57,36 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
             if (cc != null) entries.addAll(Utils.parseEmailAddresses(cc));
 
             date = obj.getString("date");
-            messageTimestamp = TimeInterval.createFromMoment(Utils.parseEmailDate(date).getTime(), model);
 
-            Individual emailInstance = emailExchangeEventClass.createIndividual(Constants.CuenetNamespace +
+            URINode emailInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
                     Constants.Email + "_" + uid);
-            emailInstance.addProperty(occursDuringProperty, messageTimestamp);
+            emailInstance.
+                    createEdgeTo(SourceHelper.createLiteral(network, Utils.parseEmailDate(date).getTime())).
+                    setProperty(OntProperties.ONT_URI, occursDuringPropertyURI);
 
             for (Map.Entry<String, String> entry: entries) {
-                Individual person = personClass.createIndividual(Constants.CuenetNamespace +
+                URINode personInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
                         Constants.Person + "_" + c);
-                if (entry.getKey() != null) person.addLiteral(nameProperty, entry.getKey());
-                if (entry.getValue() != null) person.addLiteral(emailProperty, entry.getValue());
-                emailInstance.addProperty(participatesInProperty, person);
+                if (entry.getKey() != null) {
+                    personInstance.
+                            createEdgeTo(SourceHelper.createLiteral(network, entry.getKey())).
+                            setProperty(OntProperties.ONT_URI, namePropertyURI);
+                }
+                if (entry.getValue() != null) {
+                    personInstance.
+                            createEdgeTo(SourceHelper.createLiteral(network, entry.getValue())).
+                            setProperty(OntProperties.ONT_URI, emailPropertyURI);
+                }
+
+                personInstance.createEdgeTo(emailInstance).
+                        setProperty(OntProperties.ONT_URI, participatesInPropertyURI);
                 c += 1;
             }
+
+            if (ix % 1000 == 0) logger.info("Added " + ix + " mails");
+            ix += 1;
         }
+
+        logger.info("EmailSource import complete");
     }
 }
