@@ -15,7 +15,7 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
 import java.io.File;
-import java.io.IOException;
+import java.util.HashSet;
 
 public class NeoGraphTest {
 
@@ -139,7 +139,6 @@ public class NeoGraphTest {
         tx.finish();
         graphDb.shutdown();
 
-
         graphDb = new EmbeddedGraphDatabase( directory );
         nameIx = graphDb.index().forNodes("nameIx");
         IndexHits<Node> hits = nameIx.get("name", "Agatha");
@@ -151,8 +150,24 @@ public class NeoGraphTest {
         logger.info("n2.id = " + hits.next().getId() + ", " + hits.next().getId());
         graphDb.shutdown();
 
+    }
 
+    @Test
+    public void countNodesAndEdgesInGraph() {
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
 
+        Iterable<Node> nodes = graphDb.getAllNodes();
+        HashSet<Long> idSet = new HashSet<Long>(100000);
+        int i = 0;
+        for (Node n: nodes) {
+            ++i;
+            for (Relationship r: n.getRelationships()) idSet.add(r.getId());
+        }
+
+        logger.info(i + " Nodes");
+        logger.info(idSet.size() + " Relationships");
+
+        graphDb.shutdown();
     }
 
 }

@@ -17,33 +17,39 @@ import esl.cuenet.source.SourceQueryException;
 import esl.cuenet.source.accessors.EmailAccessor;
 import esl.cuenet.source.accessors.Utils;
 import esl.system.SysLoggerUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
-import test.utils.DateTimeParser;
 
-import javax.mail.internet.MailDateFormat;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class SourceMappingTest {
 
-    private Logger logger = Logger.getLogger(SourceMappingTest.class);
+    private static Logger logger = Logger.getLogger(SourceMappingTest.class);
     private static OntModel model = null;
-
+    private static String directory = "/data/graph_db/sources";
 
     @BeforeClass
     public static void setup() {
         SysLoggerUtils.initLogger();
         model = ModelFactory.createOntologyModel();
+
+        logger.info("Deleting Files in " + directory);
+
+        File[] files = (new File(directory)).listFiles();
+        if (files == null) files = new File[]{};
+        for (File file: files) FileUtils.deleteQuietly(file);
+
 
         try {
             model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
@@ -121,8 +127,6 @@ public class SourceMappingTest {
         }
     }
 
-    private static String directory = "/data/graph_db/sources";
-
 //    @Test
     public void doTest() throws Exception {
         RankerEmailAccessor accessor = new RankerEmailAccessor(model);
@@ -145,20 +149,43 @@ public class SourceMappingTest {
 
     }
 
-//    @Test
+    //@Test
     public void testEmailSourceInstantiator() {
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         long a = System.currentTimeMillis();
         SourceInstantiator src = new EmailSource();
-        src.populate(model);
-        logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+        Transaction tx = graphDb.beginTx();
+        try {
+            src.populate(new PersistentEventEntityNetwork(graphDb));
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+            logger.error("Exception = " + e.getClass().getName() + "  " + e.getMessage()) ;
+        } finally {
+            tx.finish();
+            logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+            graphDb.shutdown();
+        }
+
     }
 
 //    @Test
     public void testFacebookPhotoSourceInstantiator() {
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         long a = System.currentTimeMillis();
         SourceInstantiator src = new FacebookPhotoSource();
-        src.populate(model);
-        logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+        Transaction tx = graphDb.beginTx();
+        try {
+            src.populate(new PersistentEventEntityNetwork(graphDb));
+            tx.success();
+        } catch (Exception e) {
+            tx.failure();
+            e.printStackTrace();
+        } finally {
+            tx.finish();
+            logger.info("Time Taken: " + (System.currentTimeMillis() - a));
+            graphDb.shutdown();
+        }
     }
 
     @Test
