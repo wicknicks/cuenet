@@ -41,4 +41,8 @@ public class Constants {
     public static final String Person = "person";
 
     public static final String EmailExchangeEvent = "email-exchange-event";
+
+    public static final String TimestampMillisStart = "timestamp-millis-start";
+
+    public static final String TimestampMillisEnd = "timestamp-millis-end";
 }
