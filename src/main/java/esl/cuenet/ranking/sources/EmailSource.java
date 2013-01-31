@@ -60,10 +60,18 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
             date = obj.getString("date");
 
             URINode emailInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
-                    Constants.Email + "_" + uid);
-            emailInstance.
-                    createEdgeTo(SourceHelper.createLiteral(network, Utils.parseEmailDate(date).getTime())).
-                    setProperty(OntProperties.ONT_URI, occursDuringPropertyURI);
+                    Constants.EmailExchangeEvent + "_" + uid);
+
+            URINode timeInterval = SourceHelper.createInstance(network, Constants.CuenetNamespace +
+                    Constants.OccursDuring);
+            long t = Utils.parseEmailDate(date).getTime();
+            timeInterval.
+                    createEdgeTo(SourceHelper.createLiteral(network, t)).
+                    setProperty(OntProperties.ONT_URI, Constants.CuenetNamespace + Constants.TimestampMillisStart);
+            timeInterval.
+                    createEdgeTo(SourceHelper.createLiteral(network, t)).
+                    setProperty(OntProperties.ONT_URI, Constants.CuenetNamespace + Constants.TimestampMillisEnd);
+            emailInstance.createEdgeTo(timeInterval).setProperty(OntProperties.ONT_URI, occursDuringPropertyURI);
 
             for (Map.Entry<String, String> entry: entries) {
                 URINode personInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
@@ -98,6 +106,7 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
 
             if (ix % 1000 == 0) logger.info("Added " + ix + " mails");
             ix += 1;
+            if (ix % 2000 == 0) break; //for testing
         }
 
         logger.info("EmailSource import complete");

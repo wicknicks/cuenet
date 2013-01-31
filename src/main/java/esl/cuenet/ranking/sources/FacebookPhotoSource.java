@@ -10,6 +10,7 @@ import esl.cuenet.ranking.SourceInstantiator;
 import esl.cuenet.ranking.URINode;
 import esl.cuenet.ranking.network.OntProperties;
 import esl.cuenet.source.accessors.AccessorConstants;
+import esl.cuenet.source.accessors.Utils;
 import org.apache.log4j.Logger;
 
 import java.text.ParseException;
@@ -73,9 +74,17 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
 
             URINode photoCaptureInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
                     Constants.PhotoCaptureEvent + "_" + photoId);
-            photoCaptureInstance.
-                    createEdgeTo(SourceHelper.createLiteral(network, parseFBDate(date).getTime())).
-                    setProperty(OntProperties.ONT_URI, occursDuringPropertyURI);
+            URINode timeInterval = SourceHelper.createInstance(network, Constants.CuenetNamespace +
+                    Constants.OccursDuring);
+
+            long t = parseFBDate(date).getTime();
+            timeInterval.
+                    createEdgeTo(SourceHelper.createLiteral(network, t)).
+                    setProperty(OntProperties.ONT_URI, Constants.CuenetNamespace + Constants.TimestampMillisStart);
+            timeInterval.
+                    createEdgeTo(SourceHelper.createLiteral(network, t)).
+                    setProperty(OntProperties.ONT_URI, Constants.CuenetNamespace + Constants.TimestampMillisEnd);
+            photoCaptureInstance.createEdgeTo(timeInterval).setProperty(OntProperties.ONT_URI, occursDuringPropertyURI);
 
             if (obj.containsField("tags")) {
                 BasicDBObject _tags = (BasicDBObject) obj.get("tags");
