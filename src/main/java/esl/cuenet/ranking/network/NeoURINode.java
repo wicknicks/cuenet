@@ -5,7 +5,6 @@ import esl.cuenet.ranking.URINode;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-//import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,21 +28,15 @@ public class NeoURINode implements URINode {
 
     @Override
     public TypedEdge createEdgeTo(URINode uriNode) {
-        //Transaction tx = node.getGraphDatabase().beginTx();
         Relationship rel = this.node.createRelationshipTo(((NeoURINode)uriNode).node, NeoRelationships.BLANK);
         TypedEdge edge = new NeoTypedEdge(rel);
         outgoingEdges.add(edge);
-        //tx.success();
-        //tx.finish();
         return edge;
     }
 
     @Override
     public void setProperty(String key, Object value) {
-        //Transaction tx = node.getGraphDatabase().beginTx();
         node.setProperty(key, value);
-        //tx.success();
-        //tx.finish();
     }
 
     @Override

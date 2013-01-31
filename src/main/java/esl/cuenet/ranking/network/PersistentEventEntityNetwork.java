@@ -18,8 +18,6 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
 
-    //private Transaction tx;
-
     public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
         this(null, null, null, null, null, graphDb);
     }
@@ -37,11 +35,7 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     @Override
     public URINode createNode() {
-        //tx = graphDb.beginTx();
-        URINode n = new NeoURINode(graphDb.createNode());
-        //tx.success();
-        //tx.finish();
-        return n;
+        return new NeoURINode(graphDb.createNode());
     }
 
     @Override
@@ -62,9 +56,6 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     @Override
     public TextIndex textIndex(String indexName) {
         return new NeoLuceneIndex(graphDb.index().forNodes(indexName));
-//        if ( !textIndexMap.containsKey(indexName) )
-//            textIndexMap.put(indexName, new NeoLuceneIndex(graphDb.index().forNodes(indexName)));
-//        return textIndexMap.get(indexName);
     }
 
     @Override
