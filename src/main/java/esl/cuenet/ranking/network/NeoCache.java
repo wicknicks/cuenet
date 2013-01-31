@@ -32,7 +32,7 @@ public class NeoCache {
         edgeMap.put(id, r);
     }
 
-    public URINode lookupNode(long id) {
+    private URINode lookupNode(long id) {
         return uriNodeMap.get(id);
     }
 

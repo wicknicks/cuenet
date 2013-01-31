@@ -18,12 +18,12 @@ public class NeoTypedEdge implements TypedEdge {
 
     @Override
     public URINode getStartNode() {
-        return NeoCache.getInstance().lookupNode(relationship.getStartNode().getId());
+        return NeoCache.getInstance().lookupNode(relationship.getStartNode());
     }
 
     @Override
     public URINode getEndNode() {
-        return NeoCache.getInstance().lookupNode(relationship.getEndNode().getId());
+        return NeoCache.getInstance().lookupNode(relationship.getEndNode());
     }
 
     @Override

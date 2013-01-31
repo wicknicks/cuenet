@@ -3,10 +3,7 @@ package esl.cuenet.ranking.network;
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import esl.cuenet.ranking.EventEntityNetwork;
-import esl.cuenet.ranking.OntoInstanceFactory;
-import esl.cuenet.ranking.SourceInstantiator;
-import esl.cuenet.ranking.URINode;
+import esl.cuenet.ranking.*;
 import org.apache.log4j.Logger;
 
 import java.io.FileNotFoundException;
@@ -28,7 +25,7 @@ public class NeoOntoInstanceImporter implements OntoInstanceFactory {
         return null;
     }
 
-    public void populate() {
+    public void populate(EntityBase entityBase) {
         OntModel model = null;
         model = ModelFactory.createOntologyModel();
 
@@ -42,7 +39,7 @@ public class NeoOntoInstanceImporter implements OntoInstanceFactory {
         int i = 1;
         for (SourceInstantiator srcInst: sourceInstantiators) {
             logger.info("Loading model " + (i++) + " of " + sourceInstantiators.length);
-            srcInst.populate(network);
+            srcInst.populate(network, entityBase);
         }
     }
 }

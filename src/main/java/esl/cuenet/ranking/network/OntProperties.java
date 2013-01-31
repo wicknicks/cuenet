@@ -8,4 +8,7 @@ public class OntProperties {
     public static final String INSTANCE = "instance";
     public static final String LITERAL = "literal";
     public static final String LVALUE = "lvalue";
+
+    public static final String IS_SAME_AS = "is_same_as";
+
 }

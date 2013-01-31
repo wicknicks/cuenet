@@ -3,6 +3,7 @@ package esl.cuenet.ranking.sources;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
+import esl.cuenet.ranking.EntityBase;
 import esl.cuenet.ranking.EventEntityNetwork;
 import esl.cuenet.ranking.SourceInstantiator;
 import esl.cuenet.ranking.URINode;
@@ -24,7 +25,7 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
     }
 
     @Override
-    public void populate(EventEntityNetwork network) {
+    public void populate(EventEntityNetwork network, EntityBase entityBase) {
 
         DBReader reader = this.startReader("emails");
         BasicDBObject keys = new BasicDBObject();
@@ -67,16 +68,28 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
             for (Map.Entry<String, String> entry: entries) {
                 URINode personInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
                         Constants.Person + "_" + c);
+                boolean f = false;
+
                 if (entry.getKey() != null) {
                     personInstance.
                             createEdgeTo(SourceHelper.createLiteral(network, entry.getKey())).
                             setProperty(OntProperties.ONT_URI, namePropertyURI);
+
+                    URINode entityNode = entityBase.lookup(EntityBase.V_EMAIL, entry.getKey());
+                    if (entityNode != null) {
+                        personInstance.createEdgeTo(entityNode)
+                                .setProperty(OntProperties.TYPE, OntProperties.IS_SAME_AS);
+                        f = true;
+                    }
                 }
                 if (entry.getValue() != null) {
                     personInstance.
                             createEdgeTo(SourceHelper.createLiteral(network, entry.getValue())).
                             setProperty(OntProperties.ONT_URI, emailPropertyURI);
                 }
+
+                if ( entry.getValue() != null && !f )
+                    logger.info("Didn't create link for = " + entry.getKey() + " " + entry.getValue());
 
                 personInstance.createEdgeTo(emailInstance).
                         setProperty(OntProperties.ONT_URI, participatesInPropertyURI);
@@ -89,4 +102,5 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
 
         logger.info("EmailSource import complete");
     }
+
 }

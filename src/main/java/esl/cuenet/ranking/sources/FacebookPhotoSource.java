@@ -4,6 +4,7 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.model.Constants;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
+import esl.cuenet.ranking.EntityBase;
 import esl.cuenet.ranking.EventEntityNetwork;
 import esl.cuenet.ranking.SourceInstantiator;
 import esl.cuenet.ranking.URINode;
@@ -43,7 +44,7 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
     }
 
     @Override
-    public void populate(EventEntityNetwork network) {
+    public void populate(EventEntityNetwork network, EntityBase entityBase) {
         userIDNodeMap.clear();
         DBReader reader = this.startReader("fb_photos");
         BasicDBObject keys = new BasicDBObject();
@@ -98,6 +99,12 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
                             personInstance.
                                     createEdgeTo(SourceHelper.createLiteral(network, tagName)).
                                     setProperty(OntProperties.ONT_URI, namePropertyURI);
+                        }
+
+                        URINode entityNode = entityBase.lookup(EntityBase.V_FB_ID, tagId);
+                        if (entityNode != null) {
+                            personInstance.createEdgeTo(entityNode)
+                                    .setProperty(OntProperties.TYPE, OntProperties.IS_SAME_AS);
                         }
 
                         personInstance.createEdgeTo(photoCaptureInstance).

@@ -1,9 +1,7 @@
 package esl.cuenet.ranking;
 
-import com.hp.hpl.jena.ontology.OntModel;
-
 public interface SourceInstantiator {
 
-    void populate(EventEntityNetwork network);
+    void populate(EventEntityNetwork network, EntityBase entityBase);
 
 }

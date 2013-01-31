@@ -7,6 +7,7 @@ import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.query.IResultSet;
+import esl.cuenet.ranking.network.NeoEntityBase;
 import esl.cuenet.ranking.network.NeoOntoInstanceImporter;
 import esl.cuenet.ranking.network.NeoOntologyImporter;
 import esl.cuenet.ranking.network.PersistentEventEntityNetwork;
@@ -149,18 +150,31 @@ public class SourceMappingTest {
 
     }
 
-    //@Test
+//    @Test
     public void testEmailSourceInstantiator() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
-        long a = System.currentTimeMillis();
-        SourceInstantiator src = new EmailSource();
+        NeoEntityBase entityBase = new NeoEntityBase(graphDb);
+
         Transaction tx = graphDb.beginTx();
         try {
-            src.populate(new PersistentEventEntityNetwork(graphDb));
+            entityBase.construct();
+            tx.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
+
+        long a = System.currentTimeMillis();
+        SourceInstantiator src = new EmailSource();
+        tx = graphDb.beginTx();
+        try {
+            src.populate(new PersistentEventEntityNetwork(graphDb), entityBase);
             tx.success();
         } catch (Exception e) {
             tx.failure();
-            logger.error("Exception = " + e.getClass().getName() + "  " + e.getMessage()) ;
+            e.printStackTrace();
         } finally {
             tx.finish();
             logger.info("Time Taken: " + (System.currentTimeMillis() - a));
@@ -169,14 +183,27 @@ public class SourceMappingTest {
 
     }
 
-//    @Test
+    @Test
     public void testFacebookPhotoSourceInstantiator() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
-        long a = System.currentTimeMillis();
-        SourceInstantiator src = new FacebookPhotoSource();
+        NeoEntityBase entityBase = new NeoEntityBase(graphDb);
+
         Transaction tx = graphDb.beginTx();
         try {
-            src.populate(new PersistentEventEntityNetwork(graphDb));
+            entityBase.construct();
+            tx.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
+
+        long a = System.currentTimeMillis();
+        SourceInstantiator src = new FacebookPhotoSource();
+        tx = graphDb.beginTx();
+        try {
+            src.populate(new PersistentEventEntityNetwork(graphDb), entityBase);
             tx.success();
         } catch (Exception e) {
             tx.failure();
@@ -188,18 +215,31 @@ public class SourceMappingTest {
         }
     }
 
-    @Test
+//    @Test
     public void sourceInstantiationTest() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
+
+        NeoEntityBase entityBase = new NeoEntityBase(graphDb);
+
+        Transaction tx = graphDb.beginTx();
+        try {
+            entityBase.construct();
+            tx.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            tx.failure();
+        } finally {
+            tx.finish();
+        }
 
         NeoOntoInstanceImporter importer = new NeoOntoInstanceImporter(network, new SourceInstantiator[]{
                 new EmailSource(), new FacebookPhotoSource()
         });
 
-        Transaction tx = graphDb.beginTx();
+        tx = graphDb.beginTx();
         try {
-            importer.populate();
+            importer.populate(entityBase);
             tx.success();
         } catch (Exception e) {
             tx.failure();
