@@ -52,12 +52,12 @@ public class NeoEntityBase implements EntityBase {
         Transaction tx = graphDb.beginTx();
 
         try {
-            tx.success();
-
             (new EmailScanner()).populate(graphDb);
             (new FacebookIdScanner()).populate(graphDb);
 
+            tx.success();
             mergeIntoMainDB();
+
         } catch (Exception e) {
             tx.failure();
             e.printStackTrace();
