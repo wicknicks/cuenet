@@ -63,7 +63,7 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
                     Constants.EmailExchangeEvent + "_" + uid);
 
             URINode timeInterval = SourceHelper.createInstance(network, Constants.CuenetNamespace +
-                    Constants.OccursDuring);
+                    Constants.TimeInterval);
             long t = Utils.parseEmailDate(date).getTime();
             timeInterval.
                     createEdgeTo(SourceHelper.createLiteral(network, t)).

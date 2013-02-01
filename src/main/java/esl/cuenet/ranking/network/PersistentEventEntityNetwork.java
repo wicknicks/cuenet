@@ -19,7 +19,7 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
 
     public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
-        this(null, null, null, null, null, graphDb);
+        this(null, null, null, new NeoSpatioTemporalIndex(graphDb), null, graphDb);
     }
 
     public PersistentEventEntityNetwork(OntModel model, OntoInstanceFactory factory,

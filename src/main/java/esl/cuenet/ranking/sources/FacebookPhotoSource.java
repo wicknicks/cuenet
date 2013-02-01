@@ -75,7 +75,7 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
             URINode photoCaptureInstance = SourceHelper.createInstance(network, Constants.CuenetNamespace +
                     Constants.PhotoCaptureEvent + "_" + photoId);
             URINode timeInterval = SourceHelper.createInstance(network, Constants.CuenetNamespace +
-                    Constants.OccursDuring);
+                    Constants.TimeInterval);
 
             long t = parseFBDate(date).getTime();
             timeInterval.

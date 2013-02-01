@@ -183,7 +183,7 @@ public class SourceMappingTest {
 
     }
 
-    @Test
+//    @Test
     public void testFacebookPhotoSourceInstantiator() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         NeoEntityBase entityBase = new NeoEntityBase(graphDb);
@@ -215,7 +215,7 @@ public class SourceMappingTest {
         }
     }
 
-//    @Test
+    @Test
     public void sourceInstantiationTest() {
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
         EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
@@ -248,7 +248,5 @@ public class SourceMappingTest {
             tx.finish();
             graphDb.shutdown();
         }
-
     }
-
 }
