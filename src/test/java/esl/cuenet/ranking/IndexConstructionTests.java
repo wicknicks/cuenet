@@ -1,7 +1,6 @@
-package esl.cuenet.ranking.network;
+package esl.cuenet.ranking;
 
-import esl.cuenet.ranking.EventEntityNetwork;
-import esl.cuenet.ranking.SpatioTemporalIndex;
+import esl.cuenet.ranking.network.PersistentEventEntityNetwork;
 import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
