@@ -107,6 +107,28 @@ public class NeoSpatioTemporalIndex implements SpatioTemporalIndex {
         txColl.ensureIndex(keys);
     }
 
+    private List<BasicDBObject> execute(String qryString, int limit) {
+        BasicDBObject query = (BasicDBObject) JSON.parse(qryString);
+        List<BasicDBObject> results = new ArrayList<BasicDBObject>(25);
+
+        for (DBObject o: txColl.find(query, new BasicDBObject("_id", 0)).limit(limit)) {
+            results.add((BasicDBObject) o);
+        }
+
+        return results;
+    }
+
+    private List<BasicDBObject> execute(String qryString, String sortKey, int sortOrder, int limit) {
+        BasicDBObject query = (BasicDBObject) JSON.parse(qryString);
+        List<BasicDBObject> results = new ArrayList<BasicDBObject>(25);
+
+        for (DBObject o: txColl.find(query, new BasicDBObject("_id", 0)).sort(new BasicDBObject(sortKey, sortOrder)).limit(limit)) {
+            results.add((BasicDBObject) o);
+        }
+
+        return results;
+    }
+
     private List<BasicDBObject> execute(String qryString) {
         BasicDBObject query = (BasicDBObject) JSON.parse(qryString);
         List<BasicDBObject> results = new ArrayList<BasicDBObject>(25);
@@ -163,8 +185,15 @@ public class NeoSpatioTemporalIndex implements SpatioTemporalIndex {
             if (ix == 10) break;
         }
 
-//        return results.get(0);
-
+        results = execute(qryString, "end", -1, 1);
+        logger.info("* I_TS - " + new Date(timestamp));
+        ix = 0;
+        for (BasicDBObject r: results) {
+            long s = r.getLong(M_START);
+            logger.info("* PREV - " + new Date(s) + " " + r);
+            ix++;
+            if (ix == 10) break;
+        }
     }
 
     @Override
@@ -193,6 +222,15 @@ public class NeoSpatioTemporalIndex implements SpatioTemporalIndex {
             if (ix == 10) break;
         }
 
+        results = execute(qryString, 1);
+        logger.info("* I_TS - " + new Date(timestamp));
+        ix = 0;
+        for (BasicDBObject r: results) {
+            long s = r.getLong(M_START);
+            logger.info("* NEXT - " + new Date(s) + " " + r);
+            ix++;
+            if (ix == 10) break;
+        }
     }
 
     @Override
