@@ -26,9 +26,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -243,7 +241,7 @@ public class SourceMappingTest {
             tx.success();
         } catch (Exception e) {
             tx.failure();
-            logger.error("Exception = " + e.getClass().getName() + "  " + e.getMessage()) ;
+            e.printStackTrace();
         } finally {
             tx.finish();
             graphDb.shutdown();
