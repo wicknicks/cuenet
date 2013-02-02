@@ -21,9 +21,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class SourceMappingTest {
+public class SourceImportTest {
 
-    private static Logger logger = Logger.getLogger(SourceMappingTest.class);
+    private static Logger logger = Logger.getLogger(SourceImportTest.class);
     private static OntModel model = null;
     private static String directory = "/data/graph_db/sources";
 
