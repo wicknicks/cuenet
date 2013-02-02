@@ -18,4 +18,11 @@ public interface EventEntityNetwork extends Versioned {
 
     void rank(Ranker ranker);
 
+
+    void startBulkLoad();
+
+    void finishBulkLoad();
+
+    void flush();
+
 }

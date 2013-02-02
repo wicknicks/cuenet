@@ -39,11 +39,19 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
         String namePropertyURI = Constants.CuenetNamespace + "name";
         String emailPropertyURI = Constants.CuenetNamespace + "email";
 
-        logger.info(" Total number of emails: " + reader.count());
-
-        int c = 0; int ix = 0;
+        //make copy of dbObjects. Mongo gc trashes cursors which are inactive for > 100ms.
+        List<BasicDBObject> dbObjects = new ArrayList<BasicDBObject>();
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
+            dbObjects.add(obj);
+        }
+
+        logger.info(" Total number of emails: " + dbObjects.size());
+
+        int c = 0; int ix = 0;
+        network.startBulkLoad();
+
+        for (BasicDBObject obj: dbObjects) {
             List<Map.Entry<String, String>> entries = new ArrayList<Map.Entry<String, String>>();
 
             uid = obj.getString("uid");
@@ -104,11 +112,15 @@ public class EmailSource extends MongoDB implements SourceInstantiator {
                 c += 1;
             }
 
-            if (ix % 1000 == 0) logger.info("Added " + ix + " mails");
+            if (ix % 1000 == 0) {
+                logger.info("Added " + ix + " mails");
+                network.flush();
+            }
             ix += 1;
-            if (ix % 2000 == 0) break; //for testing
+            //if (ix % 2000 == 0) break; //for testing
         }
 
+        network.finishBulkLoad();
         logger.info("EmailSource import complete");
     }
 

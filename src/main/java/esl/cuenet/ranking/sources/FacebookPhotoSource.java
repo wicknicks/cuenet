@@ -15,8 +15,10 @@ import org.apache.log4j.Logger;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
 
@@ -53,17 +55,24 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
 
         reader.getAll(keys);
 
-        logger.info(" Total number of photos: " + reader.count());
-
         String occursDuringPropertyURI = Constants.CuenetNamespace + Constants.OccursDuring;
         String participatesInPropertyURI = Constants.DOLCE_Lite_Namespace + Constants.ParticipantIn;
         String namePropertyURI = Constants.CuenetNamespace + "name";
 
-        String tagId, tagName, date, photoId, ownerId;
-        int c = 0; int ix = 0;
+        //make copy of dbObjects. Mongo gc trashes cursors which are inactive for > 100ms.
+        List<BasicDBObject> dbObjects = new ArrayList<BasicDBObject>();
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
+            dbObjects.add(obj);
+        }
 
+        logger.info(" Total number of photos: " + dbObjects.size());
+
+        String tagId, tagName, date, photoId, ownerId;
+        int c = 0; int ix = 0;
+        network.startBulkLoad();
+
+        for (BasicDBObject obj: dbObjects) {
             photoId = obj.getString("id");
 
             if ( !obj.containsField("created_time") ) {
@@ -123,10 +132,14 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
                 }
             }
 
-            if (ix % 1000 == 0) logger.info("Added " + ix + " photos");
+            if (ix % 1000 == 0) {
+                logger.info("Added " + ix + " photos");
+                network.flush();
+            }
             ix += 1;
         }
 
+        network.finishBulkLoad();
         logger.info("FacebookPhotoSource import complete");
 
     }

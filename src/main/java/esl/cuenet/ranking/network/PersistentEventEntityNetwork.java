@@ -3,9 +3,11 @@ package esl.cuenet.ranking.network;
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.UUID;
 
 public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
@@ -15,6 +17,8 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private final SpatioTemporalIndex stIndex;
     private final TextIndex textIndex;
     private final GraphDatabaseService graphDb;
+
+    private Transaction transaction = null;
 
     private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
 
@@ -68,7 +72,24 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     }
 
     @Override
+    public void startBulkLoad() {
+        transaction = graphDb.beginTx();
+    }
+
+    @Override
+    public void finishBulkLoad() {
+        transaction.success();
+        transaction.finish();
+    }
+
+    @Override
+    public void flush() {
+        finishBulkLoad();
+        startBulkLoad();
+    }
+
+    @Override
     public String version() {
-        return null;
+        return UUID.randomUUID().toString();
     }
 }
