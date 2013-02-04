@@ -59,7 +59,7 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
         String participatesInPropertyURI = Constants.DOLCE_Lite_Namespace + Constants.ParticipantIn;
         String namePropertyURI = Constants.CuenetNamespace + "name";
 
-        //make copy of dbObjects. Mongo gc trashes cursors which are inactive for > 100ms.
+        //make copy of dbObjects. Mongo gc trashes cursors which are inactive for > 10mins.
         List<BasicDBObject> dbObjects = new ArrayList<BasicDBObject>();
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
