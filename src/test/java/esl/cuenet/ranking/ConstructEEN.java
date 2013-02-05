@@ -3,12 +3,15 @@ package esl.cuenet.ranking;
 import esl.cuenet.ranking.network.NeoEntityBase;
 import esl.cuenet.ranking.network.NeoOntoInstanceImporter;
 import esl.cuenet.ranking.network.PersistentEventEntityNetwork;
+import esl.cuenet.ranking.rankers.EventEntityPropagationFunction;
 import esl.cuenet.ranking.sources.EmailSource;
 import esl.cuenet.ranking.sources.FacebookPhotoSource;
 import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -17,6 +20,7 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 
 public class ConstructEEN {
 
@@ -63,18 +67,29 @@ public class ConstructEEN {
 
     @Test
     public void countNodesAndEdgesInGraph() {
+        logger.info("Counting Nodes and Edges in: " + directory);
+
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
 
-        Iterable<Node> nodes = graphDb.getAllNodes();
-        HashSet<Long> idSet = new HashSet<Long>(100000);
-        int i = 0;
-        for (Node n: nodes) {
-            ++i;
-            for (Relationship r: n.getRelationships()) idSet.add(r.getId());
+        String query = "START n=node(*) RETURN COUNT(n)";
+        ExecutionEngine engine = new ExecutionEngine( graphDb );
+        ExecutionResult results = engine.execute(query);
+
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                logger.info(column.getKey() + " " + column.getValue());
+            }
         }
 
-        logger.info(i + " Nodes");
-        logger.info(idSet.size() + " Relationships");
+        query = "START r=rel(*) RETURN COUNT(r)";
+        engine = new ExecutionEngine( graphDb );
+        results = engine.execute(query);
+
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                logger.info(column.getKey() + " " + column.getValue());
+            }
+        }
 
         graphDb.shutdown();
     }

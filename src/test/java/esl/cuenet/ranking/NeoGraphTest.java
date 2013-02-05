@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
@@ -16,6 +18,7 @@ import org.neo4j.kernel.Traversal;
 
 import java.io.File;
 import java.util.HashSet;
+import java.util.Map;
 
 public class NeoGraphTest {
 
@@ -154,18 +157,29 @@ public class NeoGraphTest {
 
     @Test
     public void countNodesAndEdgesInGraph() {
+        logger.info("Counting Nodes and Edges in: " + directory);
+
         GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
 
-        Iterable<Node> nodes = graphDb.getAllNodes();
-        HashSet<Long> idSet = new HashSet<Long>(100000);
-        int i = 0;
-        for (Node n: nodes) {
-            ++i;
-            for (Relationship r: n.getRelationships()) idSet.add(r.getId());
+        String query = "START n=node(*) RETURN COUNT(n)";
+        ExecutionEngine engine = new ExecutionEngine( graphDb );
+        ExecutionResult results = engine.execute(query);
+
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                logger.info(column.getKey() + " " + column.getValue());
+            }
         }
 
-        logger.info(i + " Nodes");
-        logger.info(idSet.size() + " Relationships");
+        query = "START r=rel(*) RETURN COUNT(r)";
+        engine = new ExecutionEngine( graphDb );
+        results = engine.execute(query);
+
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                logger.info(column.getKey() + " " + column.getValue());
+            }
+        }
 
         graphDb.shutdown();
     }
