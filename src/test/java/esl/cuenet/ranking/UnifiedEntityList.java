@@ -19,6 +19,7 @@ import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class UnifiedEntityList {
@@ -36,6 +37,31 @@ public class UnifiedEntityList {
         File[] files = (new File(directory)).listFiles();
         if (files == null) files = new File[]{};
         for (File file: files) FileUtils.deleteQuietly(file);
+    }
+
+    @Test
+    public void random() {
+        File storeTempDir = null;
+
+        try {
+            storeTempDir = new File(FileUtils.getTempDirectoryPath() + File.separator + System.currentTimeMillis());
+            logger.info("Creating temp graph db at: " + storeTempDir.getAbsolutePath());
+            FileUtils.forceMkdir(storeTempDir);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        GraphDatabaseService g1 = new EmbeddedGraphDatabase(storeTempDir.getAbsolutePath());
+        new NeoEntityBase(g1);
+
+        g1.shutdown();
+
+        try {
+            FileUtils.deleteDirectory(storeTempDir);
+            logger.info("Deleted temp db: " + storeTempDir.getAbsolutePath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

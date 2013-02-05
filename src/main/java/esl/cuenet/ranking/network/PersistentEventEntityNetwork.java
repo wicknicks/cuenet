@@ -2,12 +2,15 @@ package esl.cuenet.ranking.network;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
+import esl.cuenet.ranking.rankers.EventEntityPropagationFunction;
+import org.apache.log4j.Logger;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.UUID;
+import java.util.*;
 
 public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
@@ -17,6 +20,8 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private final SpatioTemporalIndex stIndex;
     private final TextIndex textIndex;
     private final GraphDatabaseService graphDb;
+
+    private Logger logger = Logger.getLogger(PersistentEventEntityNetwork.class);
 
     private Transaction transaction = null;
 
@@ -40,6 +45,11 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     @Override
     public URINode createNode() {
         return new NeoURINode(graphDb.createNode());
+    }
+
+    @Override
+    public URINode getNodeById(long id) {
+        return new NeoURINode(graphDb.getNodeById(id));
     }
 
     @Override
@@ -91,5 +101,33 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     @Override
     public String version() {
         return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public Iterator<TypedEdge> getEdgesIterator() {
+        logger.info("Loading all relations");
+        List<TypedEdge> edges = new ArrayList<TypedEdge>();
+
+        String query = "START r=rel(*) RETURN r";
+        PropagationFunction function = new EventEntityPropagationFunction();
+
+        ExecutionEngine engine = new ExecutionEngine( graphDb );
+        ExecutionResult results = engine.execute(query);
+
+        int ix = 0;
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                ix++;
+                NeoTypedEdge te = new NeoTypedEdge((Relationship) column.getValue());
+                if (function.matchEdge(te)) {
+                    ix--; ix++;
+                }
+                if (column.getKey().equals("r")) edges.add(te);
+            }
+            if (ix % 100000 == 0) logger.info(ix);
+        }
+
+        logger.info("Total Relations: " + ix);
+        return edges.iterator();
     }
 }

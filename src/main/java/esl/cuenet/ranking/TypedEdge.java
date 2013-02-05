@@ -8,6 +8,8 @@ public interface TypedEdge {
 
     void setProperty(String key, Object value);
 
+    boolean hasProperty(String key);
+
     Object getProperty(String key);
 
 }

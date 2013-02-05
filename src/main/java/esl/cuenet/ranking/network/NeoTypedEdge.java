@@ -29,6 +29,11 @@ public class NeoTypedEdge implements TypedEdge {
     }
 
     @Override
+    public boolean hasProperty(String key) {
+        return relationship.hasProperty(key);
+    }
+
+    @Override
     public Object getProperty(String key) {
         return relationship.getProperty(key);
     }

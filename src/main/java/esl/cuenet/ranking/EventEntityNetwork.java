@@ -4,7 +4,9 @@ import java.util.Iterator;
 
 public interface EventEntityNetwork extends Versioned {
 
-    public URINode createNode();
+    URINode createNode();
+
+    URINode getNodeById(long id);
 
     EventEntityNetwork subnet(Iterator<URINode> nodeIterator);
 
@@ -16,8 +18,9 @@ public interface EventEntityNetwork extends Versioned {
 
     OntoInstanceFactory ontoInstanceFactory();
 
-    void rank(Ranker ranker);
+    Iterator<TypedEdge> getEdgesIterator();
 
+    void rank(Ranker ranker);
 
     void startBulkLoad();
 

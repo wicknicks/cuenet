@@ -1,8 +1,6 @@
 package esl.cuenet.ranking;
 
-import org.neo4j.graphdb.Relationship;
-
-public interface EntityBase {
+public interface EntityBase extends Iterable<Long> {
 
     URINode lookup(String key, Object value);
 

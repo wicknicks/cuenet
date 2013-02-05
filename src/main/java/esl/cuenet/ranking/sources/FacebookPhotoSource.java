@@ -137,6 +137,7 @@ public class FacebookPhotoSource extends MongoDB implements SourceInstantiator {
                 network.flush();
             }
             ix += 1;
+            //if (ix % 2000 == 0) break; //for testing
         }
 
         network.finishBulkLoad();

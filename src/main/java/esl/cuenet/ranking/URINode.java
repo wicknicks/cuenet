@@ -6,6 +6,8 @@ public interface URINode {
 
     TypedEdge createEdgeTo(URINode node);
 
+    boolean hasProperty(String key);
+
     void setProperty(String key, Object value);
 
     Object getProperty(String key);

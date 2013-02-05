@@ -3,11 +3,14 @@ package esl.cuenet.ranking.network;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.ranking.EntityBase;
+import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
 import esl.cuenet.source.accessors.AccessorConstants;
 import esl.cuenet.source.accessors.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.*;
 import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
@@ -28,12 +31,47 @@ public class NeoEntityBase implements EntityBase {
     private HashMap<String, Node> nodeMap = new HashMap<String, Node>();
     public static final String ENT_GRAPH_LITERAL_INDEX = "text";
 
+    private HashSet<Long> entityIdSet = new HashSet<Long>();
+
+    @Override
+    public Iterator<Long> iterator() {
+        return entityIdSet.iterator();
+    }
+
     enum Relation implements RelationshipType {
         SAME
     }
 
     public NeoEntityBase (GraphDatabaseService graphDb) {
         this.graphDbExt = graphDb;
+        load();
+    }
+
+    public static void printEntity(URINode entity, Logger logger) {
+        if (entity == null) {
+            logger.info("NULL");
+            return;
+        }
+        String s = "";
+        for (TypedEdge r: entity.getAllRelationships()) {
+            s += r.getProperty(EntityBase.TYPE) + " " + r.getEndNode().getProperty(EntityBase.TEXT) + "; ";
+        }
+        logger.info(s);
+    }
+
+    private void load() {
+        String query = "START n=node(*) WHERE has(n." + EntityBase.TYPE + ") AND n." + EntityBase.TYPE + "= '" + EntityBase.ENTITY + "' RETURN n";
+
+        ExecutionEngine engine = new ExecutionEngine( graphDbExt );
+        ExecutionResult results = engine.execute(query);
+
+        for (Map<String, Object> result: results)
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                Node n = (Node) column.getValue();
+                entityIdSet.add(n.getId());
+        }
+
+        logger.info("Loaded " + entityIdSet.size() + " entities.");
     }
 
     public void construct() {

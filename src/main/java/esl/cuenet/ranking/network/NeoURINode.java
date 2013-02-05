@@ -35,6 +35,11 @@ public class NeoURINode implements URINode {
     }
 
     @Override
+    public boolean hasProperty(String key) {
+        return node.hasProperty(key);
+    }
+
+    @Override
     public void setProperty(String key, Object value) {
         node.setProperty(key, value);
     }
