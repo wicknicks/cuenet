@@ -172,7 +172,6 @@ public class NeoGraphTest {
         }
 
         query = "START r=rel(*) RETURN COUNT(r)";
-        engine = new ExecutionEngine( graphDb );
         results = engine.execute(query);
 
         for (Map<String, Object> result: results) {
