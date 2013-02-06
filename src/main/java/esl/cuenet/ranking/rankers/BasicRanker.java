@@ -37,17 +37,17 @@ public class BasicRanker implements Ranker {
         updatedQueue.add(nodeId);
     }
 
-    private boolean toggle = false;
+    private int iters  = 0;
     @Override
     public boolean canTerminate() {
-        toggle = !toggle;
-        return !toggle;
+        iters++;
+        return (iters > 2);
     }
 
     @Override
     public void compute(PropagationFunction[] functions) {
         scoreUpdates.clear();
-
+        logger.info("UpdatedQueue contains " + updatedQueue.size() + " elements.");
         Queue<Long> tmp = new LinkedList<Long>(updatedQueue);
         for (long uId: tmp) {
             URINode updateNode = network.getNodeById(uId);
@@ -61,7 +61,13 @@ public class BasicRanker implements Ranker {
         }
 
         int c = 0;
-        for (double score: scoreUpdates.values()) if (score > 0) c++;
+        updatedQueue.clear();
+        for (Map.Entry<Long, Double> entry: scoreUpdates.entrySet()) {
+            if (entry.getValue() > 0) {
+                updatedQueue.add(entry.getKey());
+                c++;
+            }
+        }
 
         logger.info("Touched: " + c + " nodes.");
     }
