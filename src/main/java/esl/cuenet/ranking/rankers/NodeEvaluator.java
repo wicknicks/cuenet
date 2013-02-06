@@ -25,12 +25,14 @@ public class NodeEvaluator {
 
 
     protected boolean isEvent(URINode node) {
+        if (node == null) return false;
         if ( !node.hasProperty(OntProperties.ONT_URI) ) return false;
         String prop = (String) node.getProperty(OntProperties.ONT_URI);
         return (prop.contains(emailExchangeEventURI) || prop.contains(photoCaptureEventURI));
     }
 
     protected boolean isEntity(URINode node) {
+        if (node == null) return false;
         if ( node.hasProperty(OntProperties.ONT_URI) ) {
             String prop = (String) node.getProperty(OntProperties.ONT_URI);
             return prop.contains(personURI);

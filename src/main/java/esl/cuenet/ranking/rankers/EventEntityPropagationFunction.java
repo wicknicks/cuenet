@@ -18,6 +18,7 @@ public class EventEntityPropagationFunction extends NodeEvaluator implements Pro
 
     @Override
     public boolean matchEdge(TypedEdge edge) {
+        if (edge == null) return false;
         if ( !edge.hasProperty(OntProperties.ONT_URI) ) return false;
         return edge.getProperty(OntProperties.ONT_URI).equals(participatesInPropertyURI);
     }
