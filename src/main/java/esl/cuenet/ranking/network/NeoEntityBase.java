@@ -60,18 +60,9 @@ public class NeoEntityBase implements EntityBase {
     }
 
     private void load() {
-        String query = "START n=node(*) WHERE has(n." + EntityBase.TYPE + ") AND n." + EntityBase.TYPE + "= '" + EntityBase.ENTITY + "' RETURN n";
-
-        ExecutionEngine engine = new ExecutionEngine( graphDbExt );
-        ExecutionResult results = engine.execute(query);
-
-        for (Map<String, Object> result: results)
-            for ( Map.Entry<String, Object> column : result.entrySet() ) {
-                Node n = (Node) column.getValue();
-                entityIdSet.add(n.getId());
-        }
-
-        logger.info("Loaded " + entityIdSet.size() + " entities.");
+        Index<Node> nodeIndex = graphDbExt.index().forNodes(EntityBase.ENTITY_INDEX);
+        IndexHits<Node> hits = nodeIndex.get(EntityBase.TYPE, EntityBase.ENTITY);
+        for (Node n: hits) entityIdSet.add(n.getId());
     }
 
     public void construct() {

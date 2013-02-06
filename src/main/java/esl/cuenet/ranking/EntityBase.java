@@ -8,9 +8,9 @@ public interface EntityBase extends Iterable<Long> {
     public final static String TEXT = "text";
     public final static String ENTITY = "entity";
 
-
     public final static String V_NAME = "name";
     public final static String V_EMAIL = "email";
     public final static String V_FB_ID = "fb_id";
 
+    public final static String ENTITY_INDEX = "entity_index";
 }

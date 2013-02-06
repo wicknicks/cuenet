@@ -16,7 +16,7 @@ public class NeoURINode implements URINode {
 
     public NeoURINode(Node node) {
         this.node = node;
-        for (Relationship rel: this.node.getRelationships(Direction.OUTGOING))
+        for (Relationship rel: this.node.getRelationships(Direction.BOTH))
             outgoingEdges.add(new NeoTypedEdge(rel));
         NeoCache.getInstance().putNode(node, this);
     }

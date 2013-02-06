@@ -10,15 +10,8 @@ import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.neo4j.cypher.javacompat.ExecutionEngine;
-import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class BasicRankerTest {
 
@@ -49,9 +42,10 @@ public class BasicRankerTest {
         ranker.assign(entityBase.lookup(EntityBase.V_FB_ID, "6028816").getId(), 1.0);
         ranker.assign(entityBase.lookup(EntityBase.V_EMAIL, "gupta@sdsc.edu").getId(), 1.0);
 
-        List<PropagationFunction> functions = new ArrayList<PropagationFunction>(2);
-        functions.add(new EventEventPropagationFunction());
-        functions.add(new EventEntityPropagationFunction());
+        PropagationFunction[] functions = new PropagationFunction[]{
+                new EventEventPropagationFunction(),
+                new EventEntityPropagationFunction()
+        };
 
         ranker.compute(functions);
 

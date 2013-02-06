@@ -4,6 +4,10 @@ import java.util.Iterator;
 
 public interface EventEntityNetwork extends Versioned {
 
+    public static final String EVENT_INDEX = "event_index";
+
+    public static final String EVENT = "event";
+
     URINode createNode();
 
     URINode getNodeById(long id);
@@ -19,6 +23,8 @@ public interface EventEntityNetwork extends Versioned {
     OntoInstanceFactory ontoInstanceFactory();
 
     Iterator<TypedEdge> getEdgesIterator();
+
+    Iterator<URINode> getEventsIterator();
 
     void rank(Ranker ranker);
 

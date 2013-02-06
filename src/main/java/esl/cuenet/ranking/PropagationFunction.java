@@ -8,6 +8,6 @@ public interface PropagationFunction {
 
     boolean matchEndNode(URINode end);
 
-    void propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore);
+    double propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore);
 
 }

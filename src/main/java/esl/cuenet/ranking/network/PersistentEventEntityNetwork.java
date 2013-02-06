@@ -7,8 +7,11 @@ import org.apache.log4j.Logger;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 
 import java.util.*;
 
@@ -26,6 +29,7 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private Transaction transaction = null;
 
     private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
+    private List<URINode> events = null;
 
     public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
         this(null, null, null, new NeoSpatioTemporalIndex(graphDb), null, graphDb);
@@ -40,6 +44,12 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
         this.stIndex = stIndex;
         this.textIndex = textIndex;
         this.graphDb = graphDb;
+
+        Index<Node> nodeIndex = graphDb.index().forNodes(EventEntityNetwork.EVENT_INDEX);
+        IndexHits<Node> hits = nodeIndex.get(EntityBase.TYPE, EventEntityNetwork.EVENT);
+
+        events = new ArrayList<URINode>(hits.size());
+        for (Node n: hits) events.add(NeoCache.getInstance().lookupNode(n));
     }
 
     @Override
@@ -49,7 +59,7 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
     @Override
     public URINode getNodeById(long id) {
-        return new NeoURINode(graphDb.getNodeById(id));
+        return NeoCache.getInstance().lookupNode(graphDb.getNodeById(id));
     }
 
     @Override
@@ -129,5 +139,10 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
         logger.info("Total Relations: " + ix);
         return edges.iterator();
+    }
+
+    @Override
+    public Iterator<URINode> getEventsIterator() {
+        return events.iterator();
     }
 }

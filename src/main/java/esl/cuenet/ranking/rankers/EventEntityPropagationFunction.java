@@ -28,8 +28,8 @@ public class EventEntityPropagationFunction extends NodeEvaluator implements Pro
     }
 
     @Override
-    public void propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore) {
-
+    public double propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore) {
+        return startNodeScore;
     }
 
 }

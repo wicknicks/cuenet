@@ -24,8 +24,8 @@ public class EventEventPropagationFunction extends NodeEvaluator implements Prop
     }
 
     @Override
-    public void propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore) {
-
+    public double propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore) {
+        return startNodeScore * _DAMPNER;
     }
 
 }
