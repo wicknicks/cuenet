@@ -47,7 +47,7 @@ public class BasicRankerTest {
                 new EventEntityPropagationFunction()
         };
 
-        ranker.compute(functions);
+        while( !ranker.canTerminate() ) ranker.compute(functions);
 
         logger.info("Shutting down DB");
         graphDb.shutdown();

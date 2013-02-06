@@ -7,6 +7,8 @@ public interface Ranker {
 
     void assign(long nodeId, double score);
 
+    boolean canTerminate();
+
     void compute(PropagationFunction[] functions);
 
     Iterator<Map.Entry<URINode, Double>> results();

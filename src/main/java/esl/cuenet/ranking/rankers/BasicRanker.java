@@ -37,6 +37,13 @@ public class BasicRanker implements Ranker {
         updatedQueue.add(nodeId);
     }
 
+    private boolean toggle = false;
+    @Override
+    public boolean canTerminate() {
+        toggle = !toggle;
+        return !toggle;
+    }
+
     @Override
     public void compute(PropagationFunction[] functions) {
         scoreUpdates.clear();
