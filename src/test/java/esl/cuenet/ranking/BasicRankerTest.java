@@ -29,7 +29,7 @@ public class BasicRankerTest {
     }
 
     @Test
-    public void doInitializationTest() {
+    public void propagateTest() {
         logger.info("Basic Ranker Test");
 
         graphDb = new EmbeddedGraphDatabase(directory);
@@ -37,15 +37,21 @@ public class BasicRankerTest {
         EntityBase entityBase = new NeoEntityBase(graphDb);
 
         Ranker ranker = new BasicRanker(network, entityBase);
-        //ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Arjun Satish").getId(), 1.0);
+
+        //Me
+//        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Arjun Satish").getId(), 1.0);
 
         //Work
 //        ranker.assign(entityBase.lookup(EntityBase.V_FB_ID, "6028816").getId(), 1.0);
 //        ranker.assign(entityBase.lookup(EntityBase.V_EMAIL, "gupta@sdsc.edu").getId(), 1.0);
 
         //Friends
-        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Nicolas Mangano").getId(), 1.0);
-        ranker.assign(entityBase.lookup(EntityBase.V_EMAIL, "alexander.behm@gmail.com").getId(), 1.0);
+//        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Nicolas Mangano").getId(), 1.0);
+//        ranker.assign(entityBase.lookup(EntityBase.V_EMAIL, "alexander.behm@gmail.com").getId(), 1.0);
+
+        //Family
+        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Prasanna Satish").getId(), 1.0);
+        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Adarsh Satish").getId(), 1.0);
 
         PropagationFunction[] functions = new PropagationFunction[]{
                 new SubEventPropagationFunction(),
