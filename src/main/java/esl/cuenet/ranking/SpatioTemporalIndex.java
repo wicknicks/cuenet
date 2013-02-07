@@ -20,6 +20,10 @@ public interface SpatioTemporalIndex {
 
     void after(long moment);
 
+    void before(long moment, int limit);
+
+    void after(long moment, int limit);
+
     void previous (long moment);
 
     void next (long moment);

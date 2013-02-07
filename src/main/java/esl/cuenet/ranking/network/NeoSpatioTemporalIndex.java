@@ -160,6 +160,18 @@ public class NeoSpatioTemporalIndex implements SpatioTemporalIndex {
     }
 
     @Override
+    public void before(long moment, int limit) {
+        String qryString = String.format("{'end': {'$lt': %d} }", moment);
+        execute(qryString, limit);
+    }
+
+    @Override
+    public void after(long moment, int limit) {
+        String qryString = String.format("{'end': {'$lt': %d} }", moment);
+        execute(qryString, limit);
+    }
+
+    @Override
     public void previous (long timestamp) {
         String qryString = String.format("{'end': {'$lt': %d} }", timestamp);
         List<BasicDBObject> results = execute(qryString);
