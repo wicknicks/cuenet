@@ -54,7 +54,9 @@ public class NeoEntityBase implements EntityBase {
         }
         String s = "";
         for (TypedEdge r: entity.getAllRelationships()) {
-            s += r.getProperty(EntityBase.TYPE) + " " + r.getEndNode().getProperty(EntityBase.TEXT) + "; ";
+            if (r.hasProperty(EntityBase.TYPE) && r.getEndNode().hasProperty(EntityBase.TEXT))
+                s += r.getProperty(EntityBase.TYPE) + " " + r.getEndNode().getProperty(EntityBase.TEXT) + "; ";
+            if (s.length() > 100) break;
         }
         logger.info(s);
     }

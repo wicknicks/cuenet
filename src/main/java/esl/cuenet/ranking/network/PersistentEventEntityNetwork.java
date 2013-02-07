@@ -2,7 +2,6 @@ package esl.cuenet.ranking.network;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
-import esl.cuenet.ranking.rankers.EventEntityPropagationFunction;
 import org.apache.log4j.Logger;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
@@ -119,25 +118,18 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
         List<TypedEdge> edges = new ArrayList<TypedEdge>();
 
         String query = "START r=rel(*) RETURN r";
-        PropagationFunction function = new EventEntityPropagationFunction();
 
         ExecutionEngine engine = new ExecutionEngine( graphDb );
         ExecutionResult results = engine.execute(query);
 
-        int ix = 0;
         for (Map<String, Object> result: results) {
             for ( Map.Entry<String, Object> column : result.entrySet() ) {
-                ix++;
                 NeoTypedEdge te = new NeoTypedEdge((Relationship) column.getValue());
-                if (function.matchEdge(te)) {
-                    ix--; ix++;
-                }
                 if (column.getKey().equals("r")) edges.add(te);
             }
-            if (ix % 100000 == 0) logger.info(ix);
         }
 
-        logger.info("Total Relations: " + ix);
+        logger.info("Total Relations: " + edges.size());
         return edges.iterator();
     }
 

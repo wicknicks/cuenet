@@ -1,6 +1,7 @@
 package esl.cuenet.ranking.rankers;
 
 import esl.cuenet.ranking.*;
+import esl.cuenet.ranking.network.NeoEntityBase;
 import esl.cuenet.ranking.network.OntProperties;
 import org.apache.log4j.Logger;
 
@@ -19,9 +20,13 @@ public class BasicRanker implements Ranker {
     private HashMap<Long, Double> scoreUpdates = new HashMap<Long, Double>();
     private Queue<Long> updatedQueue = new LinkedList<Long>();
 
+    private NodeEvaluator evaluator = new NodeEvaluator();
+    private SpatioTemporalIndex stIndex = null;
+
     public BasicRanker(EventEntityNetwork network, EntityBase entityBase) {
         this.network = network;
         this.entityBase = entityBase;
+        this.stIndex = network.stIndex(SpatioTemporalIndex.OCCURS_DURING_IX);
 
         for (long id: this.entityBase) entityScoreMap.put(id, 0.0);
 
@@ -51,13 +56,14 @@ public class BasicRanker implements Ranker {
         Queue<Long> tmp = new LinkedList<Long>(updatedQueue);
         for (long uId: tmp) {
             URINode updateNode = network.getNodeById(uId);
-            if (updateNode.hasProperty(EntityBase.TYPE) && EntityBase.ENTITY.equals(updateNode.getProperty(EntityBase.TYPE)))
-                propagateAlongEntity(updateNode, functions);
+            if (evaluator.isEntity(updateNode)) propagateAlongEntity(updateNode, functions);
+            if (evaluator.isEvent(updateNode)) propagateAloneEvent(updateNode, functions);
         }
 
         for (long id: scoreUpdates.keySet()) {
             if (eventScoreMap.containsKey(id)) eventScoreMap.put(id, eventScoreMap.get(id) + scoreUpdates.get(id));
             if (entityScoreMap.containsKey(id)) entityScoreMap.put(id, entityScoreMap.get(id) + scoreUpdates.get(id));
+            //else logger.info("Ouch");
         }
 
         int c = 0;
@@ -70,6 +76,35 @@ public class BasicRanker implements Ranker {
         }
 
         logger.info("Touched: " + c + " nodes.");
+    }
+
+    private void propagateAloneEvent(URINode updateNode, PropagationFunction[] functions) {
+        propagateToConnectedNodes(updateNode, functions);
+        propagateToNeighboringEvents(updateNode, functions);
+    }
+
+    private void propagateToNeighboringEvents(URINode eventNode, PropagationFunction[] functions) {
+
+    }
+
+    private void propagateToConnectedNodes(URINode eventNode, PropagationFunction[] functions) {
+        double score = eventScoreMap.get(eventNode.getId());
+        for (TypedEdge edge: eventNode.getAllRelationships()) {
+            URINode otherNode = (edge.getStartNode() == eventNode) ? edge.getEndNode() : edge.getStartNode();
+            otherNode = unnest(otherNode);
+            if (otherNode == null) continue;
+            double val = propagate(eventNode, edge, otherNode, functions, score);
+            updateScore(otherNode, val);
+        }
+    }
+
+    private URINode unnest(URINode node) {
+        for (TypedEdge edge: node.getAllRelationships()) {
+            if ( !edge.hasProperty(OntProperties.TYPE) ) continue;
+            if ( !OntProperties.IS_SAME_AS.equals(edge.getProperty(OntProperties.TYPE))) continue;
+            return (edge.getStartNode() == node) ? edge.getEndNode() : edge.getStartNode();
+        }
+        return null;
     }
 
     private void propagateAlongEntity(URINode entityNode, PropagationFunction[] functions) {
@@ -106,6 +141,22 @@ public class BasicRanker implements Ranker {
 
     @Override
     public Iterator<Map.Entry<URINode, Double>> results() {
+        List<Map.Entry<Long, Double>> scores = new ArrayList<Map.Entry<Long, Double>>(entityScoreMap.entrySet());
+        Collections.sort(scores, new Comparator<Map.Entry<Long, Double>>() {
+            @Override
+            public int compare(Map.Entry<Long, Double> o1, Map.Entry<Long, Double> o2) {
+                double diff = o1.getValue() - o2.getValue();
+                if (diff > 0) return -1;
+                else if (diff < 0) return 1;
+                return 0;
+            }
+        });
+
+        for (int i=0; i<10; i++) {
+            logger.info(i + ". ID = " + scores.get(i).getKey() + "; SCORE = " + scores.get(i).getValue());
+            NeoEntityBase.printEntity(network.getNodeById(scores.get(i).getKey()), logger);
+        }
+
         return null;
     }
 

@@ -3,7 +3,6 @@ package esl.cuenet.ranking;
 import esl.cuenet.ranking.network.NeoEntityBase;
 import esl.cuenet.ranking.network.NeoOntoInstanceImporter;
 import esl.cuenet.ranking.network.PersistentEventEntityNetwork;
-import esl.cuenet.ranking.rankers.EventEntityPropagationFunction;
 import esl.cuenet.ranking.sources.EmailSource;
 import esl.cuenet.ranking.sources.FacebookPhotoSource;
 import esl.system.SysLoggerUtils;
@@ -13,13 +12,10 @@ import org.junit.Test;
 import org.neo4j.cypher.javacompat.ExecutionEngine;
 import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Map;
 
 public class ConstructEEN {
