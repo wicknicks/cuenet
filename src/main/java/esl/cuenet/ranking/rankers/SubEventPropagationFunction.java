@@ -5,7 +5,7 @@ import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
 import esl.cuenet.ranking.network.OntProperties;
 
-public class EventEventPropagationFunction extends NodeEvaluator implements PropagationFunction {
+public class SubEventPropagationFunction extends NodeEvaluator implements PropagationFunction {
 
     @Override
     public boolean matchStartNode(URINode start) {

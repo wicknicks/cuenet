@@ -5,13 +5,15 @@ import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
 import esl.cuenet.ranking.network.OntProperties;
 
-public class EventEntityPropagationFunction extends NodeEvaluator implements PropagationFunction {
+public class EntityEventPropagationFunction extends NodeEvaluator implements PropagationFunction {
 
-    int ix = 0;
+    public EntityEventPropagationFunction() {
+        super();
+    }
 
     @Override
     public boolean matchStartNode(URINode start) {
-        return isEvent(start);
+        return isEntity(start);
     }
 
     @Override
@@ -23,16 +25,12 @@ public class EventEntityPropagationFunction extends NodeEvaluator implements Pro
 
     @Override
     public boolean matchEndNode(URINode end) {
-        return isEntity(end);
+        return isEvent(end);
     }
 
     @Override
     public double propagate(URINode start, TypedEdge edge, URINode end, double startNodeScore) {
-        ix++;
-        return startNodeScore * _DAMPNER;
+        return startNodeScore;
     }
 
-    public int count() {
-        return ix;
-    }
 }
