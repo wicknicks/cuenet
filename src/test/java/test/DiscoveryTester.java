@@ -14,7 +14,7 @@ import java.io.FilenameFilter;
 
 public class DiscoveryTester extends TestBase {
 
-    private Logger logger = Logger.getLogger(Scratch.class);
+    private Logger logger = Logger.getLogger(DiscoveryTester.class);
     private String directory = "/home/arjun/Dataset/mm13/d7-futurict-boston-2013-jain/";
     private static final String ANNOTATIONS = ".annotations";
 
