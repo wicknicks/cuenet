@@ -7,9 +7,11 @@ import java.io.File;
 public class LocalFileDataset implements Dataset<File> {
 
     private File file;
+    private String[] annotations;
 
-    public LocalFileDataset(File file) {
+    public LocalFileDataset(File file, String[] annotations) {
         this.file = file;
+        this.annotations = annotations;
     }
 
     public LocalFileDataset(String filename) {
@@ -19,6 +21,10 @@ public class LocalFileDataset implements Dataset<File> {
     @Override
     public File item() {
         return file;
+    }
+
+    public String[] getAnnotations() {
+        return annotations;
     }
 }
 

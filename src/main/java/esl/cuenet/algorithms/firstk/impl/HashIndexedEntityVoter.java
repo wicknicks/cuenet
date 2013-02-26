@@ -127,7 +127,7 @@ public class HashIndexedEntityVoter {
         for (LocationContext lcx: lcxCandidates) pq.add(lcx);
         for (LocationContext l : pq) {
             logger.info(i + " " + l.name);
-            el.list(i + " " + l.name);
+            if (i<10) el.list(i + " " + l.name);
             i++;
         }
 

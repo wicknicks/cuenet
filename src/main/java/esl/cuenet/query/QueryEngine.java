@@ -173,7 +173,7 @@ public class QueryEngine {
                 logger.info("Searching for: " + uri);
             }
 
-            logger.info("Source suitable for querying: " + flag);
+            logger.info("Source *" + source.getName() + "* suitable for querying: " + flag);
             if (!flag) return null;
 
             List<String> pathExpressions = new ArrayList<String>();

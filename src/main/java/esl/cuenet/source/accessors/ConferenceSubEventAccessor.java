@@ -76,7 +76,7 @@ public abstract class ConferenceSubEventAccessor extends MongoDB implements IAcc
 
     public BasicDBList query(String collection) {
         BasicDBObject query = new BasicDBObject();
-        if (url != null) query.put("link", url);
+        if (url != null) query.put("url", url);
 
         DBReader reader = startReader(collection);
         reader.query(query);

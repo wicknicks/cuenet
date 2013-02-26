@@ -33,17 +33,17 @@ public class ExperimentsLogger {
     }
 
     public void incrementIteration() {
-        iterCount++;
-        BasicDBObject msg = new BasicDBObject("iter", iterCount);
-        msg.put("msg", "Incrementing Iteration Count");
-        write(msg);
+//        iterCount++;
+//        BasicDBObject msg = new BasicDBObject("iter", iterCount);
+//        msg.put("msg", "Incrementing Iteration Count");
+//        write(msg);
     }
 
     public void discoveryStart(String type, String name) {
-        BasicDBObject msg = new BasicDBObject("discovering", type);
-        msg.put("label", name);
-        msg.put("msg", "iter: " + iterCount + " discovering " + name);
-        write(msg);
+//        BasicDBObject msg = new BasicDBObject("discovering", type);
+//        msg.put("label", name);
+//        msg.put("msg", "iter: " + iterCount + " discovering " + name);
+//        write(msg);
     }
 
     public void recognized(String name, double confidence) {
@@ -56,6 +56,7 @@ public class ExperimentsLogger {
     public void list(String s) {
         try {
             writer.write(s + "\n");
+            writer.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

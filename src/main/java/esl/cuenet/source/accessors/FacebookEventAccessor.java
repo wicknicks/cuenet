@@ -15,7 +15,7 @@ import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
 public class FacebookEventAccessor extends MongoDB implements IAccessor {
-    private Logger logger = Logger.getLogger(GoogleCalendarCollection.class);
+    private Logger logger = Logger.getLogger(FacebookEventAccessor.class);
     private Attribute[] attributes = null;
     private boolean[] setFlags = new boolean[1];
     private String eventAuthorName = null;

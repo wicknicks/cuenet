@@ -187,7 +187,7 @@ public class ConferenceAttendeeAccessor extends MongoDB implements IAccessor {
         DBObject result = null;
         while(reader.hasNext()) result = reader.next();
 
-        if (result == null) throw new RuntimeException("Conference not found");
+        if (result == null) throw new RuntimeException("Conference not found: " + url);
 
         BasicDBObject conf = (BasicDBObject) result;
 
