@@ -19,6 +19,8 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class LocalFilePreprocessor implements Preprocessing<File> {
 
@@ -27,10 +29,10 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
     private EventGraph graph = null;
     private OntModel model = null;
 
-    private String username = "Setareh Rad";
-    private String email = "setareh.rafatirad@gmail.com";
-//    private String username = "Ramesh Jain";
-//    private String email = "jain49@gmail.com";
+//    private String username = "Setareh Rad";
+//    private String email = "setareh.rafatirad@gmail.com";
+    private String username = "Ramesh Jain";
+    private String email = "jain49@gmail.com";
 
     public LocalFilePreprocessor(OntModel model, String username, String email) {
         this.model = model;
@@ -46,6 +48,7 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
     public EventGraph process(Dataset<File> fileDataset) throws CorruptDatasetException {
         if (fileDataset == null) throw new CorruptDatasetException("Dataset = NULL");
         File file = fileDataset.item();
+        SimpleDateFormat sdformatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
 
         if (file == null) throw new CorruptDatasetException("Dataset content = NULL");
         if (!file.exists()) throw new CorruptDatasetException("File not found: " + file.getAbsolutePath());
@@ -55,6 +58,8 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             Exif exif = extractor.extractExif(file.getAbsolutePath());
             logger.info("Processing: " + file.getAbsolutePath());
             logger.info("Timestamp: " + exif.timestamp);
+            logger.info("Formatted Time: " + sdformatter.format(new Date(exif.timestamp)));
+
             logger.info("GPS-Lat: " + exif.GPSLatitude);
             logger.info("GPS-Lon: " + exif.GPSLongitude);
             logger.info("Image-Width: " + exif.width);
