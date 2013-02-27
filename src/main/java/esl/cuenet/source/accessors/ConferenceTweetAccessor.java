@@ -154,7 +154,7 @@ public class ConferenceTweetAccessor extends MongoDB implements IAccessor {
 
     private Individual getConference(String url) throws IOException, ParseException {
         OntClass conferenceClass = model.getOntClass(Constants.CuenetNamespace + "conference");
-        BasicDBObject query = new BasicDBObject("link", url);
+        BasicDBObject query = new BasicDBObject("url", url);
         DBReader reader = startReader("conferences");
 
         reader.query(query);
