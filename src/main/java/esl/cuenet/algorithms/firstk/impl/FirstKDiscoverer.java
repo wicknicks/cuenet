@@ -52,6 +52,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
     private int discoveryCount = 0;
     private int k = 3;
+    private HashSet<String> discoveredEntities = new HashSet<String>(10);
 
     private Event photoCaptureEvent = null;
 
@@ -150,7 +151,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         if (gnc == graph.getNodeCount()) {
             logger.info("Initiating Impulse Response");
-            voter.impulse(graph, photoCaptureEvent);
+            voter.impulse(graph, photoCaptureEvent, dataset.getAnnotations());
             return;
         }
 
@@ -515,6 +516,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         if (confidence < 25) return;
         pushdown(person);
         discoveryCount++;
+        discoveredEntities.add(getLiteralValue(person.getIndividual(), nameProperty));
         logger.info("Tagging face as: " + getLiteralValue(person.getIndividual(), nameProperty)
                 + "; with confidence = " + confidence);
         expLogger.list("Tagging face as: " + getLiteralValue(person.getIndividual(), nameProperty));
@@ -686,7 +688,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private boolean terminate(EventGraph graph) {
-        return (discoveryCount >= k);
+        return (discoveredEntities.size() >= k);
+        //return (discoveryCount >= k);
     }
 
     private String getLiteralValue(Individual individual, Property property) {
