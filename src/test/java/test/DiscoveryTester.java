@@ -19,13 +19,13 @@ import java.util.Arrays;
 public class DiscoveryTester extends TestBase {
 
     private Logger logger = Logger.getLogger(DiscoveryTester.class);
-    private String directory = "/home/arjun/Dataset/mm13/d8-boston-AAAS-jain/";
+    private String directory = "/home/arjun/Dataset/mm13/d2-turing100-jain/";
     private static final String ANNOTATIONS = ".annotations";
 
 
     @BeforeClass
     public static void setup() {
-        ExperimentsLogger.getInstance("/home/arjun/Dataset/mm13/jain.log");
+        ExperimentsLogger.getInstance("/home/arjun/Dataset/mm13/jain.log.40");
         SysLoggerUtils.initLogger();
     }
 
@@ -40,7 +40,7 @@ public class DiscoveryTester extends TestBase {
         Arrays.sort(photos);
 
         String[] annotations;
-        for (int i=0; i<photos.length; i++) {
+        for (int i=20; i<photos.length; i++) {
             String photo = photos[i];
             String path = FilenameUtils.concat(directory, photo);
             if (isAnnotationFileEmpty(path + ANNOTATIONS)) continue;
@@ -64,10 +64,11 @@ public class DiscoveryTester extends TestBase {
 
     @Test
     public void testSingleFile() throws Exception {
-        String singlePhotoPath = "DSC06692.JPG"; //photos[0];
+        String singlePhotoPath = "DSC01942.JPG"; //photos[0];
         String path = FilenameUtils.concat(directory, singlePhotoPath);
         ExperimentsLogger.getInstance().list(path);
         String[] annotations = getAnnotations(path + ANNOTATIONS);
+        if (annotations.length == 0) return;
         ExperimentsLogger.getInstance().list("Annotations = " + StringUtils.join(annotations, ','));
         singleFileTest(singlePhotoPath, annotations);
     }
