@@ -134,6 +134,66 @@ public class HashIndexedEntityVoter {
         logger.info("Leaving OrderByLocation");
     }
 
+    public Vote[] impulse(EventGraph graph, Event photoCaptureEvent, String[] annotations) {
+        impulseMode = true;
+
+        vote(graph, graph.getParticipants(photoCaptureEvent));
+        Statement oaStatement = photoCaptureEvent.getIndividual().getProperty(occursAtProperty);
+        String uri = oaStatement.getObject().asResource().getURI();
+
+        int ix = uri.indexOf('_');
+        if (ix == -1) return null;
+        Location pceLocation = Location.getFromCache(uri.substring(ix+1));
+
+        List<LocationContext> lcxCandidates = new ArrayList<LocationContext>();
+        for (String entityName: discoveredCandidatesTables.keySet()) {
+            CandidateVotingTable<String> candidateTable = discoveredCandidatesTables.get(entityName);
+            Iterator<String> iter = candidateTable.iterator();
+            while(iter.hasNext()) {
+                String name = iter.next();
+                Individual dctInd = candidateTable.getScore(name).individual;
+                Location dctIndLocation = getLocation(dctInd);
+                if (dctIndLocation == null) continue;
+                lcxCandidates.add(new LocationContext(dctInd,
+                        getLiteralValue(dctInd, nameProperty), dctIndLocation));
+            }
+        }
+
+        orderByLocation(lcxCandidates, pceLocation, annotations);
+
+        impulseMode = false;
+        return new Vote[0];
+    }
+
+    private void orderByLocation(List<LocationContext> lcxCandidates, final Location l0, String[] annotations) {
+        logger.info("Order by Location: " + lcxCandidates.size());
+
+        if (lcxCandidates.size() == 0) return;
+
+        PriorityQueue<LocationContext> pq = new PriorityQueue<LocationContext>(lcxCandidates.size(), new Comparator<LocationContext>() {
+            @Override
+            public int compare(LocationContext lcx1, LocationContext lcx2) {
+                double dist1 = lcx1.location.getEuclideanDistance(l0);
+                double dist2 = lcx2.location.getEuclideanDistance(l0);
+                return (int)(dist1-dist2);
+            }
+        });
+
+        int i = 1;
+        for (LocationContext lcx: lcxCandidates) pq.add(lcx);
+        for (LocationContext l : pq) {
+            for (String ann: annotations) {
+                if (ann.equals(l.name)) {
+                    logger.info("Rank " + i + " " + l.name);
+                    el.list("Rank " + i + " " + l.name);
+                }
+            }
+            i++;
+        }
+
+        logger.info("Leaving OrderByLocation");
+    }
+
     private LocationContext find(String name, List<LocationContext> lcxCandidates) {
         for (LocationContext  lcx: lcxCandidates) {
             if (lcx.name.equals(name)) return lcx;
