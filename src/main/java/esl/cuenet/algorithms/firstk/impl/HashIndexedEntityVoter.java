@@ -182,6 +182,8 @@ public class HashIndexedEntityVoter {
         int i = 1;
         for (LocationContext lcx: lcxCandidates) pq.add(lcx);
         for (LocationContext l : pq) {
+            //if you want to log all entries.
+            //el.list("Rank " + i + " " + l.name);
             for (String ann: annotations) {
                 if (ann.equals(l.name)) {
                     logger.info("Rank " + i + " " + l.name);
