@@ -45,7 +45,7 @@ public class NFATImpl implements NFAT {
         finals.add(state);
     }
 
-    private static boolean current(char c) {
+    private boolean current(char c) {
         return false;
     }
 
@@ -60,7 +60,7 @@ public class NFATImpl implements NFAT {
         return states;
     }
 
-    public static Transition constructTransition(State start, State end, char matcher) {
+    public Transition constructTransition(State start, State end, char matcher) {
         TransitionImpl transition = new TransitionImpl(end, new StringMatcher(matcher));
         ((StateImpl) start).transitions.add(transition);
         return transition;
@@ -113,7 +113,7 @@ public class NFATImpl implements NFAT {
     }
 
 
-    public static class StringMatcher implements Matcher {
+    public class StringMatcher implements Matcher {
 
         private final char character;
 
