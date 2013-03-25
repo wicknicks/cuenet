@@ -113,7 +113,7 @@ Starting The Application
 You must start four different programs for the entire application
 stack to be functional.
 
-1. REDIS
+(1) Start Redis
 
 Redis is configured through a config file called redis.conf. This is
 located in the root directory of your redis installation. Change the
@@ -130,7 +130,7 @@ start the redis server as:
 
 (from the redis root directory).
 
-2. MONGODB
+(2) Start MongoDB
 
 Start mongodb using the mongo daemon.
 
@@ -138,7 +138,7 @@ Start mongodb using the mongo daemon.
 ./mongod
 ```
 
-3. Web Server
+(3) Start Web Server
 
 cd to the "web" folder which is part of the EPT folder you downloaded
 from the SVN repository. The main file for the server impl is called
