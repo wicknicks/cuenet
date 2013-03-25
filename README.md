@@ -51,8 +51,7 @@ sudo apt-get install imagemagick
 MongoDB
 ======
 
-I suppose you already have installed mongoDB. Lets all use v1.8.3 for
-our work.
+We use Mongo as our backend database. Current version is 1.8.3.
 
 Download and extract the zip archive from either of the following
 locations:
@@ -66,7 +65,7 @@ http://www.mongodb.org/display/DOCS/Quickstart+Unix
 Redis
 =====
 
-Also, we'll need Redis. Look here to see what it does. Get the latest
+Also, we'll need Redis. Look [here](http://redis.io/) to see what it does. Get the latest
 version from here:
 http://redis.googlecode.com/files/redis-2.2.11.tar.gz
 
