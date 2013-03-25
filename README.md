@@ -1,5 +1,7 @@
 CueNet
-=====
+======
+
+For information on CueNet, please visit [http://www.ics.uci.edu/~arjun/](http://www.ics.uci.edu/~arjun/)
 
 Source Code
 ==========
