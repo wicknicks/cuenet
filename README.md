@@ -1,7 +1,7 @@
 CueNet
 ======
 
-For information on CueNet, please visit [http://www.ics.uci.edu/~arjun/](http://www.ics.uci.edu/~arjun/).
+Context Discovery Framework, with extensions and test cases, implemented as part of my PhD work. For information on CueNet, please visit [http://www.ics.uci.edu/~arjun/](http://www.ics.uci.edu/~arjun/).
 
 Source Code
 ==========
