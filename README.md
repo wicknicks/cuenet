@@ -4,8 +4,6 @@ CueNet
 Source Code
 ==========
 
-
-
 The latest version of CueNet is maintained here: 
 
 git clone https://github.com/wicknicks/cuenet.git
@@ -74,22 +72,32 @@ executables are in the src directory itself. Use the command
 
 to start the redis server.
 
-*** NODE.JS
-==========
+Node.js
+=======
 
-The latest stable version of node is 0.4.11. Download it from here:
-http://nodejs.org/dist/node-v0.4.11.tar.gz
+The latest stable version of node is 0.8.16. Download it from here:
+http://nodejs.org/dist/v0.8.16/node-v0.8.16.tar.gz
+
+Install SSL libs if you don't have them on your machine.
+
+```
+sudo apt-get install libssl-dev
+```
 
 Extract the contents to a directory on your computer, and cd into it.
 Now, run the following commands:
 
-sudo apt-get install libssl-dev ./configure make sudo make install
+```
+./configure 
+make 
+sudo make install
+```
 
 This will install node into your machine. To see if it works, type
 node and see if it starts a REPL.
 
 To start playing with node, please read the synopsis here:
-http://nodejs.org/docs/v0.4.11/api/synopsis.html
+http://nodejs.org/docs/v0.8.16/api/synopsis.html
 
 Local Folders
 ============
@@ -126,8 +134,9 @@ start the redis server as:
 
 Start mongodb using the mongo daemon.
 
+```
 ./mongod
-
+```
 
 3. Web Server
 
@@ -137,16 +146,19 @@ server.js which is part of the web sub-directory.
 
 Then, start it using node as:
 
+```
 cd cuenet/scripts/web
 node server.js
+```
 
 This should give you a message like:
 
+```
    subscribed to gcal_results, count: 1
    Connection to DB established 
+```
 
-
-This means the server has connected to redis and MongoDB. Now point your browser to: http://localhost:8080/ and the webpage will ask you to log into different websites so it can pull data from them.
+This means the server has connected to redis and MongoDB. Now point your browser to: [http://localhost:8080/](http://localhost:8080/) and the webpage will ask you to log into different websites so it can pull data from them.
 
 
 4. Start the java program from your IDE. Run any tests in the src/tests/java folder. To test the discovery algorithm, try DiscoveryTester.java or Scratch.java in src/tests/java/test package.
