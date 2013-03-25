@@ -6,4 +6,6 @@ public interface Transition {
 
     Matcher matcher();
 
+    boolean isEpsilonTransition();
+
 }

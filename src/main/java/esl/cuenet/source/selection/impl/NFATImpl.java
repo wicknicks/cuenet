@@ -13,6 +13,8 @@ public class NFATImpl implements NFAT {
     private State[] states = null;
     private HashSet<State> start = new HashSet<State>();
     private HashSet<State> finals = new HashSet<State>();
+    public static final char EPSILON = '~';
+    private char currentItem;
 
     public NFATImpl(State[] states) {
         this.states = states;
@@ -45,13 +47,72 @@ public class NFATImpl implements NFAT {
         finals.add(state);
     }
 
-    private boolean current(char c) {
-        return false;
+    private void current(char c) {
+        currentItem = c;
     }
 
     @Override
-    public boolean match(String string) {
+    public boolean match(String _string) {
+        HashSet<State> currentStates = new HashSet<State>();
+        Collections.addAll(currentStates, startStates());
+        HashSet<State> nextStates = new HashSet<State>();
+
+        currentStates = epsilonAll(currentStates);
+        for (char character : _string.toCharArray()) {
+            HashSet<State> temp = new HashSet<State>();
+            for (State current: currentStates) temp.add(current);
+
+            for (State current: temp) {
+                nextStates.addAll(step(current, character));
+                currentStates.remove(current);
+                currentStates.addAll(nextStates);
+            }
+
+            epsilonAll(currentStates);
+            nextStates = new HashSet<State>();
+        }
+
+        for (State state: currentStates) {
+            if (isFinalState(state)) return true;
+            for (State e: epsilonClosure(state))
+                if (isFinalState(e)) return true;
+        }
+
         return false;
+    }
+
+    private HashSet<State> epsilonAll(HashSet<State> currentStates) {
+        HashSet<State> nextStates = new HashSet<State>();
+        boolean allEpsilons = true;
+        for (State current: currentStates) {
+            for (Transition transition: current.getTransitions()) {
+                if (transition.isEpsilonTransition())
+                    nextStates.add(transition.outState());
+                else
+                    allEpsilons = false;
+            }
+            if ( !allEpsilons ) nextStates.add(current);
+        }
+        return nextStates;
+    }
+
+    private HashSet<State> epsilonClosure(State state) {
+        HashSet<State> epsilonNexts = new HashSet<State>();
+        for (Transition transition: state.getTransitions()) {
+            if (transition.isEpsilonTransition()) epsilonNexts.add(transition.outState());
+        }
+        return epsilonNexts;
+    }
+
+    private HashSet<State> step(State current, char character) {
+        HashSet<State> nextStates = new HashSet<State>();
+        for (Transition transition: current.getTransitions()) {
+            current(character);
+            if (transition.isEpsilonTransition()) continue;
+            if (transition.matcher().match())
+                nextStates.add(transition.outState());
+        }
+        return nextStates;
     }
 
     public static State[] constructStates(String[] stateNames) {
@@ -60,8 +121,12 @@ public class NFATImpl implements NFAT {
         return states;
     }
 
-    public Transition constructTransition(State start, State end, char matcher) {
-        TransitionImpl transition = new TransitionImpl(end, new StringMatcher(matcher));
+    public Transition addTransition(State start, State end, char matcher) {
+        TransitionImpl transition;
+        if (matcher == NFATImpl.EPSILON)
+            transition = new TransitionImpl(end);
+        else
+            transition = new TransitionImpl(end, new StringMatcher(matcher));
         ((StateImpl) start).transitions.add(transition);
         return transition;
     }
@@ -72,7 +137,7 @@ public class NFATImpl implements NFAT {
         private final String name;
 
         public StateImpl(String name, Transition[] transitions) {
-            Collections.addAll(this.transitions, transitions);
+            if (transitions != null) Collections.addAll(this.transitions, transitions);
             this.name = name;
         }
 
@@ -94,10 +159,18 @@ public class NFATImpl implements NFAT {
 
         private final State oState;
         private final Matcher matcher;
+        private final boolean isEpsilon;
+
+        public TransitionImpl(State oState) {
+            this.oState = oState;
+            this.matcher = null;
+            this.isEpsilon = true;
+        }
 
         public TransitionImpl(State oState, Matcher matcher) {
             this.oState = oState;
             this.matcher = matcher;
+            this.isEpsilon = false;
         }
 
         @Override
@@ -108,6 +181,11 @@ public class NFATImpl implements NFAT {
         @Override
         public Matcher matcher() {
             return matcher;
+        }
+
+        @Override
+        public boolean isEpsilonTransition() {
+            return isEpsilon;
         }
 
     }
@@ -123,7 +201,7 @@ public class NFATImpl implements NFAT {
 
         @Override
         public boolean match() {
-            return current(character);
+            return this.character == currentItem;
         }
     }
 
