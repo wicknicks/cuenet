@@ -119,8 +119,7 @@ come and sit after upload. Ensure that your dataset is in $HOME/dataset.
 Starting The Application
 =====================
 
-You must start four different programs for the entire application
-stack to be functional.
+Start four different programs for the entire stack to be functional.
 
 #### Start Redis
 
