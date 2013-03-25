@@ -1,8 +1,8 @@
-GETTING THE PIECES
-==================
+CueNet
+=====
 
-SOURCES
-======
+Source Code
+==========
 
 
 
@@ -22,7 +22,7 @@ Install softwares wherever necessary with apt-get.
 Note: the mvn command might take some time if you are running it for
 the first time on your machine.
 
-IDE (ECLIPSE)
+IDE (Eclipse)
 ============
 
 Add the maven plugin for eclipse. Use the m2e plugin for this. 
@@ -33,7 +33,7 @@ Import the project into Eclipse:
 File > Import > Maven > Existing Maven Project.
 
 
-IMAGE PROCESSING TOOLS
+Image Processing Tools
 ===================
 Install exiftool (http://www.sno.phy.queensu.ca/~phil/exiftool/)
 and image-magick (http://www.imagemagick.org/script/index.php),
@@ -45,7 +45,7 @@ sudo apt-get install libimage-exiftool-perl
 sudo apt-get install imagemagick
 
 
-MONGODB
+MongoDB
 ======
 
 I suppose you already have installed mongoDB. Lets all use v1.8.3 for
@@ -60,7 +60,7 @@ locations:
 More detailed instructions on how to setup is given here:
 http://www.mongodb.org/display/DOCS/Quickstart+Unix
 
-REDIS
+Redis
 =====
 
 Also, we'll need Redis. Look here to see what it does. Get the latest
@@ -91,16 +91,16 @@ node and see if it starts a REPL.
 To start playing with node, please read the synopsis here:
 http://nodejs.org/docs/v0.4.11/api/synopsis.html
 
-LOCAL FOLDERS
+Local Folders
 ============
 
 Also, ensure that you have the folders called /data/photos, /data/db
 and /data/index -- this is where all the photos, data and indexes will
-come and sit after upload.
+come and sit after upload. Ensure that your dataset is in $HOME/dataset.
 
 
-STARTING THE APPLICATION
-========================
+Starting The Application
+=====================
 
 You must start four different programs for the entire application
 stack to be functional.
