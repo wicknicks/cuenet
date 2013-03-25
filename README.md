@@ -161,7 +161,4 @@ This should give you a message like:
 This means the server has connected to redis and MongoDB. Now point your browser to: [http://localhost:8080/](http://localhost:8080/) and the webpage will ask you to log into different websites so it can pull data from them.
 
 
-4. Start the java program from your IDE. Run any tests in the src/tests/java folder. To test the discovery algorithm, try DiscoveryTester.java or Scratch.java in src/tests/java/test package.
-
-
-src/tests/java
+(4) Start the java program from your IDE. Run any tests in the src/tests/java folder. To test the discovery algorithm, try DiscoveryTester.java or Scratch.java in src/tests/java/test package.
