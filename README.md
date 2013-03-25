@@ -116,7 +116,9 @@ b) change the timeout entry to "timeout 0".
 
 start the redis server as:
 
+```bash
 ./src/redis-server ./redis.conf
+```
 
 (from the redis root directory).
 
