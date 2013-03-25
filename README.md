@@ -15,7 +15,9 @@ That should give you all the latest stuff.
 Try doing the following commands to make sure the code builds and test
 cases run:
 
+```
 mvn clean install
+```
 
 Install softwares wherever necessary with apt-get.
 
