@@ -1,7 +1,7 @@
 CueNet
 ======
 
-For information on CueNet, please visit [http://www.ics.uci.edu/~arjun/](http://www.ics.uci.edu/~arjun/)
+For information on CueNet, please visit [http://www.ics.uci.edu/~arjun/](http://www.ics.uci.edu/~arjun/).
 
 Source Code
 ==========
@@ -41,9 +41,10 @@ and make the executables (exiftool and convert) available on $PATH.
 
 On Ubuntu, the commands to install these:
 
+```
 sudo apt-get install libimage-exiftool-perl
 sudo apt-get install imagemagick
-
+```
 
 MongoDB
 ======
@@ -70,7 +71,11 @@ http://redis.googlecode.com/files/redis-2.2.11.tar.gz
 Unzip the package to a directory and run make to build it. The
 executables are in the src directory itself. Use the command
 
+```
+cd /path/where/you/extracted/redis
+make
 ./src/redis-server
+```
 
 to start the redis server.
 
@@ -90,6 +95,7 @@ Extract the contents to a directory on your computer, and cd into it.
 Now, run the following commands:
 
 ```
+cd /path/where/you/extracted/zip/file
 ./configure 
 make 
 sudo make install
