@@ -113,7 +113,7 @@ Starting The Application
 You must start four different programs for the entire application
 stack to be functional.
 
-(1) Start Redis
+#### Start Redis
 
 Redis is configured through a config file called redis.conf. This is
 located in the root directory of your redis installation. Change the
@@ -130,7 +130,7 @@ start the redis server as:
 
 (from the redis root directory).
 
-(2) Start MongoDB
+#### Start MongoDB
 
 Start mongodb using the mongo daemon.
 
@@ -138,7 +138,7 @@ Start mongodb using the mongo daemon.
 ./mongod
 ```
 
-(3) Start Web Server
+#### Start Web Server
 
 cd to the "web" folder which is part of the EPT folder you downloaded
 from the SVN repository. The main file for the server impl is called
@@ -161,4 +161,6 @@ This should give you a message like:
 This means the server has connected to redis and MongoDB. Now point your browser to: [http://localhost:8080/](http://localhost:8080/) and the webpage will ask you to log into different websites so it can pull data from them.
 
 
-(4) Start the java program from your IDE. Run any tests in the src/tests/java folder. To test the discovery algorithm, try DiscoveryTester.java or Scratch.java in src/tests/java/test package.
+#### Tests
+
+Start the java program from your IDE. Run any tests in the src/tests/java folder. To test the discovery algorithm, try DiscoveryTester.java or Scratch.java in src/tests/java/test package.
