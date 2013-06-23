@@ -63,7 +63,7 @@ def prep_kml(network, ofile):
     ofile.write('  <coordinates>\n')
     for ref in get_node_refs(edges[edge_id]):
       if ref not in nodes: continue
-      ofile.write(nodes[ref].attrib['lon'] + ", " + nodes[ref].attrib['lat'] + ", 0.\n")
+      ofile.write(nodes[ref].attrib['lon'] + "," + nodes[ref].attrib['lat'] + ",0\n")
       nodec += 1
 
     ofile.write('  </coordinates>\n')
@@ -77,7 +77,7 @@ def prep_kml(network, ofile):
 
 if __name__ == "__main__":
 
-  filx = 'karnataka.highway.osm'
+  filx = '/data/osm/karnataka.highway.osm'
   print 'Loading...', filx
   mydoc = ET.parse(filx)
   root = mydoc.getroot()
@@ -96,7 +96,7 @@ if __name__ == "__main__":
   net = combine()
   edges = edge_bk
 
-  prep_kml(net, open('karnataka.kml', 'w'))
+  prep_kml(net, open('/data/osm/karnataka.kml', 'w'))
 
   # c=len(mydoc.findall("./way/tag[@v='traffic_signals']"))
   # d=len(mydoc.findall("./way/tag[@k='name']"))
