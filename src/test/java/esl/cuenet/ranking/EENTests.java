@@ -63,4 +63,38 @@ public class EENTests {
 
     }
 
+    @Test
+    public void createSimpleEENWithIndex() {
+        GraphDatabaseService graphDb = new EmbeddedGraphDatabase( directory );
+
+        EventEntityNetwork network = new PersistentEventEntityNetwork( graphDb );
+        URINode n1 = network.createNode();
+        n1.setProperty("name", "Agatha");
+
+        URINode n2 = network.createNode();
+        n2.setProperty("name", "Poirot");
+
+        URINode n3 = network.createNode();
+        n3.setProperty("name", "Marple");
+
+        n1.createEdgeTo(n2);
+        n1.createEdgeTo(n3);
+        n2.createEdgeTo(n3);
+        n3.createEdgeTo(n2);
+
+        logger.info("n1 = " + n1.getProperty("name"));
+        logger.info("n2 = " + n2.getProperty("name"));
+        logger.info("n3 = " + n3.getProperty("name"));
+
+        TextIndex sample = network.textIndex("sample");
+        sample.put(n1, "name", n1.getProperty("name"));
+        sample.put(n2, "name", n2.getProperty("name"));
+        sample.put(n2, "fictional", "true");
+        sample.put(n3, "name", n3.getProperty("name"));
+        sample.put(n3, "fictional", "true");
+
+        URINode u = sample.lookup("name", "Agatha");
+        logger.info("u = " + u.getProperty("name"));
+    }
+
 }

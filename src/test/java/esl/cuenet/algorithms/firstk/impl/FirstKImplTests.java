@@ -19,7 +19,7 @@ public class FirstKImplTests extends TestBase {
 
         File file = new File("/home/arjun/Dataset/ramesh/confs/DSCN4265.JPG");
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
-        firstKDiscoverer.execute(new LocalFileDataset(file));
+        firstKDiscoverer.execute(new LocalFileDataset(file, null));
 
     }
 
@@ -45,7 +45,7 @@ public class FirstKImplTests extends TestBase {
         FirstKDiscoverer firstKDiscoverer = new FirstKDiscoverer();
 
         try {
-            firstKDiscoverer.execute(new LocalFileDataset(file));
+            firstKDiscoverer.execute(new LocalFileDataset(file, null));
         } catch (CorruptDatasetException cde) {
             logger.info("CorruptDatasetException: " + cde.getLocalizedMessage());
         } catch (EventGraphException e) {

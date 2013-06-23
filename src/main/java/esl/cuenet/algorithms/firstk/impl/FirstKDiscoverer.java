@@ -2,13 +2,15 @@ package esl.cuenet.algorithms.firstk.impl;
 
 import com.hp.hpl.jena.ontology.Individual;
 import com.hp.hpl.jena.ontology.OntClass;
-import com.hp.hpl.jena.rdf.model.*;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import com.hp.hpl.jena.vocabulary.OWL;
 import com.hp.hpl.jena.vocabulary.RDF;
 import com.hp.hpl.jena.vocabulary.RDFS;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.util.JSON;
 import esl.cuenet.algorithms.firstk.FirstKAlgorithm;
 import esl.cuenet.algorithms.firstk.Vote;
 import esl.cuenet.algorithms.firstk.exceptions.CorruptDatasetException;
@@ -19,14 +21,11 @@ import esl.cuenet.model.Constants;
 import esl.cuenet.query.IResultIterator;
 import esl.cuenet.query.IResultSet;
 import esl.cuenet.query.QueryEngine;
-import esl.cuenet.query.drivers.mongodb.MongoDBHelper;
-import esl.cuenet.query.drivers.webjson.HttpDownloader;
 import esl.datastructures.TimeInterval;
 import esl.datastructures.graph.*;
 import esl.system.ExperimentsLogger;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -53,6 +52,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
     private int discoveryCount = 0;
     private int k = 3;
+    private HashSet<String> discoveredEntities = new HashSet<String>(10);
 
     private Event photoCaptureEvent = null;
 
@@ -151,11 +151,11 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         if (gnc == graph.getNodeCount()) {
             logger.info("Initiating Impulse Response");
-            voter.impulse(graph, photoCaptureEvent);
+            voter.impulse(graph, photoCaptureEvent, dataset.getAnnotations());
             return;
         }
 
-        if (discoveryCount == 8) System.exit(0);
+        if (terminate(graph)) System.exit(0);
 
 //        System.out.print("Enter choice (k=" + discoveryCount + ") : ");
 //        Scanner scanner = new Scanner(System.in);
@@ -349,6 +349,9 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         if (!merged) return;
 
+        //save time if merging has accomplished the task
+        if (terminate(graph)) return;
+
         List<Entity> parts = graph.getParticipants(photoCaptureEvent);
         Vote[] votes =  voter.vote(graph, parts);
 
@@ -380,6 +383,15 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
         if ( (allEntities.size() - pcEntities.size()) > 10) {
             logger.info("Too many participants to verify on everyone");
+
+            HashSet<String> verifiedList = new HashSet<String>(allEntities.size() - pcEntities.size());
+            for (Entity gEnt: allEntities) {
+                String name = getLiteralValue(gEnt.getIndividual(), nameProperty);
+                if (containedIn(name, pcEntities)) continue;
+                confirm(verify(name), gEnt);
+            }
+
+
             return;
         }
 
@@ -504,6 +516,10 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         if (confidence < 25) return;
         pushdown(person);
         discoveryCount++;
+        discoveredEntities.add(getLiteralValue(person.getIndividual(), nameProperty));
+        logger.info("Tagging face as: " + getLiteralValue(person.getIndividual(), nameProperty)
+                + "; with confidence = " + confidence);
+        expLogger.list("Tagging face as: " + getLiteralValue(person.getIndividual(), nameProperty));
     }
 
     private void pushdown(Entity verifiedPerson) throws EventGraphException {
@@ -538,8 +554,14 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
 
     public int verify(String person) {
         logger.info("Running Verification on " + person);
+        for (String ann: dataset.getAnnotations()) {
+            if (person.equals(ann)) return 90;
+        }
+
+        return 10;
         //return (int)(Math.random() * 100);
 
+        /*
         File file = dataset.item();
 
         String uid = EntityVoter.getUIDs(person);
@@ -572,6 +594,7 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
         }
 
         return conf;
+        */
     }
 
     private String getUIDConfidence(BasicDBObject obj) {
@@ -665,7 +688,8 @@ public class FirstKDiscoverer extends FirstKAlgorithm {
     }
 
     private boolean terminate(EventGraph graph) {
-        return (discoveryCount >= k);
+        return (discoveredEntities.size() >= k);
+        //return (discoveryCount >= k);
     }
 
     private String getLiteralValue(Individual individual, Property property) {

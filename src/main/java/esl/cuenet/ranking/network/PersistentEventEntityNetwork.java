@@ -2,10 +2,17 @@ package esl.cuenet.ranking.network;
 
 import com.hp.hpl.jena.ontology.OntModel;
 import esl.cuenet.ranking.*;
+import org.apache.log4j.Logger;
+import org.neo4j.cypher.javacompat.ExecutionEngine;
+import org.neo4j.cypher.javacompat.ExecutionResult;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class PersistentEventEntityNetwork implements EventEntityNetwork {
 
@@ -16,10 +23,15 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     private final TextIndex textIndex;
     private final GraphDatabaseService graphDb;
 
-    private Transaction tx;
+    private Logger logger = Logger.getLogger(PersistentEventEntityNetwork.class);
+
+    private Transaction transaction = null;
+
+    private HashMap<String, TextIndex> textIndexMap = new HashMap<String, TextIndex>(5);
+    private List<URINode> events = null;
 
     public PersistentEventEntityNetwork(GraphDatabaseService graphDb) {
-        this(null, null, null, null, null, graphDb);
+        this(null, null, null, new NeoSpatioTemporalIndex(graphDb), null, graphDb);
     }
 
     public PersistentEventEntityNetwork(OntModel model, OntoInstanceFactory factory,
@@ -31,15 +43,22 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
         this.stIndex = stIndex;
         this.textIndex = textIndex;
         this.graphDb = graphDb;
+
+        Index<Node> nodeIndex = graphDb.index().forNodes(EventEntityNetwork.EVENT_INDEX);
+        IndexHits<Node> hits = nodeIndex.get(EntityBase.TYPE, EventEntityNetwork.EVENT);
+
+        events = new ArrayList<URINode>(hits.size());
+        for (Node n: hits) events.add(NeoCache.getInstance().lookupNode(n));
     }
 
     @Override
     public URINode createNode() {
-        tx = graphDb.beginTx();
-        URINode n = new NeoURINode(graphDb.createNode());
-        tx.success();
-        tx.finish();
-        return n;
+        return new NeoURINode(graphDb.createNode());
+    }
+
+    @Override
+    public URINode getNodeById(long id) {
+        return NeoCache.getInstance().lookupNode(graphDb.getNodeById(id));
     }
 
     @Override
@@ -53,13 +72,13 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     }
 
     @Override
-    public SpatioTemporalIndex stIndex() {
+    public SpatioTemporalIndex stIndex(String indexName) {
         return stIndex;
     }
 
     @Override
-    public TextIndex textIndex() {
-        return textIndex;
+    public TextIndex textIndex(String indexName) {
+        return new NeoLuceneIndex(graphDb.index().forNodes(indexName));
     }
 
     @Override
@@ -72,7 +91,50 @@ public class PersistentEventEntityNetwork implements EventEntityNetwork {
     }
 
     @Override
+    public void startBulkLoad() {
+        transaction = graphDb.beginTx();
+    }
+
+    @Override
+    public void finishBulkLoad() {
+        transaction.success();
+        transaction.finish();
+    }
+
+    @Override
+    public void flush() {
+        finishBulkLoad();
+        startBulkLoad();
+    }
+
+    @Override
     public String version() {
-        return null;
+        return UUID.randomUUID().toString();
+    }
+
+    @Override
+    public Iterator<TypedEdge> getEdgesIterator() {
+        logger.info("Loading all relations");
+        List<TypedEdge> edges = new ArrayList<TypedEdge>();
+
+        String query = "START r=rel(*) RETURN r";
+
+        ExecutionEngine engine = new ExecutionEngine( graphDb );
+        ExecutionResult results = engine.execute(query);
+
+        for (Map<String, Object> result: results) {
+            for ( Map.Entry<String, Object> column : result.entrySet() ) {
+                NeoTypedEdge te = new NeoTypedEdge((Relationship) column.getValue());
+                if (column.getKey().equals("r")) edges.add(te);
+            }
+        }
+
+        logger.info("Total Relations: " + edges.size());
+        return edges.iterator();
+    }
+
+    @Override
+    public Iterator<URINode> getEventsIterator() {
+        return events.iterator();
     }
 }

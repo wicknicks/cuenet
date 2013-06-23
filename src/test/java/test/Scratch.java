@@ -56,7 +56,7 @@ public class Scratch extends TestBase {
 
         long st = System.currentTimeMillis();
 
-        firstKDiscoverer.execute(new LocalFileDataset(file));
+        firstKDiscoverer.execute(new LocalFileDataset(file, null));
 
         long et = System.currentTimeMillis();
         el.list("duration = " + (et-st));

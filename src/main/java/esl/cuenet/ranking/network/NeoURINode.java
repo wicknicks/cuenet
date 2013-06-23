@@ -2,45 +2,52 @@ package esl.cuenet.ranking.network;
 
 import esl.cuenet.ranking.TypedEdge;
 import esl.cuenet.ranking.URINode;
+import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NeoURINode implements URINode {
 
-    private Node node = null;
+    Node node = null;
     private List<TypedEdge> outgoingEdges = new ArrayList<TypedEdge>(10);
 
     public NeoURINode(Node node) {
         this.node = node;
-        NeoCache.getInstance().putNode(node.getId(), this);
+        for (Relationship rel: this.node.getRelationships(Direction.BOTH))
+            outgoingEdges.add(new NeoTypedEdge(rel));
+        NeoCache.getInstance().putNode(node, this);
+    }
+
+    @Override
+    public long getId() {
+        return node.getId();
     }
 
     @Override
     public TypedEdge createEdgeTo(URINode uriNode) {
-        Transaction tx = node.getGraphDatabase().beginTx();
         Relationship rel = this.node.createRelationshipTo(((NeoURINode)uriNode).node, NeoRelationships.BLANK);
         TypedEdge edge = new NeoTypedEdge(rel);
         outgoingEdges.add(edge);
-        tx.success();
-        tx.finish();
         return edge;
     }
 
     @Override
+    public boolean hasProperty(String key) {
+        return node.hasProperty(key);
+    }
+
+    @Override
     public void setProperty(String key, Object value) {
-        Transaction tx = node.getGraphDatabase().beginTx();
         node.setProperty(key, value);
-        tx.success();
-        tx.finish();
     }
 
     @Override
     public Object getProperty(String key) {
-        return node.getProperty(key);
+        if (node.hasProperty(key)) return node.getProperty(key);
+        return null;
     }
 
     @Override

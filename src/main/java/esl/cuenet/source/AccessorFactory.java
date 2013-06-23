@@ -61,6 +61,11 @@ public class AccessorFactory {
 
         else if (name.compareTo("conferences") == 0) {
             logger.info("Initializing Conference Accessor");
+            return new ConferenceAccessor(model);
+        }
+
+        else if (name.compareTo("confattendees") == 0) {
+            logger.info("Initializing Conference Accessor");
             return new ConferenceAttendeeAccessor(model);
         }
 
