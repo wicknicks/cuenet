@@ -78,7 +78,8 @@ def generate_full_depth(event, events, seen, writer, maxdepth=5, maxsubs=10):
 def generate_zone(count, writer, maxdepth=5, maxsubs=10):
   var = 1.0
   zone=[0, 0, 0]
-  events = [i for i in range(count)] 
+  events = [i for i in range(count)]
+  writer.write_header(count, maxdepth, maxsubs) 
   for i in range(count):
     r = abs(random.gauss(0, var)) 
     if r < 0.75 * var: 
