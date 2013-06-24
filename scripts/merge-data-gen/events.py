@@ -15,15 +15,21 @@ class NestedEvent:
       self.subevents.extend(subs)
     for e in self.subevents: e.extend(parent, subs)
 
+  def randomize(self, ne=None, maxsubeventrepeat=3):
+    if ne==None: ne = NestedEvent(self.eid)
+    for sub in self.subevents:
+      for j in range(random.randint(0, maxsubeventrepeat)):
+        ne.subevents.append(NestedEvent(sub))
+    for sub in ne.subevents: 
+      sub.randomize(sub)
+    return ne
+
   def __str__(self):
     s = '(' + str(self.eid) + " ->"
-    for e in self.subevents: s += ' ' + str(e) + '\n'
+    for e in self.subevents: s += ' ' + str(e)
     return s + ')'
 
 interval = Interval()
-
-def gen_event():
-  pass
 
 if __name__ == '__main__':
   roadnetfile = open('/data/osm/uci.roadnet')
@@ -71,21 +77,24 @@ if __name__ == '__main__':
 
   ontfile.close()
 
-  allevents = set()
-  for i in range(ontconfig[0]): allevents.add(i)
-  atomicevents = allevents - events
-  print('ATOM', sorted(atomicevents) , len(nestedevents))
-  print('HALF', sorted(halfevents), len(halfevents))
-  print('FULL', sorted(fullevents), len(fullevents))
+  ne = nestedeventsindex[nestedeventsindex.keys()[0]].randomize()
+  print ne
 
-  print('INTERVAL', interval.start, interval.end)
+  # allevents = set()
+  # for i in range(ontconfig[0]): allevents.add(i)
+  # atomicevents = allevents - events
+  # print('ATOM', sorted(atomicevents) , len(nestedevents))
+  # print('HALF', sorted(halfevents), len(halfevents))
+  # print('FULL', sorted(fullevents), len(fullevents))
 
-  # for one edge
-  testedge = edges.keys()[0]
-  for node in edges[testedge]:
-    spans = random.randint(2, 5)
-    for i in range(spans):
-      eid = random.randint(0, ontconfig[0]-1)
-      print (eid, node, i*interval.end/spans, (i+1) * interval.end/spans, spans)
-      if eid in nestedeventsindex: print eid, 'nested'
-    print ''
+  # print('INTERVAL', interval.start, interval.end)
+
+  # # for one edge
+  # testedge = edges.keys()[0]
+  # for node in edges[testedge]:
+  #   spans = random.randint(2, 5)
+  #   for i in range(spans):
+  #     eid = random.randint(0, ontconfig[0]-1)
+  #     print (eid, node, i*interval.end/spans, (i+1) * interval.end/spans, spans)
+  #     if eid in nestedeventsindex: print eid, 'nested'
+  #   print ''
