@@ -9,6 +9,9 @@ target/
 #pyc
 *.pyc
 
+#logs
+*.logs
+
 #javacc output folders
 src/main/java/esl/cuenet/mapper/parser/
 src/main/java/esl/cuenet/model/pattern/
