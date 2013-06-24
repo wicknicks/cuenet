@@ -77,10 +77,12 @@ def sync(FLOW, code, email):
 
 if __name__ == "__main__":
   client, pubsub = initRedis()
+  msg = pubsub.listen().next()   #addition. untested; change for Laleh's work
   while True:
     print 'Listening.... '
     msg = pubsub.listen().next()
     jdata = msg['data']
+    print jdata, msg
     jdata = json.loads(msg['data'])
     
     if jdata['op'] == 'auth':
