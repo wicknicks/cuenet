@@ -11,27 +11,43 @@ class NestedEvent:
     self.subevents = []
 
   def extend(self, parent, subs):
+    # print 'extend eid', self.eid
     if self.eid == parent:
       self.subevents.extend(subs)
     for e in self.subevents: e.extend(parent, subs)
 
   def randomize(self, ne=None, maxsubeventrepeat=3):
+    print 'eid', self.eid, type(self.eid)
     if ne==None: ne = NestedEvent(self.eid)
     for sub in self.subevents:
-      for j in range(random.randint(0, maxsubeventrepeat)):
-        ne.subevents.append(NestedEvent(sub))
-    for sub in ne.subevents: 
-      sub.randomize(sub)
+      r = range(random.randint(0, maxsubeventrepeat))
+      print 'R', sub.eid, r
+      for j in r:
+        _rsub = NestedEvent(sub.eid)
+        ne.subevents.append(_rsub)
+        sub.randomize(_rsub)
     return ne
 
   def __str__(self):
-    s = '(' + str(self.eid) + " ->"
+    s = '(' + str(self.eid) 
+    if len(self.subevents) > 0: s += " ->"
     for e in self.subevents: s += ' ' + str(e)
     return s + ')'
 
-interval = Interval()
-
 if __name__ == '__main__':
+  ne = NestedEvent(1)
+  ne.extend(1, map(lambda a: NestedEvent(a), [2, 3]))
+  ne.extend(2, map(lambda a: NestedEvent(a), [4, 5]))
+  ne.extend(3, map(lambda a: NestedEvent(a), [7, 6]))
+  ne.extend(4, map(lambda a: NestedEvent(a), [8]))
+  ne.extend(5, map(lambda a: NestedEvent(a), [9]))
+  print 'NE', ne
+  r = ne.randomize()
+  print 'NER', r
+
+if __name__ == '__main__2': #don't run this
+  interval = Interval()
+
   roadnetfile = open('/data/osm/uci.roadnet')
   line = roadnetfile.readline().strip()
   roadnodes, roadedges = map(lambda a: int(a), line.split(','))
@@ -78,6 +94,7 @@ if __name__ == '__main__':
   ontfile.close()
 
   ne = nestedeventsindex[nestedeventsindex.keys()[0]].randomize()
+  print nestedeventsindex[nestedeventsindex.keys()[0]]
   print ne
 
   # allevents = set()
