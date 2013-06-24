@@ -2,24 +2,34 @@ import os, sys, time, json
 import imaplib, getpass
 from email import parser
 import re, argparse
+import logging
+
+#setup logger
+logger = logging.getLogger('em-sync')
+handler = logging.FileHandler('sync.logs')
+formatter = logging.Formatter('%(asctime)s %(funcName)s %(lineno)d %(levelname)s %(message)s')
+handler.setFormatter(handler)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 # Username for the email account
 # Gmail: arjun.satish (for arjun.satish@gmail.com)
 # UCI: arjun (for arjun@uci.edu or arjun@ics.uci.edu)
-USERNAME = 'cuenetemailtest'
+USERNAME = 'jain'
 
 # Location of the IMAP server 
-# mail.ucsd.edu for UCSD
-# imap.sdsc.edu for SDSC
-# imap.gmail.com for Gmail
-IMAP_SERVER = 'imap.gmail.com'
+# IMAP_SERVER = 'mail.ucsd.edu'    ## for UCSD
+# IMAP_SERVER = 'imap.sdsc.edu'    ## for SDSC
+# IMAP_SERVER = 'imap.gmail.com'   ## for Gmail
+# IMAP_SERVER = 'imap.ics.uci.edu' ## for ICS 
+IMAP_SERVER = 'imap.ics.uci.edu'
 OUTPUT_FILE = None
 IMAP_PORT = 993                      # for secure connection, otherwise 143
 MAILBOXES = []
 PASSWORD = None
 
-START_DATE = '1-Sep-2012'
-END_DATE = '15-Dec-2012'
+START_DATE = '1-Jun-2010'
+END_DATE = '31-Dec-2010'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-i', '--imap', help='IMAP Server (like imap.sdsc.edu)')
@@ -132,7 +142,8 @@ def close(mail):
   
 if __name__ == "__main__":
 
-  if OUTPUT_FILE == None: OUTPUT_FILE = '/data/email/' + USERNAME
+  if OUTPUT_FILE == None: 
+    OUTPUT_FILE = '/data/email/' + USERNAME
   
   if args['unsafe'] != 'y':
     if os.path.exists(OUTPUT_FILE): 
@@ -145,16 +156,19 @@ if __name__ == "__main__":
   for mailbox in MAILBOXES:
     print ('Selecting folder', mailbox)
     rc, data = mail.select(mailbox)
-    #print (rc, data[0], mailbox)
     if data[0].decode('utf-8') == '0': continue
-    #uids = get_uids(mail, '(SINCE "25-Jul-2012")')  
     uids = get_uids(mail, '(SINCE "' + START_DATE + '" BEFORE "' + END_DATE + '")')
     print ('Got', len(uids), 'uids in: ', mailbox)
     ix=0
     for uid in uids:
-      sync(uid)
+      try:
+        sync(uid)
+      except Exception, e:
+        logger.error('Exception raised in syncing', uid)
       ix += 1
-      if ix % 200 == 0: print ('Got %d emails' % ix)
+      if ix % 200 == 0: 
+        print ('Got %d emails' % ix)
+        logger.info('Got %d emails' % ix)
   close(mail)
   cFile.flush()
   cFile.close()
