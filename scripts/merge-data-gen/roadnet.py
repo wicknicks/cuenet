@@ -29,7 +29,7 @@ def get_node_refs(edge):
       refs.append(child.attrib['ref'])
   return refs
 
-def combine():
+def combine(nodelimit = 50000):
   queue = deque()
   network = []
   
@@ -39,12 +39,17 @@ def combine():
   network.append(edge_id)
   del edges[edge_id]
   
+  lim = len(queue)
+
   while len(queue) > 0:
+    if lim > nodelimit: break
     node = queue.popleft()
     if node in nodemap:
       for edge_id in nodemap[node]: #all connecting edges from this node
         if edge_id not in edges: continue #we have seen it before
-        for ref in get_node_refs(edges[edge_id]): queue.append(ref)
+        for ref in get_node_refs(edges[edge_id]): 
+          queue.append(ref)
+          if ref in nodes: lim += 1
         network.append(edge_id)
         del edges[edge_id]
 
@@ -75,9 +80,38 @@ def prep_kml(network, ofile):
   print('Network places: ', nodec)
   ofile.close()
 
+def prep_file_dump(network, ofile):
+  edgec = len(network)
+  nodec = 0
+  illegal_edges = {}
+  for edge_id in network:
+    for ref in get_node_refs(edges[edge_id]):
+      if ref not in nodes: 
+        illegal_edges[edge_id] = True
+        continue
+      nodec += 1
+  ofile.write(str(nodec) + "," + str(edgec) + '\n')
+
+  # Write nodes
+  for edge_id in network:
+    for ref in get_node_refs(edges[edge_id]):
+      if ref not in nodes: continue
+      ofile.write(nodes[ref].attrib['id'] + "," + nodes[ref].attrib['lon'] + "," + nodes[ref].attrib['lat'] + "\n")
+
+  # Write edges
+  for edge_id in network:
+    if edge_id not in illegal_edges:
+      ofile.write(edge_id + ' -> ')
+      for ref in get_node_refs(edges[edge_id]):
+        ofile.write(nodes[ref].attrib['id'] + ' ')
+      ofile.write('\n')
+
+
+  ofile.close()
+
 if __name__ == "__main__":
 
-  filx = '/data/osm/karnataka.highway.osm'
+  filx = '/data/osm/uci.osm'
   print 'Loading...', filx
   mydoc = ET.parse(filx)
   root = mydoc.getroot()
@@ -93,10 +127,11 @@ if __name__ == "__main__":
   print ('From OSM: ', len(nodes), len(edges), len(nodemap))
 
   edge_bk = dict(edges)
-  net = combine()
+  net = combine(500)
   edges = edge_bk
 
-  prep_kml(net, open('/data/osm/karnataka.kml', 'w'))
+  prep_file_dump(net, open('/data/osm/uci.roadnet', 'w'))
+  # prep_kml(net, open('/data/osm/karnataka.kml', 'w'))
 
   # c=len(mydoc.findall("./way/tag[@v='traffic_signals']"))
   # d=len(mydoc.findall("./way/tag[@k='name']"))

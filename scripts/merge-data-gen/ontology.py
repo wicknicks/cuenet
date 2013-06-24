@@ -99,7 +99,7 @@ def generate_zone(count, writer, maxdepth=5, maxsubs=10):
   print(zone)
 
 if __name__ == '__main__':
-  writer = Writer('events.ont')
+  writer = Writer('/data/osm/events.ont')
   generate_zone(100, writer, 3, 3)
   writer.close()
 
