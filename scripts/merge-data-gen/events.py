@@ -1,4 +1,4 @@
-import random, math
+import random, math, sys
 
 class Interval:
   def __init__(self):
@@ -41,6 +41,15 @@ class NestedEvent:
     if self.instance: return str(self.instance)
     return str(self.eid)
 
+  def serialize(self, writer):
+    if len(self.subevents) == 0: return
+    for e in self.subevents:
+      writer.write(self.instance)
+      writer.write(' -> ')
+      writer.write(e.instance)
+      writer.write('\n')
+      e.serialize(writer)
+
   def __str__(self):
     if len(self.subevents) == 0: return self.str_eid()
     s = '(' + self.str_eid()
@@ -61,9 +70,11 @@ def testRandomize():
   r = ne.randomize()
   print 'NER', r
 
-#testRandomize()
+  r.serialize(sys.stdout)
 
-if __name__ == '__main__':
+testRandomize()
+
+if __name__ == '__main__2':
   interval = Interval()
 
   roadnetfile = open('/data/osm/uci.roadnet')
