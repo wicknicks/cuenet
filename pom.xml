@@ -58,6 +58,11 @@
                 <enabled>true</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>jsi.sourceforge.net</id>
+            <name>sourceforge jsi repository</name>
+            <url>http://sourceforge.net/projects/jsi/files/m2_repo</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -116,6 +121,11 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.jsi</groupId>
+            <artifactId>jsi</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
