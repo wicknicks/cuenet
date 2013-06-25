@@ -72,9 +72,9 @@ def testRandomize():
 
   r.serialize(sys.stdout)
 
-testRandomize()
+#testRandomize()
 
-if __name__ == '__main__2':
+if __name__ == '__main__':
   interval = Interval()
 
   roadnetfile = open('/data/osm/uci.roadnet')
@@ -146,18 +146,25 @@ if __name__ == '__main__2':
       for i in range(spans):
         eid = random.randint(0, ontconfig[0]-1)
         
-        ''' skip large events'''
+        ''' skip very large events'''
         if eid in fullevents: continue
-        # if eid in halfevents: continue
+        elif eid in halfevents: pass
+        else:
+          ## generate instances for atomic events
+          _instanceid = str(eid) + '_' + str(NestedEvent.GenCounts[eid])
+          NestedEvent.GenCounts[eid] += 1
         
         if eid in nestedeventsindex: 
+          _randomevent = nestedeventsindex[eid].randomize()
+          _instanceid = _randomevent.instance
           print eid, node, i*interval.end/spans, (i+1) * interval.end/spans, 'R'
-          eventfile.write(str(eid) + ',' + str(i*interval.end/spans) + ',' + str((i+1) * interval.end/spans))
-          eventfile.write(',' + str(nestedeventsindex[eid].randomize()))
-          eventfile.write('\n')
+          eventfile.write(_instanceid + ',' + str(i*interval.end/spans) + ',' + str((i+1) * interval.end/spans))
+          eventfile.write(',R\n')
+          _randomevent.serialize(eventfile)
+          eventfile.write('.\n')
         else:
           print eid, node, i*interval.end/spans, (i+1) * interval.end/spans
-          eventfile.write(str(eid) + ',' + str(i*interval.end/spans)+ ',' + str((i+1) * interval.end/spans))
+          eventfile.write(_instanceid + ',' + str(i*interval.end/spans)+ ',' + str((i+1) * interval.end/spans))
           eventfile.write('\n')
 
   eventfile.close()
