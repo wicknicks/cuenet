@@ -77,7 +77,12 @@ def testRandomize():
 if __name__ == '__main__':
   interval = Interval()
 
-  roadnetfile = open('/data/osm/uci.roadnet')
+  eventfile = open('/data/osm/instance.sim', 'w')
+
+  _roadnetfile = '/data/osm/uci.roadnet'
+  eventfile.write(_roadnetfile + " " + str(interval.start) + " " + str(interval.end) + '\n')
+
+  roadnetfile = open(_roadnetfile)
   line = roadnetfile.readline().strip()
   roadnodes, roadedges = map(lambda a: int(a), line.split(','))
   print 'ROAD', roadnodes, 'nodes & ', roadedges, 'edges'
@@ -132,15 +137,14 @@ if __name__ == '__main__':
   for i in range(ontconfig[0]): allevents.add(i)
   atomicevents = allevents - events
   
-  eventfile = open('/data/osm/events.sim', 'w')
-  
   # for one edge
+  count = 0
   for edgeix in range(10):
     testedge = edges.keys()[edgeix]
-    eventfile.write('##' + str(testedge) + '\n')
-    print 'testedge:', testedge
+    eventfile.write('## ' + str(testedge) + '\n')
+    # print 'testedge:', testedge
     for node in edges[testedge]:
-      eventfile.write('#' + str(node))
+      eventfile.write('$$ ' + str(node))
       eventfile.write('\n')
       spans = random.randint(2, 5)
       for i in range(spans):
@@ -154,17 +158,20 @@ if __name__ == '__main__':
           _instanceid = str(eid) + '_' + str(NestedEvent.GenCounts[eid])
           NestedEvent.GenCounts[eid] += 1
         
+        count+=1
+
         if eid in nestedeventsindex: 
           _randomevent = nestedeventsindex[eid].randomize()
           _instanceid = _randomevent.instance
-          print eid, node, i*interval.end/spans, (i+1) * interval.end/spans, 'R'
+          # print eid, node, i*interval.end/spans, (i+1) * interval.end/spans, 'R'
           eventfile.write(_instanceid + ',' + str(i*interval.end/spans) + ',' + str((i+1) * interval.end/spans))
           eventfile.write(',R\n')
           _randomevent.serialize(eventfile)
           eventfile.write('.\n')
         else:
-          print eid, node, i*interval.end/spans, (i+1) * interval.end/spans
+          # print eid, node, i*interval.end/spans, (i+1) * interval.end/spans
           eventfile.write(_instanceid + ',' + str(i*interval.end/spans)+ ',' + str((i+1) * interval.end/spans))
           eventfile.write('\n')
 
+  print count, 'events generated'
   eventfile.close()
