@@ -18,6 +18,6 @@ public class DataReaderTest {
         System.out.println(network1.count());
         System.out.println(network2.count());
 
-        network1.merge(network2);
+        //network1.merge(network2);
     }
 }
