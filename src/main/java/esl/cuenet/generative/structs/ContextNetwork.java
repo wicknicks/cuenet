@@ -120,6 +120,15 @@ public class ContextNetwork {
             }
             else if (STHelper.contains(other.root, subtree.root) && STHelper.lequals(subtree.root, other.root)) {
                 System.out.println(subtree.root + " " + other.root + " new root");
+                Instance oldroot = subtree.root;
+                subtree.root = other.root;
+                if (subtree.typeIndex.containsKey(subtree.root.id.eventId))
+                    throw new RuntimeException("New root cannot have subevents");
+                else {
+                    HashSet<Instance> rootsubs = new HashSet<Instance>();
+                    rootsubs.add(oldroot);
+                    subtree.typeIndex.put(subtree.root.id.eventId, rootsubs);
+                }
             }
         }
     }

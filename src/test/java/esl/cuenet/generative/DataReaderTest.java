@@ -77,10 +77,16 @@ public class DataReaderTest {
 
         network3.addAtomic(i46_0);
 
+        ContextNetwork network4 = new ContextNetwork();
+        ContextNetwork.Instance i1_0 = new ContextNetwork.Instance(1, 0);
+        i1_0.setLocation(location);
+        i1_0.setInterval(0, 10000);
+        network4.addAtomic(i1_0);
 
 
         network1.merge(network2);
         network1.merge(network3);
+        network1.merge(network4);
 
         System.out.println("Merge");
     }
