@@ -342,10 +342,7 @@ public class ContextNetwork {
 
             InstanceId that = (InstanceId) o;
 
-            if (eventId != that.eventId) return false;
-            if (instanceId != that.instanceId) return false;
-
-            return true;
+            return eventId == that.eventId && instanceId == that.instanceId;
         }
 
         @Override
@@ -358,6 +355,33 @@ public class ContextNetwork {
         @Override
         public String toString() {
             return eventId + "_" + instanceId;
+        }
+    }
+
+    public static class Entity {
+        String type;  //person, organization, company or place
+        String id;    //arjun, uci, starbucks corp or "Mason Park"
+
+        public Entity(String type, String id) {
+            this.id = id;
+            this.type = type;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = type != null ? type.hashCode() : 0;
+            result = 31 * result + (id != null ? id.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Entity that = (Entity) o;
+
+            return id.equals(that.id) && type.equals(that.type);
         }
     }
 }
