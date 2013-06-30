@@ -21,6 +21,31 @@ public class JSIBenchmark {
         int end;
     }
 
+    @Test
+    public void retrieveTest() {
+        SpatialIndex si = new RTree();
+        si.init(null);
+
+        int lim = 10;
+        for (int i=0; i < lim; i++) {
+            Rectangle r = new Rectangle(1+i, 1, 22-i, 2);
+            si.add(r, i);
+            System.out.println("Inserting " + r + " " + i);
+        }
+
+        Rectangle query = new Rectangle((float) 7.5, 1, (float)11.5, 2);
+
+        TIntProcedure proc = new TIntProcedure() {
+            @Override
+            public boolean execute(int i) {
+                System.out.println(i);
+                return true;
+            }
+        };
+
+        si.intersects(query, proc);
+    }
+
     public long insertbench(int intervalCount) {
         // Create and initialize an rtree
         SpatialIndex si = new RTree();
@@ -96,7 +121,7 @@ public class JSIBenchmark {
 
             //System.out.println(Math.abs(e-s) + " " + count[0] * span);
         }
-        
+
         long diff = System.currentTimeMillis() - start;
         System.out.println("Time taken to query: " + diff);
         System.out.println("Average time for one query: " + (double) diff/queries);
