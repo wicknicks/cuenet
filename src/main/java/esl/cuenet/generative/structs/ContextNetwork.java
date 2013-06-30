@@ -1,5 +1,7 @@
 package esl.cuenet.generative.structs;
 
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 public class ContextNetwork {
@@ -51,9 +53,9 @@ public class ContextNetwork {
         }
 
         if (subeventInstances.contains(subevent))
-            throw new RuntimeException("WTF " + current + " " + subevent);
-
-        subeventInstances.add(subevent);
+            System.out.println("subevent already exists: " + current + " " + subevent);
+        else
+            subeventInstances.add(subevent);
     }
 
     public int count() {
@@ -78,10 +80,11 @@ public class ContextNetwork {
 
     private Instance lookup(IndexedSubeventTree root, InstanceId id) {
         HashSet<Instance> instances = root.typeIndex.get(id.eventId);
+        if (instances == null) throw new NullPointerException(id.toString());
         for (Instance i: instances) {
             if (i.id.equals(id)) return i;
         }
-        throw new NoSuchElementException(id.toString());
+        throw new NoSuchElementException(root.toString() + " " + id.toString());
     }
 
     private void updateTimeIntervals(IndexedSubeventTree root, Instance current) {
@@ -102,81 +105,100 @@ public class ContextNetwork {
     }
 
     public void merge (ContextNetwork other) {
-        for (IndexedSubeventTree subTree: other.eventTrees)
-            merge(subTree);
+        for (IndexedSubeventTree thisSub: this.eventTrees)
+            for (IndexedSubeventTree otherTree: other.eventTrees)
+                descendAndMerge(thisSub, otherTree);
+
+//        for (IndexedSubeventTree otherTree: other.eventTrees) merge(otherTree);
     }
 
-    private void merge(IndexedSubeventTree other) {
-        for (IndexedSubeventTree subtree: this.eventTrees) {
-            if (STHelper.tequals(subtree.root, other.root) && STHelper.lequals(subtree.root, other.root)) {
-                //merge subevents
-                mergeInformation(subtree.root, other.root);
-                for (InstanceId otherSubs: other.root.immediateSubevents)
-                    descend(subtree, other, subtree.root, lookup(other, otherSubs));
+    private void descendAndMerge(IndexedSubeventTree subtree, IndexedSubeventTree other) {
+        if (!STHelper.lequals(subtree.root, other.root)) return;
+
+        if (STHelper.tequals(subtree.root, other.root)) {
+            mergeInformation(subtree.root, other.root);
+            for (InstanceId oSubeventId: other.root.immediateSubevents) {
+                Instance s = lookup(other, oSubeventId);
+                recursiveMerge(subtree, subtree.root, other, s);
             }
-            else if (STHelper.contains(subtree.root, other.root) && STHelper.lequals(subtree.root, other.root)) {
-                System.out.println(subtree.root + " " + other.root + " this tree will contain other");
-                descend(subtree, other, subtree.root, other.root);
-            }
-            else if (STHelper.contains(other.root, subtree.root) && STHelper.lequals(subtree.root, other.root)) {
-                System.out.println(subtree.root + " " + other.root + " new root");
-                Instance oldroot = subtree.root;
-                subtree.root = other.root;
-                if (subtree.typeIndex.containsKey(subtree.root.id.eventId))
-                    throw new RuntimeException("New root cannot have subevents");
-                else {
-                    HashSet<Instance> rootsubs = new HashSet<Instance>();
-                    rootsubs.add(oldroot);
-                    subtree.typeIndex.put(subtree.root.id.eventId, rootsubs);
+        }
+        else if (STHelper.contains(subtree.root, other.root)) {
+            recursiveMerge(subtree, subtree.root, other, other.root);
+        } else if (STHelper.contains(other.root, subtree.root)) {
+            Instance new_root = other.root.attributeClone();
+            Instance old_root = subtree.root;
+            subtree.root = new_root;
+            addSubeventEdge(subtree.root, subtree.root, old_root);
+            System.out.println("new root " + other.root + " " + subtree.root);
+        }
+    }
+
+    //the parent is guranteed to contain instance. RM will decide to either
+    // (a) add as a subevent to parent
+    // (b) push instance down to one of its immediate subevents.
+    // (c) insert between parent and one of its immediate subevents.
+    private void recursiveMerge(IndexedSubeventTree subtree, Instance parent,
+                                IndexedSubeventTree other, Instance instance) {
+        boolean addAsSubevent = true;
+
+        if ( !STHelper.lequals(parent, instance) ) return;
+
+        //check if any of the immediate subevents accepts instance
+        for (InstanceId subs: parent.immediateSubevents) {
+            Instance subevent = lookup(subtree, subs);
+            if (STHelper.tequals(subevent, instance)) {
+                addAsSubevent = false;
+                mergeInformation(subevent, instance);
+                for (InstanceId osubs: instance.immediateSubevents) {
+                    Instance s = lookup(other, osubs);
+                    recursiveMerge(subtree, subevent, other, s);
                 }
             }
-        }
-    }
+            else if (STHelper.contains(subevent, instance)) {
+                addAsSubevent = false;
+                recursiveMerge(subtree, subevent, other, instance);
+            }
+            else if (STHelper.contains(instance, subevent)) {
+                addAsSubevent = false;
 
-    private void recursiveSubeventTreeMerge(IndexedSubeventTree subtree, IndexedSubeventTree otherTree,
-                                            Instance thisParent, Instance otherInstance) {
-        if (thisParent.immediateSubevents.size() == 0) {
-            addSubeventEdge(subtree.root, thisParent, otherInstance);
-            return;
-        }
-        for (InstanceId thisSub: thisParent.immediateSubevents) {
-            Instance thisSubevent = lookup(subtree, thisSub);
-            if (STHelper.tequals(thisSubevent, otherInstance) && STHelper.lequals(thisSubevent, otherInstance)) {
-                mergeInformation(thisSubevent, otherInstance);
-                for (InstanceId otherSubs: otherInstance.immediateSubevents)
-                    recursiveSubeventTreeMerge(subtree, otherTree, thisSubevent, lookup(otherTree, otherSubs));
-            }
-            if (STHelper.contains(thisSubevent, otherInstance) && STHelper.lequals(thisSubevent, otherInstance)) {
-                descend(subtree, otherTree, thisParent, otherInstance);
-            }
-            if (STHelper.contains(otherInstance, thisSubevent) && STHelper.lequals(thisSubevent, otherInstance)) {
-                System.out.println("This should have been handled");
-            }
-        }
-    }
+                Instance new_i = instance.attributeClone();
 
-    private void descend(IndexedSubeventTree subtree, IndexedSubeventTree otherTree, Instance thisParent, Instance otherInstance) {
-        Instance containingSubevent = null;
-        int count = 0;
-        for (InstanceId otherSubs: thisParent.immediateSubevents) {
-            Instance temp = lookup(subtree, otherSubs);
-            if (STHelper.contains(temp, otherInstance) && STHelper.lequals(temp, otherInstance)) {
-                count +=1;
-                containingSubevent = temp;
+                parent.immediateSubevents.remove(subevent.id);
+
+                addSubeventEdge(subtree.root, parent, new_i);
+                addSubeventEdge(subtree.root, new_i, subevent);
+
+                for (InstanceId osubs: instance.immediateSubevents) {
+                    Instance s = lookup(other, osubs);
+                    recursiveMerge(subtree, new_i, other, s);
+                }
+                break;
             }
         }
 
-        if (count == 0) { //this is a new subevent of thisParent
-            addSubeventEdge(subtree.root, thisParent, otherInstance);
-        } else if (count == 1) { //move deeper
-            recursiveSubeventTreeMerge(subtree, otherTree, containingSubevent, otherInstance);
-        } else {  //not yet
-            throw new RuntimeException("Multiple overlapping subevents");
+        if (addAsSubevent) {
+            Instance new_i = instance.attributeClone();
+            addSubeventEdge(subtree.root, parent, new_i);
+            for (InstanceId osubs: instance.immediateSubevents) {
+                Instance s = lookup(other, osubs);
+                recursiveMerge(subtree, new_i, other, s);
+            }
         }
     }
 
     private void mergeInformation(Instance thisSubevent, Instance otherInstance) {
         System.out.println("[merge_info] " + thisSubevent + " " + otherInstance);
+    }
+
+    public void printTree() {
+        for (IndexedSubeventTree etree: eventTrees)
+            etree.print(System.out);
+    }
+
+    public void printTree(int root_eventid, int root_instanceid) {
+        for (IndexedSubeventTree etree: eventTrees)
+            if (etree.root.id.eventId == root_eventid && etree.root.id.instanceId == root_instanceid)
+                etree.print(System.out);
     }
 
     private class IndexedSubeventTree {
@@ -186,6 +208,27 @@ public class ContextNetwork {
         @Override
         public String toString() {
             return root.toString();
+        }
+
+        public void print(PrintStream out) {
+            try {
+                out.write(("ROOT " + root + "\n").getBytes());
+                Stack<InstanceId> stack = new Stack<InstanceId>();
+                stack.add(root.id);
+                while (!stack.isEmpty()) {
+                    InstanceId i = stack.pop();
+                    for (InstanceId subids: lookup(this, i).immediateSubevents) {
+                        out.write(i.toString().getBytes());
+                        out.write(" -> ".getBytes());
+                        out.write(subids.toString().getBytes());
+                        out.write("\n".getBytes());
+                        stack.add(subids);
+                    }
+                }
+                out.write(".\n".getBytes());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -207,6 +250,15 @@ public class ContextNetwork {
         public void setInterval(int start, int end) {
             this.intervalStart = start;
             this.intervalEnd = end;
+        }
+
+        // create a clone of this instance without the immediate subevents.
+        public Instance attributeClone() {
+            Instance instance = this;
+            Instance new_i = new Instance(instance.id.eventId, instance.id.instanceId);
+            new_i.setInterval(instance.intervalStart, instance.intervalEnd);
+            new_i.setLocation(instance.location);
+            return new_i;
         }
 
         @Override
