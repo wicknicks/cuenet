@@ -31,7 +31,7 @@ public class DataReaderTest {
     }
 
     @Test
-    public void mergeTest1() throws Exception {
+    public void compareNetworksTest() throws Exception {
         DataReader dReader = new DataReader();
 
         ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim");
