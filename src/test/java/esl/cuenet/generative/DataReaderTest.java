@@ -1,7 +1,7 @@
 package esl.cuenet.generative;
 
 import esl.cuenet.generative.structs.ContextNetwork;
-import esl.cuenet.generative.structs.Ontology;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class DataReaderTest {
@@ -36,11 +36,12 @@ public class DataReaderTest {
 
         ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim");
         ContextNetwork network2 = dReader.readInstanceGraphs("/data/osm/instance.sim");
+        ContextNetwork network_small = dReader.readInstanceGraphs("/data/osm/inst-small.sim");
 
-        System.out.println(network1.count());
-        System.out.println(network2.count());
+        System.out.println(network1.count() + " " + network2.count() + " " + network_small.count());
 
-        network1.merge(network2);
+        Assert.assertEquals(network1.compareNetwork(network2), true);
+        Assert.assertEquals(network1.compareNetwork(network_small), false);
     }
 
 }

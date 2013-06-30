@@ -1,9 +1,22 @@
 package esl.cuenet.generative;
 
 import esl.cuenet.generative.structs.ContextNetwork;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class MergeTests {
+
+    @Test
+    public void mergeTest1() throws Exception {
+        DataReader dReader = new DataReader();
+
+        ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim");
+        ContextNetwork network2 = dReader.readInstanceGraphs("/data/osm/instance.sim");
+
+        Assert.assertEquals(network1.compareNetwork(network2), true);
+        network1.merge(network2);
+        Assert.assertEquals(network1.compareNetwork(network2), true);
+    }
 
     @Test
     public void mergeTest2() throws Exception {
