@@ -72,6 +72,23 @@ public class MergeTests {
         network1.merge(network4);
         network1.printTree();
 
+        ContextNetwork network5 = new ContextNetwork();
+        ContextNetwork.Instance i2_0 = new ContextNetwork.Instance(2, 0);
+        i2_0.setLocation(location);
+        i2_0.setInterval(0, 9000);
+        ContextNetwork.Instance i3_0 = new ContextNetwork.Instance(3, 0);
+        i3_0.setLocation(location);
+        i3_0.setInterval(0, 8500);
+        ContextNetwork.Instance i4_0 = new ContextNetwork.Instance(4, 0);
+        i4_0.setLocation(location);
+        i4_0.setInterval(0, 8000);
+        network5.addAtomic(i2_0);
+        network5.addSubeventEdge(i2_0, i2_0, i3_0);
+        network5.addSubeventEdge(i2_0, i3_0, i4_0);
+
+        network1.merge(network5);
+        network1.printTree();
+
         System.out.println("Merge");
     }
 

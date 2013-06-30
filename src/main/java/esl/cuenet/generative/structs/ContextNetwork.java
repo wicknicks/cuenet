@@ -130,6 +130,10 @@ public class ContextNetwork {
             subtree.root = new_root;
             addSubeventEdge(subtree.root, subtree.root, old_root);
             System.out.println("new root " + other.root + " " + subtree.root);
+            for (InstanceId oSubeventId: other.root.immediateSubevents) {
+                Instance s = lookup(other, oSubeventId);
+                recursiveMerge(subtree, subtree.root, other, s);
+            }
         }
     }
 
