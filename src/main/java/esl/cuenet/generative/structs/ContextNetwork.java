@@ -11,7 +11,9 @@ public class ContextNetwork {
     public void addAtomic(Instance inst) {
         IndexedSubeventTree tree = new IndexedSubeventTree();
         tree.root = inst;
-        tree.typeIndex.put(inst.id.eventId, new HashSet<Instance>());
+        HashSet<Instance> instances = new HashSet<Instance>();
+        instances.add(inst);
+        tree.typeIndex.put(inst.id.eventId, instances);
         eventTrees.add(tree);
     }
 
@@ -52,14 +54,23 @@ public class ContextNetwork {
             subtree.typeIndex.put(subevent.id.eventId, subeventInstances);
         }
 
-        if (subeventInstances.contains(subevent))
-            System.out.println("subevent already exists: " + current + " " + subevent);
-        else
+        if (subeventInstances.contains(subevent)) {
+//            System.out.println("subevent already exists: " + current + " " + subevent);
+        }
+        else {
             subeventInstances.add(subevent);
+        }
     }
 
     public int count() {
         return eventTrees.size();
+    }
+
+    public int nodeCount() {
+        int count = 0;
+        for (IndexedSubeventTree e: eventTrees)
+            count += e.nodeCount();
+        return count;
     }
 
     protected Instance lookup(IndexedSubeventTree root, InstanceId id) {
@@ -73,6 +84,10 @@ public class ContextNetwork {
 
 
     public void merge (ContextNetwork other) {
+        if (this.eventTrees.size() == 0) {
+            this.eventTrees.addAll(other.eventTrees);
+            return;
+        }
         for (IndexedSubeventTree thisSub: this.eventTrees)
             for (IndexedSubeventTree otherTree: other.eventTrees)
                 descendAndMerge(thisSub, otherTree);
@@ -97,7 +112,7 @@ public class ContextNetwork {
             Instance old_root = subtree.root;
             subtree.root = new_root;
             addSubeventEdge(subtree.root, subtree.root, old_root);
-            System.out.println("new root " + other.root + " " + subtree.root);
+//            System.out.println("new root " + other.root + " " + subtree.root);
             for (InstanceId oSubeventId: other.root.immediateSubevents) {
                 Instance s = lookup(other, oSubeventId);
                 recursiveMerge(subtree, subtree.root, other, s);
@@ -159,7 +174,7 @@ public class ContextNetwork {
     }
 
     private void mergeInformation(Instance thisSubevent, Instance otherInstance) {
-        System.out.println("[merge_info] " + thisSubevent + " " + otherInstance);
+        //System.out.println("[merge_info] " + thisSubevent + " " + otherInstance);
     }
 
     public void printTree() {
@@ -242,6 +257,13 @@ public class ContextNetwork {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        public int nodeCount() {
+            int count = 0;
+            for (int i: this.typeIndex.keySet())
+                count += this.typeIndex.get(i).size();
+            return count;
         }
 
         public boolean compareTree(IndexedSubeventTree other) {
@@ -385,4 +407,7 @@ public class ContextNetwork {
             return id.equals(that.id) && type.equals(that.type);
         }
     }
+
+
+
 }
