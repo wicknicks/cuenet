@@ -62,22 +62,6 @@ public class ContextNetwork {
         return eventTrees.size();
     }
 
-    public void updateTimeIntervals(Instance root) {
-        IndexedSubeventTree temp = null;
-        for (int i=eventTrees.size()-1; i>=0; i--) {
-            if (eventTrees.get(i).root.equals(root)) {
-                temp = eventTrees.get(i);
-                break;
-            }
-        }
-
-        if (temp == null) throw new RuntimeException("Invalid root: " + root);
-
-        updateTimeIntervals(temp, temp.root);
-
-        count();
-    }
-
     private Instance lookup(IndexedSubeventTree root, InstanceId id) {
         HashSet<Instance> instances = root.typeIndex.get(id.eventId);
         if (instances == null) throw new NullPointerException(id.toString());
@@ -87,22 +71,6 @@ public class ContextNetwork {
         throw new NoSuchElementException(root.toString() + " " + id.toString());
     }
 
-    private void updateTimeIntervals(IndexedSubeventTree root, Instance current) {
-        int count = current.immediateSubevents.size();
-        if (count == 0) return;
-
-        int span = (current.intervalEnd - current.intervalStart) / count;
-
-        int i=0;
-        for (InstanceId instanceid: current.immediateSubevents) {
-            Instance subevent = lookup(root, instanceid);
-            subevent.location = current.location;
-            subevent.intervalStart = current.intervalStart + (span * i);
-            subevent.intervalEnd = current.intervalStart + (span * (i+1));
-            i++;
-            updateTimeIntervals(root, subevent);
-        }
-    }
 
     public void merge (ContextNetwork other) {
         for (IndexedSubeventTree thisSub: this.eventTrees)
@@ -219,6 +187,28 @@ public class ContextNetwork {
         return true;
     }
 
+    public void pruneUp() {
+        for (IndexedSubeventTree e: eventTrees) pruneUp(e, e.root);
+    }
+
+    private Set<Entity> pruneUp(IndexedSubeventTree e, Instance parent) {
+
+        Set<Entity> entities = new HashSet<Entity>();
+
+        List<Entity> participants = parent.participants;
+        for (InstanceId sub: parent.immediateSubevents) {
+            Instance is = lookup(e, sub);
+            Set<Entity> entitiesSeenSoFar = pruneUp(e, is);
+            for (Entity es: entitiesSeenSoFar) {
+                if (participants.contains(es)) participants.remove(es);
+            }
+            entities.addAll(entitiesSeenSoFar);
+        }
+
+        entities.addAll(parent.participants);
+        return entities;
+    }
+
     private class IndexedSubeventTree {
         Instance root;
         HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
@@ -235,7 +225,12 @@ public class ContextNetwork {
                 stack.add(root.id);
                 while (!stack.isEmpty()) {
                     InstanceId i = stack.pop();
-                    for (InstanceId subids: lookup(this, i).immediateSubevents) {
+                    Instance inst = lookup(this, i);
+                    out.write(inst.toString().getBytes());
+                    out.write(" : ".getBytes());
+                    out.write(Arrays.toString(inst.participants.toArray()).getBytes());
+                    out.write("\n".getBytes());
+                    for (InstanceId subids: inst.immediateSubevents) {
                         out.write(i.toString().getBytes());
                         out.write(" -> ".getBytes());
                         out.write(subids.toString().getBytes());
@@ -274,18 +269,19 @@ public class ContextNetwork {
             }
             return true;
         }
-
     }
 
     public static class Instance {
         InstanceId id;
         List<InstanceId> immediateSubevents;
+        List<Entity> participants;
         int intervalStart, intervalEnd;
         String location;
 
         public Instance(int eventId, int instanceId) {
             this.id = new InstanceId(eventId, instanceId);
             this.immediateSubevents = new ArrayList<InstanceId>();
+            this.participants = new ArrayList<Entity>();
         }
 
         public void setLocation(String location) {
@@ -375,6 +371,11 @@ public class ContextNetwork {
         }
 
         @Override
+        public String toString() {
+            return type + "_" + id;
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -382,6 +383,49 @@ public class ContextNetwork {
             Entity that = (Entity) o;
 
             return id.equals(that.id) && type.equals(that.type);
+        }
+    }
+
+    public void updateTimeIntervals(Instance root) {
+        IndexedSubeventTree temp = null;
+        for (int i=eventTrees.size()-1; i>=0; i--) {
+            if (eventTrees.get(i).root.equals(root)) {
+                temp = eventTrees.get(i);
+                break;
+            }
+        }
+
+        if (temp == null) throw new RuntimeException("Invalid root: " + root);
+
+        updateTimeIntervals(temp, temp.root);
+    }
+
+    private void updateTimeIntervals(IndexedSubeventTree root, Instance current) {
+        int count = current.immediateSubevents.size();
+        if (count == 0) return;
+
+        int span = (current.intervalEnd - current.intervalStart) / count;
+
+        int i=0;
+        for (InstanceId instanceid: current.immediateSubevents) {
+            Instance subevent = lookup(root, instanceid);
+            subevent.location = current.location;
+            subevent.intervalStart = current.intervalStart + (span * i);
+            subevent.intervalEnd = current.intervalStart + (span * (i+1));
+            i++;
+            updateTimeIntervals(root, subevent);
+        }
+    }
+
+    public void populateEntities(List<Entity> entities) {
+        for (IndexedSubeventTree tree: eventTrees)
+            populateEntities(entities, tree);
+    }
+
+    private void populateEntities(List<Entity> entities, IndexedSubeventTree tree) {
+        for (int event: tree.typeIndex.keySet()) {
+            for (Instance instance: tree.typeIndex.get(event))
+                instance.participants = new ArrayList<Entity>(entities);
         }
     }
 }
