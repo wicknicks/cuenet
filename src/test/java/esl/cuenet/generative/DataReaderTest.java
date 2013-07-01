@@ -13,10 +13,12 @@ public class DataReaderTest {
     }
 
     @Test
-    public void createTreeTest() throws Exception {
+    public void loadTreeAndCountTest() throws Exception {
         DataReader dReader = new DataReader();
         ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/inst-small.sim");
-        network1.printTree();
+        System.out.println("trees: " + network1.count());
+        System.out.println("nodes: " + network1.nodeCount());
+//        network1.printTree();
     }
 
     @Test
