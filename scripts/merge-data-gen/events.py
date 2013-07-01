@@ -82,7 +82,7 @@ def getInstanceFile(dirname):
 if __name__ == '__main__':
   interval = Interval()
 
-  eventfile = open(getInstanceFile('/data/osm', 'w')
+  eventfile = open(getInstanceFile('/data/osm'), 'w')
 
   _roadnetfile = '/data/osm/uci.roadnet'
   eventfile.write(_roadnetfile + " " + str(interval.start) + " " + str(interval.end) + '\n')
