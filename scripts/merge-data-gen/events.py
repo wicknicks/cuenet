@@ -1,4 +1,4 @@
-import random, math, sys
+import random, math, sys, os
 
 class Interval:
   def __init__(self):
@@ -74,10 +74,15 @@ def testRandomize():
 
 #testRandomize()
 
+def getInstanceFile(dirname):
+  files = os.listdir(dirname)
+  c = 1 + len(filter(lambda a: (a.find('instance.sim') >= 0), files))
+  return os.path.join(dirname, 'instance.sim.' + str(c))
+
 if __name__ == '__main__':
   interval = Interval()
 
-  eventfile = open('/data/osm/instance.sim', 'w')
+  eventfile = open(getInstanceFile('/data/osm', 'w')
 
   _roadnetfile = '/data/osm/uci.roadnet'
   eventfile.write(_roadnetfile + " " + str(interval.start) + " " + str(interval.end) + '\n')
