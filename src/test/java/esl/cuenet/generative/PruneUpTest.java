@@ -1,6 +1,7 @@
 package esl.cuenet.generative;
 
 import esl.cuenet.generative.structs.ContextNetwork;
+import esl.cuenet.generative.structs.NetworkBuildingHelper;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class PruneUpTest {
 
         List<ContextNetwork.Entity> entities = new ArrayList<ContextNetwork.Entity>();
         for (int i=0; i<10; i++) entities.add(new ContextNetwork.Entity("P", "" + i));
-        network1.populateEntities(entities);
+        (new NetworkBuildingHelper(network1)).populateEntities(entities);
 
         network1.printTree();
 

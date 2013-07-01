@@ -1,6 +1,7 @@
 package esl.cuenet.generative;
 
 import esl.cuenet.generative.structs.ContextNetwork;
+import esl.cuenet.generative.structs.NetworkBuildingHelper;
 import esl.cuenet.generative.structs.Ontology;
 
 import java.io.BufferedReader;
@@ -86,7 +87,7 @@ public class DataReader {
             network.addSubeventEdge(inst, superInstance, subInstance);
         }
 
-        network.updateTimeIntervals(inst);
+        (new NetworkBuildingHelper(network)).updateTimeIntervals(inst);
     }
 
     public Ontology readOntology(String ontfilename) throws IOException {

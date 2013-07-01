@@ -6,7 +6,7 @@ import java.util.*;
 
 public class ContextNetwork {
 
-    private List<IndexedSubeventTree> eventTrees = new ArrayList<IndexedSubeventTree>();
+    protected List<IndexedSubeventTree> eventTrees = new ArrayList<IndexedSubeventTree>();
 
     public void addAtomic(Instance inst) {
         IndexedSubeventTree tree = new IndexedSubeventTree();
@@ -62,7 +62,7 @@ public class ContextNetwork {
         return eventTrees.size();
     }
 
-    private Instance lookup(IndexedSubeventTree root, InstanceId id) {
+    protected Instance lookup(IndexedSubeventTree root, InstanceId id) {
         HashSet<Instance> instances = root.typeIndex.get(id.eventId);
         if (instances == null) throw new NullPointerException(id.toString());
         for (Instance i: instances) {
@@ -209,7 +209,7 @@ public class ContextNetwork {
         return entities;
     }
 
-    private class IndexedSubeventTree {
+    public class IndexedSubeventTree {
         Instance root;
         HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
 
@@ -383,49 +383,6 @@ public class ContextNetwork {
             Entity that = (Entity) o;
 
             return id.equals(that.id) && type.equals(that.type);
-        }
-    }
-
-    public void updateTimeIntervals(Instance root) {
-        IndexedSubeventTree temp = null;
-        for (int i=eventTrees.size()-1; i>=0; i--) {
-            if (eventTrees.get(i).root.equals(root)) {
-                temp = eventTrees.get(i);
-                break;
-            }
-        }
-
-        if (temp == null) throw new RuntimeException("Invalid root: " + root);
-
-        updateTimeIntervals(temp, temp.root);
-    }
-
-    private void updateTimeIntervals(IndexedSubeventTree root, Instance current) {
-        int count = current.immediateSubevents.size();
-        if (count == 0) return;
-
-        int span = (current.intervalEnd - current.intervalStart) / count;
-
-        int i=0;
-        for (InstanceId instanceid: current.immediateSubevents) {
-            Instance subevent = lookup(root, instanceid);
-            subevent.location = current.location;
-            subevent.intervalStart = current.intervalStart + (span * i);
-            subevent.intervalEnd = current.intervalStart + (span * (i+1));
-            i++;
-            updateTimeIntervals(root, subevent);
-        }
-    }
-
-    public void populateEntities(List<Entity> entities) {
-        for (IndexedSubeventTree tree: eventTrees)
-            populateEntities(entities, tree);
-    }
-
-    private void populateEntities(List<Entity> entities, IndexedSubeventTree tree) {
-        for (int event: tree.typeIndex.keySet()) {
-            for (Instance instance: tree.typeIndex.get(event))
-                instance.participants = new ArrayList<Entity>(entities);
         }
     }
 }
