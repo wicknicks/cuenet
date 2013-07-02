@@ -1,8 +1,12 @@
 package esl.cuenet.generative.structs;
 
+import org.apache.log4j.Logger;
+
 import java.util.*;
 
 public class NetworkBuildingHelper {
+
+    private static Logger logger = Logger.getLogger(NetworkBuildingHelper.class);
 
     private static int time = 0;
     public static void updateTimeIntervals(ContextNetwork network, ContextNetwork.Instance root) {
@@ -53,7 +57,8 @@ public class NetworkBuildingHelper {
         boolean val = true;
         for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
             ContextNetwork.Instance subevent = network.lookup(root, instanceid);
-            if (subevent.id.eventId != (start.id.eventId + 1)) return false;
+            if (subevent.id.eventId != (start.id.eventId + 1))
+                return false;
             val = val & checkOrderStrict(network, root, subevent);
         }
         return val;
@@ -158,7 +163,7 @@ public class NetworkBuildingHelper {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
         for (int i=0; i<count; i++) {
-            System.out.println("Generating Sample #" + i);
+            logger.info("Generating Sample #" + i);
 
             ContextNetwork sNet = new ContextNetwork();
             sNet.addAtomic(network.eventTrees.get(0).root.attributeClone());
@@ -179,6 +184,8 @@ public class NetworkBuildingHelper {
     }
 
     private static void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
+
+        nodeCount = 6000;
 
         Random generator = new Random();
         Integer[] keys = new Integer[tree.typeIndex.keySet().size()];
@@ -211,7 +218,9 @@ public class NetworkBuildingHelper {
             }
 
             ContextNetwork tempNet = new ContextNetwork();
-            tempNet.addAtomic(temp.attributeClone());
+            ContextNetwork.Instance new_root = tree.root.attributeClone();
+            tempNet.addAtomic(new_root);
+            tempNet.addSubeventEdge(new_root, new_root, temp.attributeClone());
 
             int mc = sNet.nodeCount();
             sNet.merge(tempNet);
@@ -224,5 +233,39 @@ public class NetworkBuildingHelper {
         }
     }
 
+    public static boolean validateSample(ContextNetwork original,
+                                         ContextNetwork sample) {
+
+        ContextNetwork.IndexedSubeventTree _sample = sample.eventTrees.get(0);
+
+        for (int event: _sample.typeIndex.keySet()) {
+            for (ContextNetwork.Instance instance : _sample.typeIndex.get(event)){
+                for (ContextNetwork.InstanceId subeventid: instance.immediateSubevents) {
+                    boolean v = validateEdge(instance, subeventid, original);
+                    if (v) return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean validateEdge(ContextNetwork.Instance event,
+                                        ContextNetwork.InstanceId subeventid, ContextNetwork original) {
+        ContextNetwork.Instance sampleEvent = original.eventTrees.get(0).instanceMap.get(event.id);
+        Stack<ContextNetwork.InstanceId> stack = new Stack<ContextNetwork.InstanceId>();
+        stack.add(sampleEvent.id);
+
+        while ( !stack.isEmpty() ) {
+            ContextNetwork.InstanceId instanceid= stack.pop();
+            ContextNetwork.Instance instance = original.lookup(original.eventTrees.get(0), instanceid);
+            for (ContextNetwork.InstanceId subid: instance.immediateSubevents) {
+                if (subid.equals(subeventid)) return true;
+                stack.add(subid);
+            }
+        }
+
+        return false;
+    }
 
 }
