@@ -1,10 +1,19 @@
 package esl.cuenet.generative;
 
 import esl.cuenet.generative.structs.ContextNetwork;
+import esl.system.SysLoggerUtils;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class DataReaderTest {
+
+    static {
+        SysLoggerUtils.initLogger();
+    }
+
+    Logger logger = Logger.getLogger(DataReaderTest.class);
+
 
     @Test
     public void loadOntTest() throws Exception {
@@ -44,6 +53,20 @@ public class DataReaderTest {
 
         Assert.assertEquals(network1.compareNetwork(network2), true);
         Assert.assertEquals(network1.compareNetwork(network_small), false);
+
+        logger.info("Loading large net #1");
+        ContextNetwork network_large = dReader.readInstanceGraphs("/data/osm/instance.sim.4");
+
+        logger.info("Loading large net #2");
+        ContextNetwork network_large2 = dReader.readInstanceGraphs("/data/osm/instance.sim.4");
+
+        logger.info("Compare equal networks");
+        Assert.assertEquals(network_large.compareNetwork(network_large2), true);
+
+        logger.info("Compare unequal net");
+        Assert.assertEquals(network_large.compareNetwork(network1), false);
+
+        logger.info("Done!");
     }
 
 }

@@ -21,7 +21,7 @@ public class NetworkBuildingHelper {
 
         if (temp == null) throw new RuntimeException("Invalid root: " + root);
 
-        System.out.println("max depth " + depth(temp, temp.root));
+        //System.out.println("max depth " + depth(temp, temp.root));
         //temp.root.setInterval(0, 20);
         //updateTimeIntervals(temp, temp.root);
         downwardTime(temp, temp.root);

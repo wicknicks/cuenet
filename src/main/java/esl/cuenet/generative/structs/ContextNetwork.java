@@ -283,44 +283,50 @@ public class ContextNetwork {
 
         public boolean compareTree(IndexedSubeventTree other) {
             if ( !this.root.equals(other.root) ) {
-                System.out.println("root");
+//                System.out.println("root");
                 return false;
             }
             if ( this.typeIndex.size() != other.typeIndex.size()) {
-                System.out.println("size");
+//                System.out.println("size");
                 return false;
             }
             if ( !this.typeIndex.keySet().containsAll(other.typeIndex.keySet()) ) {
-                System.out.println("keyset");
+//                System.out.println("keyset");
                 return false;
             }
 
             for (Integer thiskey: this.typeIndex.keySet()) {
                 HashSet<Instance> thisvalues = this.typeIndex.get(thiskey);
-                HashSet<Instance> othervalues = other.typeIndex.get(thiskey);
-                if ( !thisvalues.containsAll(othervalues) )  {
-                    System.out.println("thisvalues");
-                    return false;
-                }
-
                 for (Instance thisinstance: thisvalues) {
-                    boolean flag = true;
-                    for (Instance thatinstance: othervalues) {
-                        if (thatinstance.equals(thisinstance)) {
-                            flag = false;
-                            if ( !thatinstance.immediateSubevents.containsAll(thisinstance.immediateSubevents) ) {
-                                System.out.println("thatvalues");
-                                return false;
-                            }
+                    if ( !other.instanceMap.containsKey(thisinstance.id) ) return false;
+                    if ( !thisinstance.compareInstance(other.instanceMap.get(thisinstance.id)) ) return false;
 
-                            break;
-                        }
-                    }
-                    if ( flag ) {
-                        System.out.println("just flag");
-                        return false;
-                    }
                 }
+
+//                HashSet<Instance> othervalues = other.typeIndex.get(thiskey);
+//                if ( !thisvalues.containsAll(othervalues) )  {
+//                    System.out.println("thisvalues");
+//                    return false;
+//                }
+//
+//                for (Instance thisinstance: thisvalues) {
+//                    boolean flag = true;
+//                    for (Instance thatinstance: othervalues) {
+//                        if (thatinstance.equals(thisinstance)) {
+//                            flag = false;
+//                            if ( !thatinstance.immediateSubevents.containsAll(thisinstance.immediateSubevents) ) {
+//                                System.out.println("thatvalues");
+//                                return false;
+//                            }
+//
+//                            break;
+//                        }
+//                    }
+//                    if ( flag ) {
+//                        System.out.println("just flag");
+//                        return false;
+//                    }
+//                }
             }
             return true;
         }
@@ -374,6 +380,13 @@ public class ContextNetwork {
         @Override
         public String toString() {
             return id.toString();
+        }
+
+        public boolean compareInstance(Instance other) {
+            if (this.intervalStart != other.intervalStart) return false;
+            if (this.intervalEnd != other.intervalEnd) return false;
+            if ( !this.location.equals(other.location) ) return false;
+            return true;
         }
     }
 
