@@ -28,7 +28,6 @@ public class ContextNetwork {
 
         if (subtree == null) throw new RuntimeException("No corresponding subtree for event " + root);
 
-
         //find parent instance
         if (subtree.typeIndex.containsKey(parent.id.eventId)) {
             HashSet<Instance> instances = subtree.typeIndex.get(parent.id.eventId);
@@ -84,7 +83,7 @@ public class ContextNetwork {
 
     protected Instance lookup(IndexedSubeventTree root, InstanceId id) {
         if ( !root.instanceMap.containsKey(id) )
-                throw new NoSuchElementException(root.toString() + " " + id.toString());
+            throw new NoSuchElementException(root.toString() + " " + id.toString());
         return root.instanceMap.get(id);
 
 //        HashSet<Instance> instances = root.typeIndex.get(id.eventId);
@@ -143,6 +142,8 @@ public class ContextNetwork {
 
         if ( !STHelper.lequals(parent, instance) ) return;
 
+        List<Instance> containedSubevents = new ArrayList<Instance>();
+
         //check if any of the immediate subevents accepts instance
         for (InstanceId subs: parent.immediateSubevents) {
             Instance subevent = lookup(subtree, subs);
@@ -160,19 +161,33 @@ public class ContextNetwork {
             }
             else if (STHelper.contains(instance, subevent)) {
                 addAsSubevent = false;
+                containedSubevents.add(subevent);
 
-                Instance new_i = instance.attributeClone();
+//                Instance new_i = instance.attributeClone();
+//
+//                parent.immediateSubevents.remove(subevent.id);
+//
+//                addSubeventEdge(subtree.root, parent, new_i);
+//                addSubeventEdge(subtree.root, new_i, subevent);
+//
+//                for (InstanceId osubs: instance.immediateSubevents) {
+//                    Instance s = lookup(other, osubs);
+//                    recursiveMerge(subtree, new_i, other, s);
+//                }
+//                break;
+            }
+        }
 
-                parent.immediateSubevents.remove(subevent.id);
-
-                addSubeventEdge(subtree.root, parent, new_i);
-                addSubeventEdge(subtree.root, new_i, subevent);
-
-                for (InstanceId osubs: instance.immediateSubevents) {
-                    Instance s = lookup(other, osubs);
-                    recursiveMerge(subtree, new_i, other, s);
-                }
-                break;
+        if (containedSubevents.size() > 0) {
+            Instance new_i = instance.attributeClone();
+            addSubeventEdge(subtree.root, parent, new_i);
+            for (Instance c_subevent: containedSubevents) {
+                parent.immediateSubevents.remove(c_subevent.id);
+                addSubeventEdge(subtree.root, new_i, c_subevent);
+            }
+            for (InstanceId osubs: instance.immediateSubevents) {
+                Instance s = lookup(other, osubs);
+                recursiveMerge(subtree, new_i, other, s);
             }
         }
 
@@ -188,7 +203,6 @@ public class ContextNetwork {
 
     private void mergeInformation(Instance thisSubevent, Instance otherInstance) {
         //System.out.println("[merge_info] " + thisSubevent + " " + otherInstance);
-        int i = 0;
     }
 
     public void printTree() {
@@ -284,15 +298,12 @@ public class ContextNetwork {
 
         public boolean compareTree(IndexedSubeventTree other) {
             if ( !this.root.equals(other.root) ) {
-//                System.out.println("root");
                 return false;
             }
             if ( this.typeIndex.size() != other.typeIndex.size()) {
-//                System.out.println("size");
                 return false;
             }
             if ( !this.typeIndex.keySet().containsAll(other.typeIndex.keySet()) ) {
-//                System.out.println("keyset");
                 return false;
             }
 
@@ -304,6 +315,11 @@ public class ContextNetwork {
                     if ( !thisinstance.compareInstance(other.instanceMap.get(thisinstance.id)) )
                         return false;
 
+                    Instance thatinstance = other.instanceMap.get(thisinstance.id);
+                    if ( thisinstance.immediateSubevents.size() != thatinstance.immediateSubevents.size())
+                        return false;
+                    if ( !thisinstance.immediateSubevents.containsAll(thatinstance.immediateSubevents))
+                        return false;
                 }
 
 //                HashSet<Instance> othervalues = other.typeIndex.get(thiskey);
