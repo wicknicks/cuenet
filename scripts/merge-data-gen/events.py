@@ -156,7 +156,7 @@ if __name__ == '__main__':
         eid = random.randint(0, ontconfig[0]-1)
         
         ''' skip very large events'''
-        if eid in fullevents: continue
+        if eid in fullevents: pass
         elif eid in halfevents: pass
         else:
           ## generate instances for atomic events

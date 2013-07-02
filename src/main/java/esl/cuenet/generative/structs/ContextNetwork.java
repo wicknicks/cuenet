@@ -12,12 +12,15 @@ public class ContextNetwork {
         IndexedSubeventTree tree = new IndexedSubeventTree();
         tree.root = inst;
         HashSet<Instance> instances = new HashSet<Instance>();
+
         instances.add(inst);
+        tree.instanceMap.put(inst.id, inst);
+
         tree.typeIndex.put(inst.id.eventId, instances);
         eventTrees.add(tree);
     }
 
-    public void addSubeventEdge(Instance root, Instance current, Instance subevent) {
+    public void addSubeventEdge(Instance root, Instance parent, Instance subevent) {
         //find root in eventTrees list
         IndexedSubeventTree subtree = null;
         for (IndexedSubeventTree i: eventTrees)
@@ -25,27 +28,30 @@ public class ContextNetwork {
 
         if (subtree == null) throw new RuntimeException("No corresponding subtree for event " + root);
 
-        if (subtree.typeIndex.containsKey(current.id.eventId)) {
-            HashSet<Instance> instances = subtree.typeIndex.get(current.id.eventId);
-            instances.add(current);
+
+        //find parent instance
+        if (subtree.typeIndex.containsKey(parent.id.eventId)) {
+            HashSet<Instance> instances = subtree.typeIndex.get(parent.id.eventId);
+            instances.add(parent);
 
             Instance temp = null;
             for (Instance i: instances) {
-                if (i.equals(current)) temp = i;
+                if (i.equals(parent)) temp = i;
             }
 
-            if (temp == null) throw new RuntimeException("Could not find instance " + current);
+            if (temp == null) throw new RuntimeException("Could not find instance " + parent);
 
-            temp.immediateSubevents.add(subevent.id);
+            if ( !temp.immediateSubevents.contains(subevent.id) ) temp.immediateSubevents.add(subevent.id);
 
         } else {
             HashSet<Instance> instances = new HashSet<Instance>();
-            subtree.typeIndex.put(current.id.eventId, instances);
-            instances.add(current);
+            subtree.typeIndex.put(parent.id.eventId, instances);
+            instances.add(parent);
 
-            current.immediateSubevents.add(subevent.id);
+            parent.immediateSubevents.add(subevent.id);
         }
 
+        //all new subevents must be added to typeindex
         HashSet<Instance> subeventInstances;
         if (subtree.typeIndex.containsKey(subevent.id.eventId))
             subeventInstances = subtree.typeIndex.get(subevent.id.eventId);
@@ -60,6 +66,9 @@ public class ContextNetwork {
         else {
             subeventInstances.add(subevent);
         }
+
+        if ( !subtree.instanceMap.containsKey(parent.id) ) subtree.instanceMap.put(parent.id, parent);
+        if ( !subtree.instanceMap.containsKey(subevent.id) ) subtree.instanceMap.put(subevent.id, subevent);
     }
 
     public int count() {
@@ -74,12 +83,16 @@ public class ContextNetwork {
     }
 
     protected Instance lookup(IndexedSubeventTree root, InstanceId id) {
-        HashSet<Instance> instances = root.typeIndex.get(id.eventId);
-        if (instances == null) throw new NullPointerException(id.toString());
-        for (Instance i: instances) {
-            if (i.id.equals(id)) return i;
-        }
-        throw new NoSuchElementException(root.toString() + " " + id.toString());
+        if ( !root.instanceMap.containsKey(id) )
+                throw new NoSuchElementException(root.toString() + " " + id.toString());
+        return root.instanceMap.get(id);
+
+//        HashSet<Instance> instances = root.typeIndex.get(id.eventId);
+//        if (instances == null) throw new NullPointerException(id.toString());
+//        for (Instance i: instances) {
+//            if (i.id.equals(id)) return i;
+//        }
+//        throw new NoSuchElementException(root.toString() + " " + id.toString());
     }
 
 
@@ -227,6 +240,7 @@ public class ContextNetwork {
     public class IndexedSubeventTree {
         Instance root;
         HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
+        HashMap<InstanceId, Instance> instanceMap = new HashMap<InstanceId, Instance>();
 
         @Override
         public String toString() {
@@ -267,26 +281,44 @@ public class ContextNetwork {
         }
 
         public boolean compareTree(IndexedSubeventTree other) {
-            if ( !this.root.equals(other.root) ) return false;
-            if ( this.typeIndex.size() != other.typeIndex.size()) return false;
-            if ( !this.typeIndex.keySet().containsAll(other.typeIndex.keySet()) ) return false;
+            if ( !this.root.equals(other.root) ) {
+                System.out.println("root");
+                return false;
+            }
+            if ( this.typeIndex.size() != other.typeIndex.size()) {
+                System.out.println("size");
+                return false;
+            }
+            if ( !this.typeIndex.keySet().containsAll(other.typeIndex.keySet()) ) {
+                System.out.println("keyset");
+                return false;
+            }
 
             for (Integer thiskey: this.typeIndex.keySet()) {
                 HashSet<Instance> thisvalues = this.typeIndex.get(thiskey);
                 HashSet<Instance> othervalues = other.typeIndex.get(thiskey);
-                if ( !thisvalues.containsAll(othervalues) )  return false;
+                if ( !thisvalues.containsAll(othervalues) )  {
+                    System.out.println("thisvalues");
+                    return false;
+                }
 
                 for (Instance thisinstance: thisvalues) {
                     boolean flag = true;
                     for (Instance thatinstance: othervalues) {
                         if (thatinstance.equals(thisinstance)) {
                             flag = false;
-                            if ( !thatinstance.immediateSubevents.containsAll(thisinstance.immediateSubevents) )
+                            if ( !thatinstance.immediateSubevents.containsAll(thisinstance.immediateSubevents) ) {
+                                System.out.println("thatvalues");
                                 return false;
+                            }
+
                             break;
                         }
                     }
-                    if ( flag ) return false;
+                    if ( flag ) {
+                        System.out.println("just flag");
+                        return false;
+                    }
                 }
             }
             return true;

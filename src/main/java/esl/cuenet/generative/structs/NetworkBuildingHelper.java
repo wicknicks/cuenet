@@ -74,6 +74,7 @@ public class NetworkBuildingHelper {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
         for (int i=0; i<count; i++) {
+            System.out.println("Generating Sample #" + i);
             ContextNetwork network = new ContextNetwork();
             sampleIntoNetwork(network, 0.1);
             networks.add(network);
@@ -91,6 +92,9 @@ public class NetworkBuildingHelper {
     }
 
     private void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
+
+        //if (nodeCount > 2000) nodeCount = 2000;
+
         Random generator = new Random();
         Integer[] keys = new Integer[tree.typeIndex.keySet().size()];
         tree.typeIndex.keySet().toArray(keys);
@@ -108,6 +112,8 @@ public class NetworkBuildingHelper {
             ContextNetwork tempNet = new ContextNetwork();
             tempNet.addAtomic(temp.attributeClone());
             sNet.merge(tempNet);
+
+            if (i % 500 == 0) System.out.println("Sample contains " + i + " nodes");
         }
 
 //        sNet.printTree();
