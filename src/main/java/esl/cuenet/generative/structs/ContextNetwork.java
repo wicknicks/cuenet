@@ -383,9 +383,12 @@ public class ContextNetwork {
         }
 
         public boolean compareInstance(Instance other) {
-            if (this.intervalStart != other.intervalStart) return false;
-            if (this.intervalEnd != other.intervalEnd) return false;
-            if ( !this.location.equals(other.location) ) return false;
+            if (this.intervalStart != other.intervalStart)
+                return false;
+            if (this.intervalEnd != other.intervalEnd)
+                return false;
+            if ( !this.location.equals(other.location) )
+                return false;
             return true;
         }
     }

@@ -42,7 +42,7 @@ public class PruneUpTest {
 
         List<ContextNetwork.Entity> entities = new ArrayList<ContextNetwork.Entity>();
         for (int i=0; i<10; i++) entities.add(new ContextNetwork.Entity("P", "" + i));
-        (new NetworkBuildingHelper(network1)).populateEntities(entities);
+        NetworkBuildingHelper.populateEntities(network1, entities);
 
         network1.printTree();
 

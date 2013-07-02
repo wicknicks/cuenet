@@ -4,13 +4,8 @@ import java.util.*;
 
 public class NetworkBuildingHelper {
 
-    private final ContextNetwork network;
-
-    public NetworkBuildingHelper(ContextNetwork network) {
-        this.network = network;
-    }
-
-    public void updateTimeIntervals(ContextNetwork.Instance root) {
+    private static int time = 0;
+    public static void updateTimeIntervals(ContextNetwork network, ContextNetwork.Instance root) {
         ContextNetwork.IndexedSubeventTree temp = null;
         for (int i=network.eventTrees.size()-1; i>=0; i--) {
             if (network.eventTrees.get(i).root.equals(root)) {
@@ -24,12 +19,51 @@ public class NetworkBuildingHelper {
         //System.out.println("max depth " + depth(temp, temp.root));
         //temp.root.setInterval(0, 20);
         //updateTimeIntervals(temp, temp.root);
-        downwardTime(temp, temp.root);
+        time = 0;
+        downwardTime(network, temp, temp.root);
         //checktimes(temp, temp.root);
-        checkTree(temp, temp.root);
+        checkTree(network, temp, temp.root);
     }
 
-    private void checkTree(ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
+    public static void downwardTime(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
+        if (start.immediateSubevents.size() == 0) {
+            start.intervalStart = time++; if (time == Integer.MAX_VALUE) throw new RuntimeException("overflow... WTF!!!");
+            start.intervalEnd = time++; if (time == Integer.MAX_VALUE) throw new RuntimeException("overflow... WTF!!!");
+            return;
+        }
+
+        for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
+            ContextNetwork.Instance subevent = network.lookup(root, instanceid);
+            downwardTime(network, root, subevent);
+        }
+
+        int min = Integer.MAX_VALUE, max = -1;
+        for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
+            ContextNetwork.Instance subevent = network.lookup(root, instanceid);
+            if (subevent.intervalStart < min) min = subevent.intervalStart;
+            if (subevent.intervalEnd > max) max = subevent.intervalEnd;
+        }
+        start.intervalEnd = max;
+        start.intervalStart = min;
+    }
+
+    public static boolean checkOrderStrict(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
+        if (start.immediateSubevents.size() == 0) return true;
+
+        boolean val = true;
+        for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
+            ContextNetwork.Instance subevent = network.lookup(root, instanceid);
+            if (subevent.id.eventId != (start.id.eventId + 1)) return false;
+            val = val & checkOrderStrict(network, root, subevent);
+        }
+        return val;
+    }
+
+    public static boolean checkOrderStrict(ContextNetwork network) {
+        return checkOrderStrict(network, network.eventTrees.get(0), network.eventTrees.get(0).root);
+    }
+
+    private static void checkTree(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         Stack<ContextNetwork.InstanceId> ids = new Stack<ContextNetwork.InstanceId>();
         ids.add(start.id);
         HashMap<ContextNetwork.InstanceId, Boolean> seen = new HashMap<ContextNetwork.InstanceId, Boolean>();
@@ -47,30 +81,9 @@ public class NetworkBuildingHelper {
         }
     }
 
-    private int time = 0;
-    public void downwardTime(ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
-        if (start.immediateSubevents.size() == 0) {
-            start.intervalStart = time++; if (time == Integer.MAX_VALUE) throw new RuntimeException("overflow... WTF!!!");
-            start.intervalEnd = time++; if (time == Integer.MAX_VALUE) throw new RuntimeException("overflow... WTF!!!");
-            return;
-        }
 
-        for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
-            ContextNetwork.Instance subevent = network.lookup(root, instanceid);
-            downwardTime(root, subevent);
-        }
 
-        int min = Integer.MAX_VALUE, max = -1;
-        for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
-            ContextNetwork.Instance subevent = network.lookup(root, instanceid);
-            if (subevent.intervalStart < min) min = subevent.intervalStart;
-            if (subevent.intervalEnd > max) max = subevent.intervalEnd;
-        }
-        start.intervalEnd = max;
-        start.intervalStart = min;
-    }
-
-    public void checktimes(ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
+    public static void checktimes(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         if (start.immediateSubevents.size() == 0) return;
         int span = (start.intervalEnd - start.intervalStart) / start.immediateSubevents.size();
         for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
@@ -78,24 +91,24 @@ public class NetworkBuildingHelper {
             if ( (subevent.intervalEnd - subevent.intervalStart) != span)
                 throw new NullPointerException("bad times " + subevent + " " + (subevent.intervalEnd - subevent.intervalStart) + " " + span);
             else {
-                checktimes(root, subevent);
+                checktimes(network, root, subevent);
             }
         }
     }
 
 
-    public int depth(ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
+    public static int depth(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         if (start.immediateSubevents.size() == 0) return 0;
         int maxdepth = -1;
         for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
-            int d = depth(root, network.lookup(root, instanceid));
+            int d = depth(network, root, network.lookup(root, instanceid));
             if (d > maxdepth)
                 maxdepth = d;
         }
         return maxdepth + 1;
     }
 
-    private void updateTimeIntervals(ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance current) {
+    private static void updateTimeIntervals(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance current) {
         int count = current.immediateSubevents.size();
         if (count == 0) return;
 
@@ -111,23 +124,23 @@ public class NetworkBuildingHelper {
 //            subevent.intervalStart = current.intervalStart + i;
 //            subevent.intervalEnd = current.intervalStart + i + span + 1;
             i++;
-            updateTimeIntervals(root, subevent);
+            updateTimeIntervals(network, root, subevent);
         }
     }
 
-    public void populateEntities(List<ContextNetwork.Entity> entities) {
+    public static void populateEntities(ContextNetwork network, List<ContextNetwork.Entity> entities) {
         for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees)
             populateEntities(entities, tree);
     }
 
-    private void populateEntities(List<ContextNetwork.Entity> entities, ContextNetwork.IndexedSubeventTree tree) {
+    private static void populateEntities(List<ContextNetwork.Entity> entities, ContextNetwork.IndexedSubeventTree tree) {
         for (int event: tree.typeIndex.keySet()) {
             for (ContextNetwork.Instance instance: tree.typeIndex.get(event))
                 instance.participants = new ArrayList<ContextNetwork.Entity>(entities);
         }
     }
 
-    public List<ContextNetwork> createNetworkForEachInstace() {
+    public static List<ContextNetwork> createNetworkForEachInstace(ContextNetwork network) {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
         for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
             for (int event: tree.typeIndex.keySet()) {
@@ -141,7 +154,7 @@ public class NetworkBuildingHelper {
         return networks;
     }
 
-    public List<ContextNetwork> sample(int count) {
+    public static List<ContextNetwork> sample(ContextNetwork network, int count) {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
         for (int i=0; i<count; i++) {
@@ -150,14 +163,14 @@ public class NetworkBuildingHelper {
             ContextNetwork sNet = new ContextNetwork();
             sNet.addAtomic(network.eventTrees.get(0).root.attributeClone());
 
-            sampleIntoNetwork(sNet, 0.1);
+            sampleIntoNetwork(network, sNet, 0.1);
             networks.add(sNet);
         }
 
         return networks;
     }
 
-    private void sampleIntoNetwork(ContextNetwork sNet, double percentage) {
+    private static void sampleIntoNetwork(ContextNetwork network, ContextNetwork sNet, double percentage) {
         Random generator = new Random();
         //randomly choose an eventTree
         ContextNetwork.IndexedSubeventTree tree = network.eventTrees.get(generator.nextInt(network.eventTrees.size()));
@@ -165,7 +178,7 @@ public class NetworkBuildingHelper {
         sampleFromTree(sNet, tree, (int) Math.ceil(tree.nodeCount() * percentage));
     }
 
-    private void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
+    private static void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
 
         Random generator = new Random();
         Integer[] keys = new Integer[tree.typeIndex.keySet().size()];
@@ -210,5 +223,6 @@ public class NetworkBuildingHelper {
             //if (i % 500 == 0) System.out.println("Sample contains " + i + " nodes, need: " + nodeCount);
         }
     }
+
 
 }

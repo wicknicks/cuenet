@@ -27,16 +27,16 @@ public class LargeMergeTest {
         logger.info("Loading network1... ");
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
 
-        NetworkBuildingHelper helper = new NetworkBuildingHelper(network1);
+        // NetworkBuildingHelper helper = new NetworkBuildingHelper(network1);
 
         logger.info("Creating Instance Nets... ");
         //Create nets from each instance
         //Merging these gurantee that all nodes in n1 will be in merge
-        List<ContextNetwork> instanceNets = helper.createNetworkForEachInstace();
+        List<ContextNetwork> instanceNets = NetworkBuildingHelper.createNetworkForEachInstace(network1);
 
         logger.info("Creating Samples... " + _sample_count);
         //Generate samples
-        List<ContextNetwork> samples = helper.sample(_sample_count);
+        List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, _sample_count);
 
         for (ContextNetwork sa: samples) logger.info("Nodes in merge graph " + sa.nodeCount());
 
@@ -59,6 +59,14 @@ public class LargeMergeTest {
         boolean val = merge.compareNetwork(network2);
         logger.info("Equals: " + val);
         Assert.assertEquals(val, true);
+    }
+
+    @Test
+    public void checkOrderTest() throws Exception {
+        DataReader dReader = new DataReader();
+        logger.info("Loading network1... ");
+        ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim.4");
+        logger.info("strict check " + NetworkBuildingHelper.checkOrderStrict(network1));
     }
 
     @Test

@@ -87,7 +87,7 @@ public class DataReader {
             network.addSubeventEdge(inst, superInstance, subInstance);
         }
 
-        (new NetworkBuildingHelper(network)).updateTimeIntervals(inst);
+        NetworkBuildingHelper.updateTimeIntervals(network, inst);
     }
 
     public Ontology readOntology(String ontfilename) throws IOException {
