@@ -12,6 +12,9 @@ target/
 #logs
 *.logs
 
+#scripts
+*.sh
+
 #javacc output folders
 src/main/java/esl/cuenet/mapper/parser/
 src/main/java/esl/cuenet/model/pattern/
