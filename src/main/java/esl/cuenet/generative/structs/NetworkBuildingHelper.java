@@ -207,7 +207,7 @@ public class NetworkBuildingHelper {
                 sNet.merge(tempNet);
             }
 
-            if (i % 500 == 0) System.out.println("Sample contains " + i + " nodes, need: " + nodeCount);
+            //if (i % 500 == 0) System.out.println("Sample contains " + i + " nodes, need: " + nodeCount);
         }
     }
 

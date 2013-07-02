@@ -38,7 +38,7 @@ public class LargeMergeTest {
         //Generate samples
         List<ContextNetwork> samples = helper.sample(_sample_count);
 
-        for (ContextNetwork sa: samples) System.out.println(sa.nodeCount());
+        for (ContextNetwork sa: samples) logger.info("Nodes in merge graph " + sa.nodeCount());
 
         ContextNetwork merge = samples.get(0);
         for (int i=1; i<samples.size(); i++) {
@@ -54,7 +54,7 @@ public class LargeMergeTest {
         logger.info("Loading network2... ");
         ContextNetwork network2 = dReader.readInstanceGraphs(filename);
 
-        logger.info(merge.nodeCount() + " " + network2.nodeCount());
+        logger.info("Final node counts: " + merge.nodeCount() + " " + network2.nodeCount());
 
         boolean val = merge.compareNetwork(network2);
         logger.info("Equals: " + val);
