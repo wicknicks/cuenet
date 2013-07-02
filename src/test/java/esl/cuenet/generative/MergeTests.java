@@ -10,12 +10,17 @@ public class MergeTests {
     public void mergeTest1() throws Exception {
         DataReader dReader = new DataReader();
 
-        ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim");
-        ContextNetwork network2 = dReader.readInstanceGraphs("/data/osm/instance.sim");
+        ContextNetwork network1 = dReader.readInstanceGraphs("/data/osm/instance.sim.4");
+        ContextNetwork network2 = dReader.readInstanceGraphs("/data/osm/instance.sim.4");
+
+        System.out.println(network1.nodeCount() + " " + network2.nodeCount());
 
         Assert.assertEquals(network1.compareNetwork(network2), true);
         network1.merge(network2);
-        //Assert.assertEquals(network1.compareNetwork(network2), true);           //INTERESTING!
+
+        System.out.println(network1.nodeCount() + " " + network2.nodeCount());
+
+        Assert.assertEquals(network1.compareNetwork(network2), true);           //INTERESTING!
     }
 
     @Test

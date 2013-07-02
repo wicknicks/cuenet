@@ -211,7 +211,8 @@ public class ContextNetwork {
                     break;
                 }
             }
-            if ( !flag ) return false;
+            if ( !flag )
+                return false;
         }
         return true;
     }
@@ -298,8 +299,10 @@ public class ContextNetwork {
             for (Integer thiskey: this.typeIndex.keySet()) {
                 HashSet<Instance> thisvalues = this.typeIndex.get(thiskey);
                 for (Instance thisinstance: thisvalues) {
-                    if ( !other.instanceMap.containsKey(thisinstance.id) ) return false;
-                    if ( !thisinstance.compareInstance(other.instanceMap.get(thisinstance.id)) ) return false;
+                    if ( !other.instanceMap.containsKey(thisinstance.id) )
+                        return false;
+                    if ( !thisinstance.compareInstance(other.instanceMap.get(thisinstance.id)) )
+                        return false;
 
                 }
 
