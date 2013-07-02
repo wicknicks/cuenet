@@ -156,4 +156,50 @@ public class MergeTests {
         network1.merge(network2);
         network1.printTree();
     }
+
+
+    @Test
+    public void mergeMultiTest() {
+        String location = "## 171169284 $$ 1822416005";
+        ContextNetwork network1 = new ContextNetwork();
+        ContextNetwork.Instance i1_0 = new ContextNetwork.Instance(1, 0);
+        i1_0.setLocation(location);
+        i1_0.setInterval(0, 100);
+        ContextNetwork.Instance i2_0 = new ContextNetwork.Instance(2, 0);
+        i2_0.setLocation(location);
+        i2_0.setInterval(0, 10);
+        ContextNetwork.Instance i3_0 = new ContextNetwork.Instance(3, 0);
+        i3_0.setLocation(location);
+        i3_0.setInterval(10, 20);
+        ContextNetwork.Instance i4_0 = new ContextNetwork.Instance(4, 0);
+        i4_0.setLocation(location);
+        i4_0.setInterval(20, 30);
+        ContextNetwork.Instance i5_0 = new ContextNetwork.Instance(5, 0);
+        i5_0.setLocation(location);
+        i5_0.setInterval(70, 100);
+        network1.addAtomic(i1_0);
+        network1.addSubeventEdge(i1_0, i1_0, i2_0);
+        network1.addSubeventEdge(i1_0, i1_0, i3_0);
+        network1.addSubeventEdge(i1_0, i1_0, i4_0);
+        network1.addSubeventEdge(i1_0, i1_0, i5_0);
+        network1.printTree();
+
+        ContextNetwork network2 = new ContextNetwork();
+        ContextNetwork.Instance A = new ContextNetwork.Instance(100, 0);
+        A.setLocation(location);
+        A.setInterval(0, 50);
+        ContextNetwork.Instance B = new ContextNetwork.Instance(101, 0);
+        B.setLocation(location);
+        B.setInterval(0, 25);
+        ContextNetwork.Instance C = new ContextNetwork.Instance(102, 0);
+        C.setLocation(location);
+        C.setInterval(25, 50);
+        network2.addAtomic(A);
+        network2.addSubeventEdge(A, A, B);
+        network2.addSubeventEdge(A, A, C);
+        network2.printTree();
+
+        network1.merge(network2);
+        network1.printTree();
+    }
 }
