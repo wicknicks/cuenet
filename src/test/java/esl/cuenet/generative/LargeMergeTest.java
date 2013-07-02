@@ -38,10 +38,13 @@ public class LargeMergeTest {
         //Generate samples
         List<ContextNetwork> samples = helper.sample(_sample_count);
 
+        for (ContextNetwork sa: samples) System.out.println(sa.nodeCount());
+
         ContextNetwork merge = samples.get(0);
         for (int i=1; i<samples.size(); i++) {
             logger.info("Merging Sample #" + i);
             merge.merge(samples.get(i));
+            logger.info("Merge Node Count " + merge.nodeCount());
         }
 
         logger.info("Merging Instance Nets");
@@ -51,10 +54,10 @@ public class LargeMergeTest {
         logger.info("Loading network2... ");
         ContextNetwork network2 = dReader.readInstanceGraphs(filename);
 
-        System.out.println(merge.nodeCount() + " " + network2.nodeCount());
+        logger.info(merge.nodeCount() + " " + network2.nodeCount());
 
         boolean val = merge.compareNetwork(network2);
-        System.out.println("Return: " + val);
+        logger.info("Equals: " + val);
         Assert.assertEquals(val, true);
     }
 
@@ -65,7 +68,8 @@ public class LargeMergeTest {
 
     @Test
     public void testMid() throws Exception {
-        testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
+        //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
+        testLoadSampleMerge("/data/osm/instance.sim.4", 5);
     }
 
     @Test
