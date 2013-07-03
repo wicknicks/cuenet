@@ -1,5 +1,6 @@
 package esl.cuenet.generative;
 
+import com.javamex.classmexer.MemoryUtil;
 import esl.cuenet.generative.structs.ContextNetwork;
 import esl.cuenet.generative.structs.NetworkBuildingHelper;
 import esl.system.SysLoggerUtils;
@@ -17,8 +18,6 @@ public class LargeMergeTest {
 
     Logger logger = Logger.getLogger(LargeMergeTest.class);
 
-
-    private ContextNetwork network2 = null;
     public void testLoadSampleMerge(String filename, int _sample_count) throws Exception {
 
         assert _sample_count > 1;
@@ -27,13 +26,7 @@ public class LargeMergeTest {
 
         logger.info("Loading network1... " + filename);
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
-
-        // NetworkBuildingHelper helper = new NetworkBuildingHelper(network1);
-
-        logger.info("Creating Instance Nets... ");
-        //Create nets from each instance
-        //Merging these gurantee that all nodes in n1 will be in merge
-        List<ContextNetwork> instanceNets = NetworkBuildingHelper.createNetworkForEachInstace(network1);
+        logger.info("Nodes: " + network1.nodeCount() + " ; memory = " + MemoryUtil.deepMemoryUsageOf(network1));
 
         logger.info("Creating Samples... " + _sample_count);
         //Generate samples
@@ -51,9 +44,15 @@ public class LargeMergeTest {
             logger.info("Merging Sample #" + i);
             merge.merge(samples.get(i));
             logger.info("Post merge node count #" + merge.nodeCount() + " ; time  = " + (System.currentTimeMillis() - s));
+            logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
             if ( !NetworkBuildingHelper.validateSample(network1, merge) )
                 logger.info("Merge corrupted merge graph");
         }
+
+        logger.info("Creating Instance Nets... ");
+        //Create nets from each instance
+        //Merging these gurantee that all nodes in n1 will be in merge
+        List<ContextNetwork> instanceNets = NetworkBuildingHelper.createNetworkForEachInstace(network1);
 
         logger.info("Merging Instance Nets");
         s = System.currentTimeMillis();
@@ -67,12 +66,12 @@ public class LargeMergeTest {
 
         logger.info("checkorder: " + NetworkBuildingHelper.checkOrderStrict(merge));
 
-        //if (network2 == null) {
-            logger.info("Loading network2... ");
-            network2 = dReader.readInstanceGraphs(filename);
-        //}
+
+        logger.info("Loading network2... ");
+        ContextNetwork network2 = dReader.readInstanceGraphs(filename);
 
         logger.info("Final node counts: " + merge.nodeCount() + " " + network2.nodeCount());
+        logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
 
         boolean val = merge.compareNetwork(network2);
         logger.info("Equals: " + val);
@@ -95,7 +94,7 @@ public class LargeMergeTest {
     @Test
     public void testMid() throws Exception {
         //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
-        testLoadSampleMerge("/data/osm/10/instance.sim.2", 5);
+        testLoadSampleMerge("/data/osm/10/instance.sim.4", 5);
     }
 
     @Test
