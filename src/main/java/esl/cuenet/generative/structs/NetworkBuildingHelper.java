@@ -153,6 +153,7 @@ public class NetworkBuildingHelper {
                     ContextNetwork n = new ContextNetwork();
                     n.addAtomic(instance.attributeClone());
                     networks.add(n);
+                    //if (networks.size() % 10000 == 0) System.out.println("size = " + networks.size());
                 }
             }
         }
@@ -162,74 +163,54 @@ public class NetworkBuildingHelper {
     public static List<ContextNetwork> sample(ContextNetwork network, int count) {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
+        Random generator = new Random();
+        ContextNetwork.IndexedSubeventTree tree = network.eventTrees.get(generator.nextInt(network.eventTrees.size()));
+        HashMap<Integer, ContextNetwork.Instance[]> localInstanceMap = new HashMap<Integer, ContextNetwork.Instance[]>();
+        for (int event: tree.typeIndex.keySet()) {
+            HashSet<ContextNetwork.Instance> instances = tree.typeIndex.get(event);
+            ContextNetwork.Instance[] insts = new ContextNetwork.Instance[instances.size()];
+            instances.toArray(insts);
+            localInstanceMap.put(event, insts);
+        }
+
+        //int nodelimit = 6000;
+        int nodelimit = (int) Math.ceil(tree.nodeCount() * 0.1);
         for (int i=0; i<count; i++) {
             logger.info("Generating Sample #" + i);
 
             ContextNetwork sNet = new ContextNetwork();
             sNet.addAtomic(network.eventTrees.get(0).root.attributeClone());
 
-            sampleIntoNetwork(network, sNet, 0.1);
+            sampleIntoNetwork(sNet, localInstanceMap, tree, nodelimit);
             networks.add(sNet);
         }
 
         return networks;
     }
 
-    private static void sampleIntoNetwork(ContextNetwork network, ContextNetwork sNet, double percentage) {
-        Random generator = new Random();
-        //randomly choose an eventTree
-        ContextNetwork.IndexedSubeventTree tree = network.eventTrees.get(generator.nextInt(network.eventTrees.size()));
 
-        sampleFromTree(sNet, tree, (int) Math.ceil(tree.nodeCount() * percentage));
-    }
-
-    private static void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
-
-        //nodeCount = 6000;
+    private static void sampleIntoNetwork(ContextNetwork sNet, HashMap<Integer, ContextNetwork.Instance[]> localInstanceMap,
+                                          ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
 
         Random generator = new Random();
-        Integer[] keys = new Integer[tree.typeIndex.keySet().size()];
-        tree.typeIndex.keySet().toArray(keys);
-        int i=0;
+        Integer[] keys = new Integer[localInstanceMap.keySet().size()];
+        localInstanceMap.keySet().toArray(keys);
         while (sNet.nodeCount() < nodeCount) {
-            i++;
-        //for (int i=0; i<nodeCount; i++) {
-            int k = keys[generator.nextInt(keys.length)];
 
-            HashSet<ContextNetwork.Instance> instances = tree.typeIndex.get(k);
-            int l = generator.nextInt(instances.size());
-            ContextNetwork.Instance temp = null;
-            for (ContextNetwork.Instance inst: instances) {
-                temp = inst;
-                if (l-- == 0) break;
-            }
+            int k = keys[generator.nextInt(keys.length)];
+            int l = generator.nextInt(localInstanceMap.get(k).length);
+            ContextNetwork.Instance temp = localInstanceMap.get(k)[l];
             assert temp != null;
 
-            if (temp.equals(tree.root)) {
-                i--;
-                //System.out.println("Got root");
-                continue;
-            }
-
-            if ( sNet.eventTrees.get(0).instanceMap.containsKey(temp.id)) {
-                i--;
-                //System.out.println("Repeat");
-                continue;
-            }
+            if (temp.equals(tree.root)) continue;
+            if ( sNet.eventTrees.get(0).instanceMap.containsKey(temp.id)) continue;
 
             ContextNetwork tempNet = new ContextNetwork();
             ContextNetwork.Instance new_root = tree.root.attributeClone();
             tempNet.addAtomic(new_root);
             tempNet.addSubeventEdge(new_root, new_root, temp.attributeClone());
 
-            int mc = sNet.nodeCount();
             sNet.merge(tempNet);
-            if (sNet.nodeCount() - mc != 1) {
-                //System.out.println("Didn't add");
-                sNet.merge(tempNet);
-            }
-
-            //if (i % 500 == 0) System.out.println("Sample contains " + i + " nodes, need: " + nodeCount);
         }
     }
 
