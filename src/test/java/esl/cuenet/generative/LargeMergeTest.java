@@ -38,7 +38,7 @@ public class LargeMergeTest {
         logger.info("Creating Samples... " + _sample_count);
         //Generate samples
         List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, _sample_count);
-//
+
         for (ContextNetwork sample : samples) {
             if ( !NetworkBuildingHelper.validateSample(network1, sample) )
                 logger.info("Invalid Sample");
@@ -67,10 +67,10 @@ public class LargeMergeTest {
 
         logger.info("checkorder: " + NetworkBuildingHelper.checkOrderStrict(merge));
 
-        if (network2 == null) {
+        //if (network2 == null) {
             logger.info("Loading network2... ");
             network2 = dReader.readInstanceGraphs(filename);
-        }
+        //}
 
         logger.info("Final node counts: " + merge.nodeCount() + " " + network2.nodeCount());
 
@@ -95,7 +95,7 @@ public class LargeMergeTest {
     @Test
     public void testMid() throws Exception {
         //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
-        testLoadSampleMerge("/data/osm/instance.sim.4", 50);
+        testLoadSampleMerge("/data/osm/10/instance.sim.2", 5);
     }
 
     @Test
@@ -107,8 +107,18 @@ public class LargeMergeTest {
     }
 
     @Test
+    public void multiDatasetRepeatTestMid() throws Exception {
+        String[] filenames = new String[10];
+        for (int i=1; i<=10; i++) filenames[i-1] = "/data/osm/10/instance.sim." + i;
+        for (String file: filenames) {
+            testLoadSampleMerge(file, 50);
+            logger.info("------------------------------------------ " + file);
+        }
+    }
+
+    @Test
     public void testLarge() throws Exception {
-        testLoadSampleMerge("/data/osm/instance.sim.5", 5);
+        testLoadSampleMerge("/data/osm/instance.sim.6", 5);
     }
 
 }
