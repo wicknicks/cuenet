@@ -33,10 +33,10 @@ public class ContextNetwork {
             HashSet<Instance> instances = subtree.typeIndex.get(parent.id.eventId);
             instances.add(parent);
 
-            Instance temp = null;
-            for (Instance i: instances) {
-                if (i.equals(parent)) temp = i;
-            }
+            Instance temp = subtree.instanceMap.get(parent.id);
+            //for (Instance i: instances) {
+            //    if (i.equals(parent)) temp = i;
+            //}
 
             if (temp == null) throw new RuntimeException("Could not find instance " + parent);
 
