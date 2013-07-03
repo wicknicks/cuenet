@@ -185,7 +185,7 @@ public class NetworkBuildingHelper {
 
     private static void sampleFromTree(ContextNetwork sNet, ContextNetwork.IndexedSubeventTree tree, int nodeCount) {
 
-        nodeCount = 6000;
+        //nodeCount = 6000;
 
         Random generator = new Random();
         Integer[] keys = new Integer[tree.typeIndex.keySet().size()];

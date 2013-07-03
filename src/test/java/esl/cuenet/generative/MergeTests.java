@@ -16,11 +16,13 @@ public class MergeTests {
         System.out.println(network1.nodeCount() + " " + network2.nodeCount());
 
         Assert.assertEquals(network1.compareNetwork(network2), true);
+        long s = System.currentTimeMillis();
         network1.merge(network2);
+        System.out.println("Time " + (System.currentTimeMillis() - s));
 
         System.out.println(network1.nodeCount() + " " + network2.nodeCount());
 
-        Assert.assertEquals(network1.compareNetwork(network2), true);           //INTERESTING!
+        Assert.assertEquals(network1.compareNetwork(network2), true);
     }
 
     @Test

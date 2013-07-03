@@ -39,26 +39,28 @@ public class LargeMergeTest {
         //Generate samples
         List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, _sample_count);
 //
-        for (ContextNetwork sa: samples) logger.info("Nodes in merge graph " + sa.nodeCount());
-
         for (ContextNetwork sample : samples) {
             if ( !NetworkBuildingHelper.validateSample(network1, sample) )
                 logger.info("Invalid Sample");
         }
 
         ContextNetwork merge = samples.get(0);
+        long s;
         for (int i=1; i<samples.size(); i++) {
+            s = System.currentTimeMillis();
             logger.info("Merging Sample #" + i);
             merge.merge(samples.get(i));
-            logger.info("Post merge node count #" + merge.nodeCount());
+            logger.info("Post merge node count #" + merge.nodeCount() + " ; time  = " + (System.currentTimeMillis() - s));
             if ( !NetworkBuildingHelper.validateSample(network1, merge) )
                 logger.info("Merge corrupted merge graph");
         }
 
         logger.info("Merging Instance Nets");
+        s = System.currentTimeMillis();
         for (ContextNetwork instanceNet : instanceNets)
             merge.merge(instanceNet);
-        logger.info("Merges Complete");
+        logger.info("Merges Complete Merges = " + instanceNets.size() + "; Nodes = "  + merge.nodeCount() +
+                "; time = " + (System.currentTimeMillis() - s));
 
         if ( !NetworkBuildingHelper.validateSample(network1, merge) )
             logger.info("Merge corrupted merge graph");
@@ -93,7 +95,7 @@ public class LargeMergeTest {
     @Test
     public void testMid() throws Exception {
         //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
-        testLoadSampleMerge("/data/osm/instance.sim.4", 5);
+        testLoadSampleMerge("/data/osm/instance.sim.4", 50);
     }
 
     @Test
@@ -106,7 +108,7 @@ public class LargeMergeTest {
 
     @Test
     public void testLarge() throws Exception {
-        testLoadSampleMerge("/data/osm/inst-large.sim", 5);
+        testLoadSampleMerge("/data/osm/instance.sim.5", 5);
     }
 
 }
