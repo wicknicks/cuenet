@@ -25,7 +25,7 @@ public class LargeMergeTest {
 
         DataReader dReader = new DataReader();
 
-        logger.info("Loading network1... ");
+        logger.info("Loading network1... " + filename);
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
 
         // NetworkBuildingHelper helper = new NetworkBuildingHelper(network1);
