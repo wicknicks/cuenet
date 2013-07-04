@@ -209,14 +209,18 @@ public class ContextNetwork {
     }
 
     public void printTree() {
+        printTree(false);
+    }
+
+    public void printTree(boolean printEntities) {
         for (IndexedSubeventTree etree: eventTrees)
-            etree.print(System.out);
+            etree.print(System.out, printEntities);
     }
 
     public void printTree(int root_eventid, int root_instanceid) {
         for (IndexedSubeventTree etree: eventTrees)
             if (etree.root.id.eventId == root_eventid && etree.root.id.instanceId == root_instanceid)
-                etree.print(System.out);
+                etree.print(System.out, true);
     }
 
     public boolean compareNetwork(ContextNetwork other) {
@@ -256,6 +260,7 @@ public class ContextNetwork {
         return entities;
     }
 
+
     public class IndexedSubeventTree {
         Instance root;
         HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
@@ -266,7 +271,7 @@ public class ContextNetwork {
             return root.toString();
         }
 
-        public void print(PrintStream out) {
+        public void print(PrintStream out, boolean printEntities) {
             try {
                 out.write(("ROOT " + root + "\n").getBytes());
                 Stack<InstanceId> stack = new Stack<InstanceId>();
@@ -274,10 +279,12 @@ public class ContextNetwork {
                 while (!stack.isEmpty()) {
                     InstanceId i = stack.pop();
                     Instance inst = lookup(this, i);
-                    out.write(inst.toString().getBytes());
-                    out.write(" : ".getBytes());
-                    out.write(Arrays.toString(inst.participants.toArray()).getBytes());
-                    out.write("\n".getBytes());
+                    if ( printEntities ) {
+                        out.write(inst.toString().getBytes());
+                        out.write(" : ".getBytes());
+                        out.write(Arrays.toString(inst.participants.toArray()).getBytes());
+                        out.write("\n".getBytes());
+                    }
                     for (InstanceId subids: inst.immediateSubevents) {
                         out.write(i.toString().getBytes());
                         out.write(" -> ".getBytes());

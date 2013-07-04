@@ -8,6 +8,15 @@ public class NetworkBuildingHelper {
 
     private static Logger logger = Logger.getLogger(NetworkBuildingHelper.class);
 
+
+    public static void createTimeIntervals(ContextNetwork network) {
+        time = 0;
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            downwardTime(network, tree, tree.root);
+        }
+    }
+
+
     private static int time = 0;
     public static void updateTimeIntervals(ContextNetwork network, ContextNetwork.Instance root) {
         ContextNetwork.IndexedSubeventTree temp = null;
