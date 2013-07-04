@@ -22,13 +22,13 @@ nodeids = list(nodeids)
 writer = open(getInstanceFile('/data/osm/multi'), 'w')
 writer.write('/data/osm/uci.roadnet 1 10000\n')
 
-for _l in range(locations):
+for _loc in range(locations):
+  
   countAtLevels = []
-  for i in range(depth):
-    countAtLevels.append(random.randint(2, 4))
+  for i in range(depth): countAtLevels.append(random.randint(2, 4))
 
-  writer.write('## ' + str(edgeids[_l]) + '\n')
-  writer.write('$$ ' + str(nodeids[_l]) + '\n')
+  writer.write('## ' + str(edgeids[_loc]) + '\n')
+  writer.write('$$ ' + str(nodeids[_loc]) + '\n')
   writer.write('0_0,0,10000000,R\n')
 
   print countAtLevels
