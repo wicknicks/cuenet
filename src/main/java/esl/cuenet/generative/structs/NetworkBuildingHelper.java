@@ -160,7 +160,7 @@ public class NetworkBuildingHelper {
         return networks;
     }
 
-    public static List<ContextNetwork> sample(ContextNetwork network, int count) {
+    public static List<ContextNetwork> sample(ContextNetwork network, int count, double percentage) {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
         Random generator = new Random();
@@ -174,7 +174,7 @@ public class NetworkBuildingHelper {
         }
 
         //int nodelimit = 6000;
-        int nodelimit = (int) Math.ceil(tree.nodeCount() * 0.1);
+        int nodelimit = (int) Math.ceil(tree.nodeCount() * percentage);
         for (int i=0; i<count; i++) {
             logger.info("Generating Sample #" + i);
 

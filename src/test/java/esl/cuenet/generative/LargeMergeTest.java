@@ -18,7 +18,7 @@ public class LargeMergeTest {
 
     Logger logger = Logger.getLogger(LargeMergeTest.class);
 
-    public void testLoadSampleMerge(String filename, int _sample_count) throws Exception {
+    public void testLoadSampleMerge(String filename, int _sample_count, double percentage) throws Exception {
 
         assert _sample_count > 1;
 
@@ -30,7 +30,7 @@ public class LargeMergeTest {
 
         logger.info("Creating Samples... " + _sample_count);
         //Generate samples
-        List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, _sample_count);
+        List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, _sample_count, percentage);
 
         for (ContextNetwork sample : samples) {
             if ( !NetworkBuildingHelper.validateSample(network1, sample) )
@@ -44,7 +44,7 @@ public class LargeMergeTest {
             logger.info("Merging Sample #" + i);
             merge.merge(samples.get(i));
             logger.info("Post merge node count #" + merge.nodeCount() + " ; time  = " + (System.currentTimeMillis() - s));
-            logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
+            //logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
             if ( !NetworkBuildingHelper.validateSample(network1, merge) )
                 logger.info("Merge corrupted merge graph");
         }
@@ -88,19 +88,19 @@ public class LargeMergeTest {
 
     @Test
     public void testSmall() throws Exception {
-        testLoadSampleMerge("/data/osm/inst-small.sim", 10);
+        testLoadSampleMerge("/data/osm/inst-small.sim", 10, 0.1);
     }
 
     @Test
     public void testMid() throws Exception {
         //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
-        testLoadSampleMerge("/data/osm/10/instance.sim.4", 5);
+        testLoadSampleMerge("/data/osm/10/instance.sim.4", 5, 0.1);
     }
 
     @Test
     public void repeatTestMid() throws Exception {
         for (int i=1; i<3; i++) {
-            testLoadSampleMerge("/data/osm/instance.sim.4", 5*i);
+            testLoadSampleMerge("/data/osm/instance.sim.4", 5*i, 0.1);
             logger.info("------------------------------------------");
         }
     }
@@ -110,14 +110,24 @@ public class LargeMergeTest {
         String[] filenames = new String[10];
         for (int i=1; i<=10; i++) filenames[i-1] = "/data/osm/10/instance.sim." + i;
         for (String file: filenames) {
-            testLoadSampleMerge(file, 50);
+            testLoadSampleMerge(file, 50, 0.1);
             logger.info("------------------------------------------ " + file);
         }
     }
 
     @Test
     public void testLarge() throws Exception {
-        testLoadSampleMerge("/data/osm/instance.sim.6", 5);
+        testLoadSampleMerge("/data/osm/instance.sim.6", 5, 0.1);
     }
+
+    @Test
+    public void testMergeWithIncreasingSampleSize() throws Exception {
+        String filename = "/data/osm/6/instance.sim.7";
+        for (double p=0.1; p<=0.7; p+=0.1) {
+            testLoadSampleMerge(filename, 10, 0.1);
+            logger.info("------------------------------------------ sampling at " + p);
+        }
+    }
+
 
 }

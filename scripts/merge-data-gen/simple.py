@@ -6,12 +6,12 @@ def getInstanceFile(dirname):
   return os.path.join(dirname, 'instance.sim.' + str(c))
 
 
-depth = 10
+depth = 6
 countAtLevels = []
 for i in range(depth):
-  countAtLevels.append(random.randint(2, 5))
+  countAtLevels.append(random.randint(2, 10))
 
-writer = open(getInstanceFile('/data/osm/10'), 'w')
+writer = open(getInstanceFile('/data/osm/6'), 'w')
 writer.write('/data/osm/uci.roadnet 1 10000 ')
 for item in countAtLevels: writer.write(' %d ' % item )
 writer.write('\n## 171169284\n')
