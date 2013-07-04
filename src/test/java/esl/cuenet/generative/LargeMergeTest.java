@@ -26,7 +26,7 @@ public class LargeMergeTest {
 
         logger.info("Loading network1... " + filename);
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
-        logger.info("Nodes: " + network1.nodeCount() + " ; memory = " + MemoryUtil.deepMemoryUsageOf(network1));
+        //logger.info("Nodes: " + network1.nodeCount() + " ; memory = " + MemoryUtil.deepMemoryUsageOf(network1));
 
         logger.info("Creating Samples... " + _sample_count);
         //Generate samples
@@ -71,7 +71,7 @@ public class LargeMergeTest {
         ContextNetwork network2 = dReader.readInstanceGraphs(filename);
 
         logger.info("Final node counts: " + merge.nodeCount() + " " + network2.nodeCount());
-        logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
+        //logger.info("Size of merge graph: " + MemoryUtil.deepMemoryUsageOf(merge));
 
         boolean val = merge.compareNetwork(network2);
         logger.info("Equals: " + val);
@@ -94,7 +94,7 @@ public class LargeMergeTest {
     @Test
     public void testMid() throws Exception {
         //testLoadSampleMerge("/data/osm/inst-mid.sim", 5);
-        testLoadSampleMerge("/data/osm/10/instance.sim.4", 5, 0.1);
+        testLoadSampleMerge("/data/osm/inst-mid.sim", 5, 0.1);
     }
 
     @Test
