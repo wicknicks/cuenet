@@ -203,6 +203,9 @@ public class ContextNetwork {
 
     private void mergeInformation(Instance thisSubevent, Instance otherInstance) {
         //System.out.println("[merge_info] " + thisSubevent + " " + otherInstance);
+        if ( !thisSubevent.id.equals(otherInstance.id) ) {
+            return;
+        }
     }
 
     public void printTree() {
