@@ -183,18 +183,19 @@ public class NetworkBuildingHelper {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
         Random generator = new Random();
-        ContextNetwork.IndexedSubeventTree tree = network.eventTrees.get(generator.nextInt(network.eventTrees.size()));
-        HashMap<Integer, ContextNetwork.Instance[]> localInstanceMap = new HashMap<Integer, ContextNetwork.Instance[]>();
-        for (int event: tree.typeIndex.keySet()) {
-            HashSet<ContextNetwork.Instance> instances = tree.typeIndex.get(event);
-            ContextNetwork.Instance[] insts = new ContextNetwork.Instance[instances.size()];
-            instances.toArray(insts);
-            localInstanceMap.put(event, insts);
-        }
-
-        //int nodelimit = 6000;
-        int nodelimit = (int) Math.ceil(tree.nodeCount() * percentage);
         for (int i=0; i<count; i++) {
+            ContextNetwork.IndexedSubeventTree tree = network.eventTrees.get(generator.nextInt(network.eventTrees.size()));
+            HashMap<Integer, ContextNetwork.Instance[]> localInstanceMap = new HashMap<Integer, ContextNetwork.Instance[]>();
+            for (int event: tree.typeIndex.keySet()) {
+                HashSet<ContextNetwork.Instance> instances = tree.typeIndex.get(event);
+                ContextNetwork.Instance[] insts = new ContextNetwork.Instance[instances.size()];
+                instances.toArray(insts);
+                localInstanceMap.put(event, insts);
+            }
+
+            //int nodelimit = 6000;
+            int nodelimit = (int) Math.ceil(tree.nodeCount() * percentage);
+
             logger.info("Generating Sample #" + i);
 
             ContextNetwork sNet = new ContextNetwork();
