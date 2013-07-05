@@ -162,11 +162,27 @@ public class NetworkBuildingHelper {
                     ContextNetwork n = new ContextNetwork();
                     n.addAtomic(instance.attributeClone());
                     networks.add(n);
-                    //if (networks.size() % 10000 == 0) System.out.println("size = " + networks.size());
+                    if (networks.size() >= 1000000) return networks;
                 }
             }
         }
         return networks;
+    }
+
+    public static void mergeEachInstance(ContextNetwork merge, ContextNetwork network) {
+        int i = 0;
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            for (int event: tree.typeIndex.keySet()) {
+                for (ContextNetwork.Instance instance: tree.typeIndex.get(event)) {
+                    ContextNetwork n = new ContextNetwork();
+                    n.addAtomic(instance.attributeClone());
+                    merge.merge(n);
+                    i++;
+                    if (i % 500000 == 0) logger.info(i + " Instance Merges Complete.");
+                }
+            }
+        }
+        logger.info("All instances merged!");
     }
 
     public static ContextNetwork prepareRootsForSampling(ContextNetwork network) {

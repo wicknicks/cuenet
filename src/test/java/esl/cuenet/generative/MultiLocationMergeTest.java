@@ -17,36 +17,63 @@ public class MultiLocationMergeTest {
 
     Logger logger = Logger.getLogger(MultiLocationMergeTest.class);
 
-    public void testMultiFile(String filename) throws Exception {
-        DataReader dReader = new DataReader();
-        ContextNetwork network1 = dReader.readInstanceGraphs(filename);
+    public void testMultiNetwork(ContextNetwork network1, int sampleCount, double samplePercentage) throws Exception {
+
+        assert sampleCount > 1;
+        assert samplePercentage > 0;
+        assert samplePercentage <= 1;
+
         NetworkBuildingHelper.createTimeIntervals(network1);
 
         ContextNetwork merge = NetworkBuildingHelper.prepareRootsForSampling(network1);
         logger.info(merge.nodeCount());
 
-        List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, 5, 0.1);
+        List<ContextNetwork> samples = NetworkBuildingHelper.sample(network1, sampleCount, samplePercentage);
+
+        int i=0; long s;
         for (ContextNetwork sample : samples) {
-            logger.info("sample size: " +  sample.nodeCount());
+            i++;
+            s = System.currentTimeMillis();
+            logger.info("Merging Sample #" + i);
             merge.merge(sample);
+            logger.info("Post merge node count #" + merge.nodeCount() + " ; Time  = " + (System.currentTimeMillis() - s));
         }
 
-        List<ContextNetwork> instanceNets = NetworkBuildingHelper.createNetworkForEachInstace(network1);
-        for (ContextNetwork cn: instanceNets)
-            merge.merge(cn);
+        s = System.currentTimeMillis();
+        NetworkBuildingHelper.mergeEachInstance(merge, network1);
+        logger.info("Instance Nets Merge Time = " + (System.currentTimeMillis() - s));
 
         logger.info(merge.nodeCount() + " " + network1.nodeCount());
         Assert.assertEquals(network1.compareNetwork(merge), true);
     }
 
-    @Test
-    public void testSmallDataset() throws Exception {
-        testMultiFile("/data/osm/multi/instance.sim.1");
+    public void testMultiFile(String filename, int sampleCount, double samplePercentage) throws Exception {
+
+        assert sampleCount > 1;
+        assert samplePercentage > 0;
+        assert samplePercentage <= 1;
+
+        DataReader dReader = new DataReader();
+        logger.info("Loading ---- " + filename);
+        ContextNetwork network1 = dReader.readInstanceGraphs(filename);
+
+        testMultiNetwork(network1, sampleCount, samplePercentage);
     }
 
     @Test
-    public void testMediumDataset() throws Exception {
-        testMultiFile("/data/osm/multi/instance.sim.3");
+    public void testSmallDataset() throws Exception {
+        testMultiFile("/data/osm/multi/instance.sim.1", 5, 0.1);
+    }
+
+    @Test
+    public void multiSampleTest() throws Exception {
+        String filename = "/data/osm/multi/instance.sim.5";
+
+        DataReader dReader = new DataReader();
+        logger.info("Loading ---- " + filename);
+        ContextNetwork network1 = dReader.readInstanceGraphs(filename);
+
+        for (int i=0; i<10; i++) testMultiNetwork(network1, 5*(1+1), 0.1);
     }
 
 }
