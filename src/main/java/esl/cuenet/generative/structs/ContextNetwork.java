@@ -24,7 +24,7 @@ public class ContextNetwork {
         //find root in eventTrees list
         IndexedSubeventTree subtree = null;
         for (IndexedSubeventTree i: eventTrees)
-            if (i.root.equals(root)) subtree = i;
+            if (i.root == root) subtree = i;     //instance comparison
 
         if (subtree == null) throw new RuntimeException("No corresponding subtree for event " + root);
 
