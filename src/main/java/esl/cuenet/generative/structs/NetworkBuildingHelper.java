@@ -169,6 +169,16 @@ public class NetworkBuildingHelper {
         return networks;
     }
 
+    public static ContextNetwork prepareRootsForSampling(ContextNetwork network) {
+        ContextNetwork cn = new ContextNetwork();
+
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            cn.addAtomic(tree.root.attributeClone());
+        }
+
+        return cn;
+    }
+
     public static List<ContextNetwork> sample(ContextNetwork network, int count, double percentage) {
         List<ContextNetwork> networks = new ArrayList<ContextNetwork>();
 
@@ -188,7 +198,7 @@ public class NetworkBuildingHelper {
             logger.info("Generating Sample #" + i);
 
             ContextNetwork sNet = new ContextNetwork();
-            sNet.addAtomic(network.eventTrees.get(0).root.attributeClone());
+            sNet.addAtomic(tree.root.attributeClone());
 
             sampleIntoNetwork(sNet, localInstanceMap, tree, nodelimit);
             networks.add(sNet);
