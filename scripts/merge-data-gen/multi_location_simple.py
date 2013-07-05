@@ -6,7 +6,7 @@ def getInstanceFile(dirname):
   return os.path.join(dirname, 'instance.sim.' + str(c))
 
 locations = 10
-depth = 3
+depth = 8
 
 edgeids = set()
 nodeids = set()
@@ -19,19 +19,21 @@ while len(nodeids) != locations:
   nodeids.add( random.randint(1000000, 9999999) )
 nodeids = list(nodeids)
 
-writer = open(getInstanceFile('/data/osm/multi'), 'w')
+instancefile = getInstanceFile('/data/osm/multi')
+print 'Writing into', instancefile
+writer = open(instancefile, 'w')
 writer.write('/data/osm/uci.roadnet 1 10000\n')
 
 for _loc in range(locations):
   
   countAtLevels = []
-  for i in range(depth): countAtLevels.append(random.randint(2, 4))
+  for i in range(depth): countAtLevels.append(random.randint(2, 5))
 
   writer.write('## ' + str(edgeids[_loc]) + '\n')
   writer.write('$$ ' + str(nodeids[_loc]) + '\n')
   writer.write('0_0,0,10000000,R\n')
 
-  print countAtLevels
+  print countAtLevels, reduce(lambda a, b: a*b, countAtLevels)
   prod = 1
   for k in xrange(len(countAtLevels)):
     count = countAtLevels[k]
