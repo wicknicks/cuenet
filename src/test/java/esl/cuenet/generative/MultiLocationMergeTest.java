@@ -69,7 +69,10 @@ public class MultiLocationMergeTest {
         assert samplePercentage <= 1;
 
         DataReader dReader = new DataReader();
-        logger.info("Loading ---- " + filename);
+        logger.info("----------------------------------------------------------------------------");
+        logger.info("L O A D I N G    " + filename);
+        logger.info("----------------------------------------------------------------------------");
+
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
 
         testMultiNetwork(network1, sampleCount, samplePercentage);
@@ -82,7 +85,7 @@ public class MultiLocationMergeTest {
 
     @Test
     public void testDataset() throws Exception {
-        testMultiFile("/data/osm/increasing_locations/instance.sim.7", 500, 0.33);
+        testMultiFile("/home/arjun/data/increasing_locations/instance.sim.7", 500, 0.33);
     }
 
     @Test
@@ -101,7 +104,6 @@ public class MultiLocationMergeTest {
         String filename = "/data/osm/multi/instance.sim.5";
 
         DataReader dReader = new DataReader();
-        logger.info("Loading ---- " + filename);
         ContextNetwork network1 = dReader.readInstanceGraphs(filename);
 
         ContextNetwork finalMerge = null;
@@ -132,8 +134,8 @@ public class MultiLocationMergeTest {
 
     @Test
     public void increasingLocations() throws Exception {
-        String file = "/data/osm/increasing_locations/instance.sim.";
-        for (int i=1; i<7; i++) {
+        String file = "/home/arjun/data/increasing_locations/instance.sim.";
+        for (int i=1; i<15; i++) {
             testMultiFile(file + i, 10, 0.33);
         }
     }
