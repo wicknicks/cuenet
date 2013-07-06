@@ -139,4 +139,24 @@ public class MultiLocationMergeTest {
             testMultiFile(file + i, 10, 0.33);
         }
     }
+
+    @Test
+    public void runDatasetFromCommandLine() throws Exception {
+        int samplecount = 10;
+        double samplepercentage = 0.33;
+
+        String temp = System.getProperties().getProperty("samplecount");
+        if (temp != null) samplecount = Integer.parseInt(temp);
+
+        temp = System.getProperties().getProperty("samplepercentage");
+        if (temp != null) samplepercentage = Double.parseDouble(temp);
+
+        String simfile = (String) System.getProperties().get("simfile");
+        if (simfile != null) {
+            logger.info(simfile + " " + samplecount + " " + samplepercentage);
+            testMultiFile(simfile, samplecount, samplepercentage);
+        }
+        else
+            logger.info("No property found. returning");
+    }
 }
