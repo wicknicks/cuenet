@@ -70,7 +70,7 @@ public class DataReader {
 
         while (true) {
             line = reader.readLine();
-            if (line.equals(".")) break;
+            if (line == null || line.equals(".")) break;
 
             String[] eparts = line.split(" -> ");
             superEvent = splitAndConvertToInts(eparts[0], "_");
