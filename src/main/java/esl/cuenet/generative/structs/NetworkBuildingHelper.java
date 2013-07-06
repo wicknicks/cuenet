@@ -212,7 +212,7 @@ public class NetworkBuildingHelper {
             //int nodelimit = 6000;
             int nodelimit = (int) Math.ceil(tree.nodeCount() * percentage);
 
-            logger.info("Generating Sample #" + i);
+            //logger.info("Generating Sample #" + i);
 
             ContextNetwork sNet = new ContextNetwork();
             sNet.addAtomic(tree.root.attributeClone());
