@@ -27,4 +27,19 @@ public class MemoryTester {
         logger.info("network1 takes up: " + MemoryUtil.deepMemoryUsageOf(network1));
     }
 
+    @Test
+    public void cmdMeasureContextNetworkSize() throws Exception {
+        DataReader dReader = new DataReader();
+        String simfile = (String) System.getProperties().get("simfile");
+        if (simfile != null) {
+            logger.info("----------------------------------------------------------------------------");
+            logger.info(" L O A D I N G    " + simfile);
+            logger.info("----------------------------------------------------------------------------");
+            ContextNetwork network = dReader.readInstanceGraphs(simfile);
+            logger.info("network size in bytes: " + MemoryUtil.deepMemoryUsageOf(network));
+        }
+        else
+            logger.info("No simfile property found. Test skipped");
+    }
+
 }
