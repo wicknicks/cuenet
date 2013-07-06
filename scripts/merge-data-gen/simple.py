@@ -6,19 +6,23 @@ def getInstanceFile(dirname):
   return os.path.join(dirname, 'instance.sim.' + str(c))
 
 
-depth = 6
+depth = 10
 countAtLevels = []
 for i in range(depth):
-  countAtLevels.append(random.randint(2, 10))
+  countAtLevels.append(random.randint(2, 8))
 
-writer = open(getInstanceFile('/data/osm/6'), 'w')
+instancefile = getInstanceFile('/data/osm/size/node')
+
+writer = open(instancefile, 'w')
 writer.write('/data/osm/uci.roadnet 1 10000 ')
 for item in countAtLevels: writer.write(' %d ' % item )
 writer.write('\n## 171169284\n')
 writer.write('$$ 1822416005\n')
 writer.write('0_0,0,10000000,R\n')
 
-print countAtLevels
+countAtLevels = [8, 2, 8, 2, 6, 2, 5, 3, 5, 4]
+
+print countAtLevels, reduce(lambda a, b: a*b, countAtLevels), instancefile
 #countAtLevels = [1, 2, 3, 1]
 prod = 1
 for k in xrange(len(countAtLevels)):
