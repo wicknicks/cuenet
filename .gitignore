@@ -11,6 +11,8 @@ target/
 
 #logs
 *.logs
+*.times
+*.out
 
 #scripts
 *.sh
