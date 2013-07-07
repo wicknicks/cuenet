@@ -5,7 +5,7 @@ def getInstanceFile(dirname):
   c = 1 + len(filter(lambda a: (a.find('instance.sim') >= 0), files))
   return os.path.join(dirname, 'instance.sim.' + str(c))
 
-locations = 1000
+locations = 10000
 depth = 8
 
 edgeids = set()
@@ -19,21 +19,24 @@ while len(nodeids) != locations:
   nodeids.add( random.randint(1000000, 9999999) )
 nodeids = list(nodeids)
 
-instancefile = getInstanceFile('/data/osm/increasing_locations')
+instancefile = getInstanceFile('/home/arjun/data/cuenet/size/tree')
 print 'Writing into', instancefile
 writer = open(instancefile, 'w')
 writer.write('/data/osm/uci.roadnet 1 10000\n')
 
+countAtLevels = [2, 3, 4, 5, 5]
+print countAtLevels, reduce(lambda a, b: a*b, countAtLevels), locations
+
 for _loc in range(locations):
   
-  countAtLevels = []
-  for i in range(depth): countAtLevels.append(random.randint(2, 5))
+  #countAtLevels = []
+  #for i in range(depth): countAtLevels.append(random.randint(2, 5))
 
   writer.write('## ' + str(edgeids[_loc]) + '\n')
   writer.write('$$ ' + str(nodeids[_loc]) + '\n')
   writer.write('0_0,0,10000000,R\n')
 
-  print countAtLevels, reduce(lambda a, b: a*b, countAtLevels)
+  #print countAtLevels, reduce(lambda a, b: a*b, countAtLevels)
   prod = 1
   for k in xrange(len(countAtLevels)):
     count = countAtLevels[k]
