@@ -2,11 +2,11 @@ import os, random
 
 def getInstanceFile(dirname):
   files = os.listdir(dirname)
-  c = 1 + len(filter(lambda a: (a.find('instance.sim') >= 0), files))
-  return os.path.join(dirname, 'instance.sim.' + str(c))
+  c = 1 + len(filter(lambda a: (a.find('instance.sim.10') >= 0), files))
+  return os.path.join(dirname, 'instance.sim.10.' + str(c))
 
 
-depth = 3
+depth = 10
 countAtLevels = []
 for i in range(depth):
   countAtLevels.append(random.randint(2, 8))
