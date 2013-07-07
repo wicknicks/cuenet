@@ -129,5 +129,33 @@ public class LargeMergeTest {
         }
     }
 
+    @Test
+    public void cmdMergeWithIncreasingDepth() throws Exception {
+        DataReader dReader = new DataReader();
+
+        String primesim = System.getProperty("primesim");
+        if (primesim == null) logger.info("primesim = null, skipping");
+
+        String mergesim = System.getProperty("mergesim");
+        if (mergesim == null) logger.info("mergesim = null, skipping");
+
+//        String mergesim = "/home/arjun/data/cuenet/simplemerge/instance.sim.1";
+//        String primesim = "/home/arjun/data/cuenet/simplemerge/prime.sim";
+
+        ContextNetwork prime = dReader.readInstanceGraphs(primesim);
+        NetworkBuildingHelper.createTimeIntervals(prime);
+
+        ContextNetwork merge = dReader.readInstanceGraphs(mergesim);
+        NetworkBuildingHelper.createTimeIntervals(merge);
+
+        logger.info("prime = " + primesim);
+        logger.info("merge = " + mergesim);
+
+        logger.info("Starting merge");
+        long s = System.currentTimeMillis();
+        prime.merge(merge);
+        long e = System.currentTimeMillis();
+        logger.info("Time Taken to Merge = " + (e-s));
+    }
 
 }

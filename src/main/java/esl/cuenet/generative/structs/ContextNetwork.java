@@ -154,10 +154,12 @@ public class ContextNetwork {
                     Instance s = lookup(other, osubs);
                     recursiveMerge(subtree, subevent, other, s);
                 }
+                break;
             }
             else if (STHelper.contains(subevent, instance)) {
                 addAsSubevent = false;
                 recursiveMerge(subtree, subevent, other, instance);
+                break;
             }
             else if (STHelper.contains(instance, subevent)) {
                 addAsSubevent = false;
@@ -174,7 +176,7 @@ public class ContextNetwork {
 //                    Instance s = lookup(other, osubs);
 //                    recursiveMerge(subtree, new_i, other, s);
 //                }
-//                break;
+                break;
             }
         }
 
