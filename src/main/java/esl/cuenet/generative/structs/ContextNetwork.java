@@ -176,7 +176,7 @@ public class ContextNetwork {
 //                    Instance s = lookup(other, osubs);
 //                    recursiveMerge(subtree, new_i, other, s);
 //                }
-                break;
+//                break;
             }
         }
 

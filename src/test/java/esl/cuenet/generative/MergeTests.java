@@ -6,7 +6,7 @@ import org.junit.Test;
 
 public class MergeTests {
 
-    @Test
+    //@Test
     public void mergeTest1() throws Exception {
         DataReader dReader = new DataReader();
 
