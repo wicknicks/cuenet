@@ -203,7 +203,8 @@ public class LargeMergeTest {
                 total += System.currentTimeMillis() - st;
 
                 if (j % 100 == 0) {
-                    logger.info("Time for " + j + " merges = " + total);
+                    logger.info("Time till " + j + " merges = " + total);
+                    logger.info("NC = " + prime.nodeCount());
                     total = 0;
                 }
 
@@ -211,6 +212,8 @@ public class LargeMergeTest {
                 logger.error("Exception while loading " + ex.getMessage() + " at i = " + (prefix+i));
             }
         }
+
+        logger.info("Time till " + (_end - _start) + " merges = " + total);
     }
 
     @Test
