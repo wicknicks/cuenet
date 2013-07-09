@@ -51,13 +51,14 @@ public class DataReader {
         network.addAtomic(inst);
     }
 
+    public int offset = 0;
     private void atomicCompositeEvent(BufferedReader reader, ContextNetwork network, String[] parts, String location) throws IOException {
         int[] instanceSpec = splitAndConvertToInts(parts[0], "_");
         int intervalStart = Integer.parseInt(parts[1]);
         int intervalEnd = Integer.parseInt(parts[2]);
 
         //ContextNetwork tempNetwork = new ContextNetwork();
-        ContextNetwork.Instance inst = new ContextNetwork.Instance(instanceSpec[0], instanceSpec[1]);
+        ContextNetwork.Instance inst = new ContextNetwork.Instance(offset + instanceSpec[0], instanceSpec[1]);
         inst.setInterval(intervalStart, intervalEnd);
         inst.setLocation(location);
         network.addAtomic(inst);
@@ -76,12 +77,12 @@ public class DataReader {
             superEvent = splitAndConvertToInts(eparts[0], "_");
             subEvent = splitAndConvertToInts(eparts[1], "_");
 
-            superInstance = new ContextNetwork.Instance(superEvent[0], superEvent[1]);
+            superInstance = new ContextNetwork.Instance(offset + superEvent[0], superEvent[1]);
             if (superInstance.equals(inst)) {
                 superInstance = inst;
             }
 
-            subInstance = new ContextNetwork.Instance(subEvent[0], subEvent[1]);
+            subInstance = new ContextNetwork.Instance(offset + subEvent[0], subEvent[1]);
             subInstance.setLocation(location);
 
             network.addSubeventEdge(inst, superInstance, subInstance);

@@ -145,6 +145,7 @@ public class LargeMergeTest {
         ContextNetwork prime = dReader.readInstanceGraphs(primesim);
         NetworkBuildingHelper.createTimeIntervals(prime);
 
+        dReader.offset = 100;
         ContextNetwork merge = dReader.readInstanceGraphs(mergesim);
         NetworkBuildingHelper.createTimeIntervals(merge);
 
@@ -156,6 +157,7 @@ public class LargeMergeTest {
         prime.merge(merge);
         long e = System.currentTimeMillis();
         logger.info("Time Taken to Merge = " + (e-s));
+        logger.info(NetworkBuildingHelper.depth(prime));
     }
 
     @Test
