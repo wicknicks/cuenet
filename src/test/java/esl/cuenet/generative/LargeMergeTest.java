@@ -158,4 +158,58 @@ public class LargeMergeTest {
         logger.info("Time Taken to Merge = " + (e-s));
     }
 
+    @Test
+    public void cmdMultiMergeTest() throws Exception {
+        DataReader dReader = new DataReader();
+
+        String prefix = System.getProperty("prefix");
+        if (prefix == null) {
+            logger.info("prefix = null, skipping");
+            return;
+        }
+
+        String start = System.getProperty("start");
+        if (start == null) {
+            logger.info("start = null, skipping");
+            return;
+        }
+
+        String end = System.getProperty("end");
+        if (end == null) {
+            logger.info("end = null, skipping");
+            return;
+        }
+
+        int _start = Integer.parseInt(start);
+        int _end = Integer.parseInt(end);
+        ContextNetwork[] networks = new ContextNetwork[_end - _start + 1];
+
+        logger.info(_start + " " + prefix + " " + _end);
+
+        long s = System.currentTimeMillis();
+        for (int i=_start, j=0; i<=_end;i++, j++) {
+            try {
+                networks[j] = dReader.readInstanceGraphs(prefix + i);
+            } catch (Exception ex) {
+                logger.error("Exception while loading " + ex.getMessage() + " at i = " + (prefix+i));
+            }
+        }
+        long e = System.currentTimeMillis();
+        logger.info("Loaded Networks in " + (e-s));
+
+        s = System.currentTimeMillis();
+        for (int i=1; i<networks.length; i++) {
+            try {
+                networks[0].merge(networks[i]);
+            } catch (Exception ex) {
+                s = System.currentTimeMillis();
+                logger.error("Exception " + ex.getClass().getCanonicalName() + " " +
+                        ex.getMessage() + " " + prefix + (_start + i));
+                logger.info("Time taken so far = " + (e-s));
+            }
+        }
+        e = System.currentTimeMillis();
+        logger.info("Time taken to merge = " + (e-s));
+    }
 }
+

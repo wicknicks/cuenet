@@ -2,8 +2,8 @@ import os, random
 
 def getInstanceFile(dirname):
   files = os.listdir(dirname)
-  c = 1 + len(filter(lambda a: (a.find('instance.sim.1000000') >= 0), files))
-  return os.path.join(dirname, 'instance.sim.1000000.' + str(c))
+  c = 1 + len(filter(lambda a: (a.find('instance.sim.') >= 0), files))
+  return os.path.join(dirname, 'instance.sim.' + str(c))
 
 
 depth = 10
@@ -11,9 +11,9 @@ countAtLevels = []
 for i in range(depth):
   countAtLevels.append(random.randint(2, 8))
 
-instancefile = getInstanceFile('/home/arjun/data/cuenet/nodemerge')
+instancefile = getInstanceFile('/home/arjun/data/cuenet/multimerge')
 # instancefile = '/home/arjun/data/cuenet/nodemerge/prime.sim.1000000'
-maxnode = 1000000
+maxnode = 10000
 
 writer = open(instancefile, 'w')
 writer.write('/data/osm/uci.roadnet 1 10000 ')
