@@ -77,6 +77,10 @@ public class NetworkBuildingHelper {
         return checkOrderStrict(network, network.eventTrees.get(0), network.eventTrees.get(0).root);
     }
 
+    public static void checkTree(ContextNetwork net) {
+        checkTree(net, net.eventTrees.get(0), net.eventTrees.get(0).root);
+    }
+
     private static void checkTree(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         Stack<ContextNetwork.InstanceId> ids = new Stack<ContextNetwork.InstanceId>();
         ids.add(start.id);

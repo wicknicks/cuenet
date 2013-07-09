@@ -189,6 +189,7 @@ public class LargeMergeTest {
         int _start = Integer.parseInt(start);
         int _end = Integer.parseInt(end);
         ContextNetwork[] networks = new ContextNetwork[_end - _start + 1];
+        String[] names = new String[_end - _start + 1];
 
         logger.info(_start + " " + prefix + " " + _end);
 
@@ -196,6 +197,8 @@ public class LargeMergeTest {
         for (int i=_start, j=0; i<=_end;i++, j++) {
             try {
                 networks[j] = dReader.readInstanceGraphs(prefix + i);
+                names[j] = prefix + i;
+                NetworkBuildingHelper.createTimeIntervals(networks[j]);
                 int d = NetworkBuildingHelper.depth(networks[j]);
                 if (d > 20) logger.info("depth = " + d);
             } catch (Exception ex) {
@@ -207,7 +210,7 @@ public class LargeMergeTest {
 
         s = System.currentTimeMillis();
         for (int i=1; i<networks.length; i++) {
-            //logger.info("merging " + i);
+            logger.info("merging " + names[0] + " with " + names[i]);
             try {
                 networks[0].merge(networks[i]);
             } catch (Exception ex) {
@@ -220,6 +223,8 @@ public class LargeMergeTest {
                 e = System.currentTimeMillis();
                 logger.info("Time taken for " + i + " merges = " + (e-s));
             }
+            int d = NetworkBuildingHelper.depth(networks[0]);
+            logger.info(d);
         }
         e = System.currentTimeMillis();
         logger.info("Time taken to merge = " + (e-s));
