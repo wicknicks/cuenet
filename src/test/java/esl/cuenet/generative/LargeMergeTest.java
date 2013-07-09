@@ -180,6 +180,12 @@ public class LargeMergeTest {
             return;
         }
 
+
+//        String prefix = "/home/arjun/data/cuenet/multimerge/instance.sim.";
+//        String start = "1";
+//        String end = "10";
+
+
         int _start = Integer.parseInt(start);
         int _end = Integer.parseInt(end);
         ContextNetwork[] networks = new ContextNetwork[_end - _start + 1];
@@ -190,6 +196,7 @@ public class LargeMergeTest {
         for (int i=_start, j=0; i<=_end;i++, j++) {
             try {
                 networks[j] = dReader.readInstanceGraphs(prefix + i);
+                logger.info(NetworkBuildingHelper.depth(networks[j]));
             } catch (Exception ex) {
                 logger.error("Exception while loading " + ex.getMessage() + " at i = " + (prefix+i));
             }
@@ -199,6 +206,7 @@ public class LargeMergeTest {
 
         s = System.currentTimeMillis();
         for (int i=1; i<networks.length; i++) {
+            logger.info("merging " + i);
             try {
                 networks[0].merge(networks[i]);
             } catch (Exception ex) {
@@ -206,6 +214,10 @@ public class LargeMergeTest {
                 logger.error("Exception " + ex.getClass().getCanonicalName() + " " +
                         ex.getMessage() + " " + prefix + (_start + i));
                 logger.info("Time taken so far = " + (e-s));
+            }
+            if (i%100 == 0) {
+                e = System.currentTimeMillis();
+                logger.info("Time taken for " + i + " merges = " + (e-s));
             }
         }
         e = System.currentTimeMillis();
