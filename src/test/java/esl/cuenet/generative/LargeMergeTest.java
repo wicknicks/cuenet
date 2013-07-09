@@ -160,6 +160,59 @@ public class LargeMergeTest {
         logger.info(NetworkBuildingHelper.depth(prime));
     }
 
+
+    @Test
+    public void cmdMultiMerge() throws Exception {
+        DataReader dReader = new DataReader();
+
+        String prefix = System.getProperty("prefix");
+        if (prefix == null) {
+            logger.info("prefix = null, skipping");
+            return;
+        }
+
+        String start = System.getProperty("start");
+        if (start == null) {
+            logger.info("start = null, skipping");
+            return;
+        }
+
+        String end = System.getProperty("end");
+        if (end == null) {
+            logger.info("end = null, skipping");
+            return;
+        }
+
+        int _start = Integer.parseInt(start);
+        int _end = Integer.parseInt(end);
+
+        ContextNetwork prime = dReader.readInstanceGraphs(prefix + start);
+        NetworkBuildingHelper.createTimeIntervals(prime);
+        ContextNetwork merge;
+
+        long st, total = 0;
+
+
+        for (int i=_start + 1, j=0; i<=_end; i++, j++) {
+            try {
+                merge = dReader.readInstanceGraphs(prefix + i);
+                NetworkBuildingHelper.createTimeIntervals(merge);
+
+                st = System.currentTimeMillis();
+                prime.merge(merge);
+                total += System.currentTimeMillis() - st;
+
+                if (j % 100 == 0) {
+                    logger.info("Time for " + j + " merges = " + total);
+                    total = 0;
+                }
+
+            } catch (Exception ex) {
+                logger.error("Exception while loading " + ex.getMessage() + " at i = " + (prefix+i));
+            }
+        }
+    }
+
     @Test
     public void cmdMultiMergeTest() throws Exception {
         DataReader dReader = new DataReader();
