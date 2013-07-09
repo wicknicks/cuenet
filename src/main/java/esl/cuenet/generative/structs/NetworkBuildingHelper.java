@@ -110,6 +110,10 @@ public class NetworkBuildingHelper {
         }
     }
 
+    public static int depth(ContextNetwork network) {
+        return depth(network, network.eventTrees.get(0), network.eventTrees.get(0).root);
+    }
+
 
     public static int depth(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         if (start.immediateSubevents.size() == 0) return 0;
