@@ -77,8 +77,44 @@ public class YahooPlaceFinderReverseGeo {
         return result;
     }
 
+    private BasicDBObject queryFactual(double lat, double lon) throws IOException {
+        logger.info("Reverse Geocoding Factual");
+        URL placeFinderURL = new URL("http://api.v3.factual.com/places/geocode?geo={%22$point%22:[" + lat + "," + lon
+                + "]}&KEY=T2DDACVJNeHrnT835pAz7MufmdQm64pxAE3VFHv3");
+
+        URLConnection placeFinderConnection = placeFinderURL.openConnection();
+        BufferedReader in = new BufferedReader(new
+                InputStreamReader(placeFinderConnection.getInputStream()));
+
+        StringBuilder buffer = new StringBuilder(100);
+        int ich;
+        while ((ich = in.read()) != -1) buffer.append((char) ich);
+
+        in.close();
+
+        BasicDBObject ret = new BasicDBObject();
+
+        int ix = buffer.indexOf("[");
+        if (ix == -1) return ret;
+        int eix = buffer.indexOf("]");
+        if (eix == -1) return ret;
+
+        BasicDBList datalist = (BasicDBList) JSON.parse(buffer.substring(ix, eix + 1));
+        if (datalist.size() == 0) return ret;
+
+        BasicDBObject object = (BasicDBObject) datalist.get(0);
+        if (object.containsField("locality")) ret.put("city", object.getString("locality"));
+        if (object.containsField("region")) ret.put("state", object.getString("region"));
+        if (object.containsField("country")) ret.put("country", object.getString("country"));
+        if (object.containsField("postcode")) ret.put("uzip", object.getString("postcode"));
+        if (object.containsField("address")) ret.put("line1", object.getString("address"));
+
+        return object;
+    }
+
     private BasicDBObject queryPlaceFinder(double lat, double lon) throws IOException {
-        logger.info("Reverse Geocoding");
+        /*logger.info("Reverse Geocoding");
+
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + lat + "," + lon
                 + "&gflags=R&flags=J&appid=UmMtXR7c");
 
@@ -102,6 +138,9 @@ public class YahooPlaceFinderReverseGeo {
         if (list.size() == 0) return null;
 
         return (BasicDBObject) list.get(0);
+        */
+
+        return queryFactual(lat, lon);
     }
 
 }
