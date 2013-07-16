@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger('em-sync')
 handler = logging.FileHandler('sync.logs')
 formatter = logging.Formatter('%(asctime)s %(funcName)s %(lineno)d %(levelname)s %(message)s')
-handler.setFormatter(handler)
+handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
@@ -20,16 +20,16 @@ USERNAME = 'jain'
 # Location of the IMAP server 
 # IMAP_SERVER = 'mail.ucsd.edu'    ## for UCSD
 # IMAP_SERVER = 'imap.sdsc.edu'    ## for SDSC
-# IMAP_SERVER = 'imap.gmail.com'   ## for Gmail
+IMAP_SERVER = 'imap.gmail.com'   ## for Gmail
 # IMAP_SERVER = 'imap.ics.uci.edu' ## for ICS 
-IMAP_SERVER = 'imap.ics.uci.edu'
+# IMAP_SERVER = 'imap.ics.uci.edu'
 OUTPUT_FILE = None
 IMAP_PORT = 993                      # for secure connection, otherwise 143
 MAILBOXES = []
 PASSWORD = None
 
-START_DATE = '1-Jun-2010'
-END_DATE = '31-Dec-2010'
+START_DATE = '1-Jan-2011'
+END_DATE = '31-Dec-2011'
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('-i', '--imap', help='IMAP Server (like imap.sdsc.edu)')
