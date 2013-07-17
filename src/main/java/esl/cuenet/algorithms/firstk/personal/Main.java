@@ -9,9 +9,12 @@ public class Main {
 
     public static void main(String[] args) {
         SysLoggerUtils.initLogger();
-        new Facebook();
-        new Email();
-        Candidates.getInstance().logistics(false);
+//        new Facebook();
+//        new Email();
+//        Candidates.getInstance().logistics(false);
+
+        (new Ontology()).printAll();
+
     }
 
 }
