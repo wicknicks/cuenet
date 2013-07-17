@@ -5,6 +5,12 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.Hash;
 import com.mongodb.util.JSON;
 
+import org.apache.commons.codec.net.URLCodec;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
@@ -20,6 +26,8 @@ public class YahooPlaceFinderReverseGeo {
     private static YahooPlaceFinderReverseGeo instance = new YahooPlaceFinderReverseGeo();
     private HashMap<String, BasicDBObject> geocodeCache = null;
     private GeocodingCache persistentGeocodingCache = new GeocodingCache();
+
+    private URLCodec codec = new URLCodec();
 
     public YahooPlaceFinderReverseGeo() {
         geocodeCache = persistentGeocodingCache.getAll();
@@ -48,7 +56,34 @@ public class YahooPlaceFinderReverseGeo {
         }
 
         logger.info("Geocoding adress: " + addressWithSpaces);
+
+        String url = "http://query.yahooapis.com/v1/public/yql?q=" +
+                codec.encode("select * from geo.placefinder WHERE text = \"" + addressWithSpaces + "\"", "ISO-8859-1") +
+                "&appid=UmMtXR7c&format=json";
+
+        HttpClient httpclient = new DefaultHttpClient();
+        String buffer = httpclient.execute(new HttpGet(url), new BasicResponseHandler());
+
+        BasicDBObject object = (BasicDBObject) JSON.parse(buffer);
+        BasicDBObject query = (BasicDBObject) object.get("query");
+        BasicDBObject result;
+        if (query.getInt("count") == 0) {
+            throw new RuntimeException("Geocoder found no results for " + addressWithSpaces);
+        }
+        if (query.getInt("count") == 1) {
+            result = (BasicDBObject) query.get("results");
+        }
+        else {
+            BasicDBObject r = (BasicDBObject) query.get("results");
+            BasicDBList list = (BasicDBList) r.get("Result");
+            result = (BasicDBObject) list.get(0);
+        }
+
+        logger.info("geocoding " + addressWithSpaces + " = " + result);
+
+        /*** old impl
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + addressWithSpaces.replaceAll(" ", "%20")
+
                 + "&flags=J&appid=UmMtXR7c");
 
         URLConnection placeFinderConnection = placeFinderURL.openConnection();
@@ -61,6 +96,7 @@ public class YahooPlaceFinderReverseGeo {
 
         in.close();
 
+
         int ix = buffer.indexOf("[");
         if (ix == -1) return null;
         int eix = buffer.indexOf("]");
@@ -71,6 +107,10 @@ public class YahooPlaceFinderReverseGeo {
         if (list.size() == 0) return null;
 
         BasicDBObject result = (BasicDBObject) list.get(0);
+
+
+        */
+
         geocodeCache.put(addressWithSpaces, result);
         persistentGeocodingCache.addToCache(addressWithSpaces, result);
 
@@ -113,6 +153,33 @@ public class YahooPlaceFinderReverseGeo {
     }
 
     private BasicDBObject queryPlaceFinder(double lat, double lon) throws IOException {
+        String url = "http://query.yahooapis.com/v1/public/yql?q="
+                    + codec.encode("select * from geo.placefinder where text=\"" + lat + ", " + lon + "\" and gflags=\"R\"", "ISO-8859-1")
+                    + "&appid=UmMtXR7c&format=json";
+
+        HttpClient httpclient = new DefaultHttpClient();
+        String buffer = httpclient.execute(new HttpGet(url), new BasicResponseHandler());
+
+        BasicDBObject object = (BasicDBObject) JSON.parse(buffer);
+        BasicDBObject query = (BasicDBObject) object.get("query");
+        BasicDBObject result;
+        if (query.getInt("count") == 0) {
+            throw new RuntimeException("Rev-Geocoder found no results for " + lat + ", " + lon);
+        }
+        if (query.getInt("count") == 1) {
+            result = (BasicDBObject) query.get("results");
+        }
+        else {
+            BasicDBObject r = (BasicDBObject) query.get("results");
+            BasicDBList list = (BasicDBList) r.get("Result");
+            result = (BasicDBObject) list.get(0);
+        }
+
+        logger.info("reverse geocoding " + lat + ", " + lon + " = " + result);
+
+
+        return result;
+
         /*logger.info("Reverse Geocoding");
 
         URL placeFinderURL = new URL("http://where.yahooapis.com/geocode?q=" + lat + "," + lon
@@ -140,7 +207,7 @@ public class YahooPlaceFinderReverseGeo {
         return (BasicDBObject) list.get(0);
         */
 
-        return queryFactual(lat, lon);
+        //return queryFactual(lat, lon);
     }
 
 }

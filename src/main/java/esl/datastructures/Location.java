@@ -3,6 +3,7 @@ package esl.datastructures;
 import com.hp.hpl.jena.enhanced.EnhGraph;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Node_URI;
+import com.hp.hpl.jena.ontology.OntClass;
 import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.ontology.impl.IndividualImpl;
 import com.mongodb.BasicDBObject;
@@ -116,5 +117,10 @@ public class Location extends IndividualImpl {
 
     private double DtoR(double d) {
         return d*0.0174532925;
+    }
+
+    @Override
+    public OntClass getOntClass() {
+        return getOntModel().getOntClass(Constants.DOLCELocationURI);
     }
 }
