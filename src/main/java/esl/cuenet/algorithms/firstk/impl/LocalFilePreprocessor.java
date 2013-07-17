@@ -123,22 +123,27 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
         graph.addIndividual(individual, type);
     }
 
-    class Exif {
+    public static class Exif {
         Integer width = null;
         Integer height = null;
         Long timestamp = null;
         String mimetype = null;
         Double GPSLatitude = null;
         Double GPSLongitude = null;
+
+        public String toString() {
+            return width + "x" + height + " ; " + timestamp + " @ (" + GPSLatitude + ", " + GPSLongitude + ")";
+        }
     }
 
-    class ExifExtractor {
+    public static class ExifExtractor {
 
         private String exiftoolPath = "exiftool --help";
         private String args[] = {"-d \"%s\" -datetimeoriginal", "-c \"%.6f\"",
                 "-gpslatitude", "-gpslongitude", "-imagewidth", "-imageheight", "-mimetype"};
         private String command = null;
         private Exif exif = null;
+        private Logger logger = Logger.getLogger(ExifExtractor.class);
 
         public ExifExtractor() {
             StringBuilder builder = new StringBuilder();

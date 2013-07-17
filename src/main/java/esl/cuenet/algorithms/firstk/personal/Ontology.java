@@ -20,6 +20,8 @@ public class Ontology {
     private Multimap<URI, URI> supereventIndex = HashMultimap.create();
     private Multimap<URI, URI> isAIndex = HashMultimap.create();
 
+    public static String PERSON = "Person";
+
     public Ontology() {
         try {
             load();

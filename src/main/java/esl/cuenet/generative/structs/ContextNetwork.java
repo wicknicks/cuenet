@@ -264,7 +264,7 @@ public class ContextNetwork {
 
 
     public class IndexedSubeventTree {
-        Instance root;
+        public Instance root;
         HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
         HashMap<InstanceId, Instance> instanceMap = new HashMap<InstanceId, Instance>();
 
@@ -364,11 +364,11 @@ public class ContextNetwork {
     }
 
     public static class Instance {
-        InstanceId id;
-        List<InstanceId> immediateSubevents;
-        List<Entity> participants;
-        int intervalStart, intervalEnd;
-        String location;
+        protected final InstanceId id;
+        protected List<InstanceId> immediateSubevents;
+        protected List<Entity> participants;
+        protected int intervalStart, intervalEnd;
+        protected String location;
 
         public Instance(int eventId, int instanceId) {
             this.id = new InstanceId(eventId, instanceId);
@@ -457,8 +457,8 @@ public class ContextNetwork {
     }
 
     public static class Entity {
-        String type;  //person, organization, company or place
-        String id;    //arjun, uci, starbucks corp or "Mason Park"
+        protected final String type;  //person, organization, company or place
+        protected final String id;    //arjun, uci, starbucks corp or "Mason Park"
 
         public Entity(String type, String id) {
             this.id = id;
