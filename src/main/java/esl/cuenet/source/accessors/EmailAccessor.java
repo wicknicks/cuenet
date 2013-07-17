@@ -18,6 +18,7 @@ import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
 import org.apache.log4j.Logger;
 
+import javax.mail.internet.MailDateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,8 +33,8 @@ public class EmailAccessor extends MongoDB implements IAccessor {
     private OntModel model = null;
     private Attribute[] attributes = null;
     protected boolean[] setFlags = new boolean[3];
-    protected List<String> queryEmails = new ArrayList<String>();
-    private SimpleDateFormat rfc2822DateFormatter = new SimpleDateFormat("");
+    protected List<String> queryEmails = new ArrayList<String>();         //Mon, 3 Jan 2011 22:41:28 +0530
+    private SimpleDateFormat rfc2822DateFormatter = new MailDateFormat();
 
     public EmailAccessor(OntModel model) {
         super(AccessorConstants.DBNAME);
@@ -116,16 +117,16 @@ public class EmailAccessor extends MongoDB implements IAccessor {
         BasicDBList predicates = new BasicDBList();
         for (String em: queryEmails) {
             Pattern emPattern = Pattern.compile(em, Pattern.CASE_INSENSITIVE);
-            predicates.add(new BasicDBObject("To", emPattern));
-            predicates.add(new BasicDBObject("From", emPattern));
-            predicates.add(new BasicDBObject("CC", emPattern));
+            predicates.add(new BasicDBObject("to", emPattern));
+            predicates.add(new BasicDBObject("from", emPattern));
+            predicates.add(new BasicDBObject("cc", emPattern));
         }
 
         BasicDBObject keys = new BasicDBObject();
-        keys.put("To", 1);
-        keys.put("CC", 1);
-        keys.put("From", 1);
-        keys.put("Subject", 1);
+        keys.put("to", 1);
+        keys.put("cc", 1);
+        keys.put("from", 1);
+        keys.put("date", 1);
         keys.put("_id", 0);
 
         BasicDBObject queryObject = new BasicDBObject("$or", predicates);
@@ -138,18 +139,18 @@ public class EmailAccessor extends MongoDB implements IAccessor {
         while (reader.hasNext()) {
             BasicDBObject obj = (BasicDBObject) reader.next();
             List<Map.Entry<String, String>> entries = new ArrayList<Map.Entry<String, String>>();
-            to = obj.getString("To");
+            to = obj.getString("to");
             if (to != null) entries.addAll(Utils.parseEmailAddresses(to));
 
-            from = obj.getString("From");
+            from = obj.getString("from");
             if (from != null) entries.addAll(Utils.parseEmailAddresses(from));
 
-            cc = obj.getString("CC");
+            cc = obj.getString("cc");
             if (cc != null)entries.addAll(Utils.parseEmailAddresses(cc));
 
             List<Individual> individualCollection = new ArrayList<Individual>();
 
-            date = obj.getString("Date");
+            date = obj.getString("date");
             TimeInterval interval = getDate(date);
             if (interval != null) individualCollection.add(interval);
 
@@ -174,8 +175,10 @@ public class EmailAccessor extends MongoDB implements IAccessor {
                 ms = (rfc2822DateFormatter.parse(date)).getTime();
                 interval = TimeInterval.createFromMoment(ms, model);
             } catch (ParseException e) {
-                logger.error("RFC2822 Date Parsing failed: " + date);
+                logger.error("RFC2822 Date Parsing failed: " + date + " " + e.getMessage());
             }
+        } else {
+            logger.info("Date is null!");
         }
 
         return interval;
