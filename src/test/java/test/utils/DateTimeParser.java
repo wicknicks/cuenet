@@ -1,10 +1,17 @@
 package test.utils;
 
+import com.hp.hpl.jena.ontology.OntModel;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import esl.datastructures.Location;
+import esl.datastructures.TimeInterval;
 import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import javax.mail.internet.MailDateFormat;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -44,6 +51,19 @@ public class DateTimeParser {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
         Date f = sdf.parse("2012-07-27T18:29:39+0000");
         logger.info(f + " " + f.getTime());
+    }
+
+    @Test
+    public void getTime() throws IOException {
+        OntModel model = ModelFactory.createOntologyModel();
+
+        model.read(new FileReader("/home/arjun/Documents/Dropbox/Ontologies/cuenet-main/cuenet-main.owl"),
+                "http://www.semanticweb.org/arjun/cuenet-main.owl");
+        TimeInterval t = TimeInterval.createFromMoment(10, model);
+        System.out.println(t.getOntClass());
+
+        Location l = Location.createFromAddress("Irvine", model);
+        System.out.println(l.getOntClass());
     }
 
 }
