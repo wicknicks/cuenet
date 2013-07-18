@@ -21,6 +21,18 @@ public class Location {
     private String id = null;
     private static HashMap<String, Location> lCache = new HashMap<String, Location>();
 
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+
+    public String getFullAddress() {
+        return fullAddress;
+    }
+
     protected Location(double lat, double lon, String _id) throws IOException {
         this.lat = lat;
         this.lon = lon;

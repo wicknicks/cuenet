@@ -47,14 +47,14 @@ public class EventContextNetworkTester {
         network.createSubeventEdge(e1, e2);
         logger.info("Subevent added");
 
-        network.createPartiticipatingEdge(e1, p1);
-        network.createPartiticipatingEdge(e1, p2);
-        network.createPartiticipatingEdge(e1, p3);
-        network.createPartiticipatingEdge(e1, p4);
-        network.createPartiticipatingEdge(e1, p5);
+        network.createPartiticipationEdge(e1, p1);
+        network.createPartiticipationEdge(e1, p2);
+        network.createPartiticipationEdge(e1, p3);
+        network.createPartiticipationEdge(e1, p4);
+        network.createPartiticipationEdge(e1, p5);
 
-        network.createPartiticipatingEdge(e2, p4);
-        network.createPartiticipatingEdge(e2, p5);
+        network.createPartiticipationEdge(e2, p4);
+        network.createPartiticipationEdge(e2, p5);
 
         network.printTree(true);
 

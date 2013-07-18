@@ -19,14 +19,13 @@ public class EventContextNetwork extends ContextNetwork {
 
     private HashMap<String, Integer> eventURIHashTable = new HashMap<String, Integer>(10);
 
-    private Instance root = null;
     private Logger logger = Logger.getLogger(EventContextNetwork.class);
 
-    public ECNRef createEvent(String ontologyURI, int startTime, int endTime) {
+    public ECNRef createEvent(String ontologyURI, long startTime, long endTime) {
         return createEvent(ontologyURI, startTime, endTime, null);
     }
 
-    public ECNRef createEvent(String ontologyURI, int startTime, int endTime, String location) {
+    public ECNRef createEvent(String ontologyURI, long startTime, long endTime, String location) {
         if ( !eventURIHashTable.containsKey(ontologyURI) ) {
             int count = eventURIHashTable.size();
             eventURIHashTable.put(ontologyURI, count);
@@ -69,21 +68,26 @@ public class EventContextNetwork extends ContextNetwork {
     }
 
     public void createSubeventEdge(ECNRef _super, ECNRef _sub) {
-        if ( !eventMap.containsKey(_super) || !eventMap.containsKey(_sub))
-        {
+        if ( !eventMap.containsKey(_super) || !eventMap.containsKey(_sub)) {
             logger.info("Unkown keys = " + _super + " " + _sub);
             return;
         }
         addSubeventEdge(eventTrees.get(0).root, eventMap.get(_super), eventMap.get(_sub));
     }
 
-    public void createPartiticipatingEdge(ECNRef event, ECNRef person) {
-        if ( !eventMap.containsKey(event) || !personMap.containsKey(person))
-        {
+    public void createPartiticipationEdge(ECNRef event, ECNRef person) {
+        if ( !eventMap.containsKey(event) || !personMap.containsKey(person)) {
             logger.info("Unkown keys = " + event + " " + person);
             return;
         }
         eventMap.get(event).addPariticipant(personMap.get(person));
+    }
+
+    public void visit(Visitor visitor) {
+        for (Event event: eventMap.values()) {
+            visitor.visit(event);
+            event.visit(visitor);
+        }
     }
 
     public static class ECNRef {
@@ -132,6 +136,12 @@ public class EventContextNetwork extends ContextNetwork {
             if ( !this.participants.contains(person) )
                 this.participants.add(person);
         }
+
+        public void visit(Visitor visitor) {
+            for (Entity p: this.participants) {
+                visitor.visit((Person) p);
+            }
+        }
     }
 
     public static class Person extends Entity {
@@ -140,6 +150,11 @@ public class EventContextNetwork extends ContextNetwork {
             super(type, "" + id);
         }
 
+    }
+
+    public interface Visitor {
+        public void visit(Event event);
+        public void visit(Person person);
     }
 
 }

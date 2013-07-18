@@ -265,8 +265,8 @@ public class ContextNetwork {
 
     public class IndexedSubeventTree {
         public Instance root;
-        HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
-        HashMap<InstanceId, Instance> instanceMap = new HashMap<InstanceId, Instance>();
+        public HashMap<Integer, HashSet<Instance>> typeIndex = new HashMap<Integer, HashSet<Instance>>();
+        public HashMap<InstanceId, Instance> instanceMap = new HashMap<InstanceId, Instance>();
 
         @Override
         public String toString() {
@@ -367,7 +367,7 @@ public class ContextNetwork {
         protected final InstanceId id;
         protected List<InstanceId> immediateSubevents;
         protected List<Entity> participants;
-        protected int intervalStart, intervalEnd;
+        protected long intervalStart, intervalEnd;
         protected String location;
 
         public Instance(int eventId, int instanceId) {
@@ -380,7 +380,7 @@ public class ContextNetwork {
             this.location = location;
         }
 
-        public void setInterval(int start, int end) {
+        public void setInterval(long start, long end) {
             this.intervalStart = start;
             this.intervalEnd = end;
         }

@@ -124,12 +124,12 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
     }
 
     public static class Exif {
-        Integer width = null;
-        Integer height = null;
-        Long timestamp = null;
-        String mimetype = null;
-        Double GPSLatitude = null;
-        Double GPSLongitude = null;
+        public Integer width = null;
+        public Integer height = null;
+        public Long timestamp = null;
+        public String mimetype = null;
+        public Double GPSLatitude = null;
+        public Double GPSLongitude = null;
 
         public String toString() {
             return width + "x" + height + " ; " + timestamp + " @ (" + GPSLatitude + ", " + GPSLongitude + ")";

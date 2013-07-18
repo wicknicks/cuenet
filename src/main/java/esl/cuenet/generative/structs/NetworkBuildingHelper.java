@@ -50,7 +50,7 @@ public class NetworkBuildingHelper {
             downwardTime(network, root, subevent);
         }
 
-        int min = Integer.MAX_VALUE, max = -1;
+        long min = Integer.MAX_VALUE, max = -1;
         for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
             ContextNetwork.Instance subevent = network.lookup(root, instanceid);
             if (subevent.intervalStart < min) min = subevent.intervalStart;
@@ -103,7 +103,7 @@ public class NetworkBuildingHelper {
 
     public static void checktimes(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         if (start.immediateSubevents.size() == 0) return;
-        int span = (start.intervalEnd - start.intervalStart) / start.immediateSubevents.size();
+        long span = (start.intervalEnd - start.intervalStart) / start.immediateSubevents.size();
         for (ContextNetwork.InstanceId instanceid: start.immediateSubevents) {
             ContextNetwork.Instance subevent = network.lookup(root, instanceid);
             if ( (subevent.intervalEnd - subevent.intervalStart) != span)
@@ -134,7 +134,7 @@ public class NetworkBuildingHelper {
         int count = current.immediateSubevents.size();
         if (count == 0) return;
 
-        int span = (current.intervalEnd - current.intervalStart) / count;
+        long span = (current.intervalEnd - current.intervalStart) / count;
 //        int span = (current.intervalEnd - current.intervalStart) - current.immediateSubevents.size();
 
         int i=0;

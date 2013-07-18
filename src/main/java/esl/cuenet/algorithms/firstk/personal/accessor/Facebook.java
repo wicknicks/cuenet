@@ -1,6 +1,7 @@
 package esl.cuenet.algorithms.firstk.personal.accessor;
 
 import com.mongodb.BasicDBObject;
+import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
 import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
@@ -20,27 +21,27 @@ public class Facebook implements Source {
     }
 
     @Override
-    public List<Object> eventsContaining(Object person, Time interval, Location location) {
+    public List<EventContextNetwork> eventsContaining(EventContextNetwork.Person person, Time interval, Location location) {
         return null;
     }
 
     @Override
-    public List<Object> participants(Object event) {
+    public List<EventContextNetwork> participants(EventContextNetwork.Event event) {
         return null;
     }
 
     @Override
-    public List<Object> subevents(Object event) {
+    public List<EventContextNetwork> subevents(EventContextNetwork.Event event) {
         return null;
     }
 
     @Override
-    public List<Object> knows(Object person) {
+    public List<EventContextNetwork.Person> knows(EventContextNetwork.Person person) {
         return null;
     }
 
     @Override
-    public List<Object> knowsAtTime(Object person, Time time) {
+    public List<EventContextNetwork.Person> knowsAtTime(EventContextNetwork.Person person, Time time) {
         return null;
     }
 
