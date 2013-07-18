@@ -8,13 +8,13 @@ import java.util.List;
 
 public interface Source {
 
-    public List<EventContextNetwork> eventsContaining(EventContextNetwork.Person person, Time interval, Location location);
+    public List<EventContextNetwork> eventsContaining(Candidates.CandidateReference person, Time interval, Location location);
 
     public List<EventContextNetwork> participants(EventContextNetwork.Event event);
 
     public List<EventContextNetwork> subevents(EventContextNetwork.Event event);
 
-    public List<EventContextNetwork.Person> knows (EventContextNetwork.Person person);
+    public List<Candidates.CandidateReference> knows (Candidates.CandidateReference person);
 
-    public List<EventContextNetwork.Person> knowsAtTime (EventContextNetwork.Person person, Time time);
+    public List<EventContextNetwork> knowsAtTime (Candidates.CandidateReference person, Time time);
 }

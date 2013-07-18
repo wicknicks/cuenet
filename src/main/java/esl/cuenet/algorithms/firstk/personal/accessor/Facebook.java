@@ -1,5 +1,8 @@
 package esl.cuenet.algorithms.firstk.personal.accessor;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
@@ -14,6 +17,8 @@ public class Facebook implements Source {
     private Logger logger = Logger.getLogger(Facebook.class);
     private Candidates candidateList = Candidates.getInstance();
 
+    private Multimap<Candidates.CandidateReference, Candidates.CandidateReference> knowsGraph = HashMultimap.create();
+
 
     public Facebook() {
         FBLoader loader = new FBLoader();
@@ -21,7 +26,7 @@ public class Facebook implements Source {
     }
 
     @Override
-    public List<EventContextNetwork> eventsContaining(EventContextNetwork.Person person, Time interval, Location location) {
+    public List<EventContextNetwork> eventsContaining(Candidates.CandidateReference person, Time interval, Location location) {
         return null;
     }
 
@@ -36,14 +41,16 @@ public class Facebook implements Source {
     }
 
     @Override
-    public List<EventContextNetwork.Person> knows(EventContextNetwork.Person person) {
-        return null;
+    public List<Candidates.CandidateReference> knows(Candidates.CandidateReference person) {
+        if ( !knowsGraph.containsKey(person) ) return null;
+        return Lists.newArrayList(knowsGraph.get(person));
     }
 
     @Override
-    public List<EventContextNetwork.Person> knowsAtTime(EventContextNetwork.Person person, Time time) {
+    public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
         return null;
     }
+
 
     public class FBLoader extends MongoDB {
 
@@ -98,6 +105,11 @@ public class Facebook implements Source {
                 pid = obj.getString("id");
 
                 //logger.info("relationships = " + pid + " " + relationid);
+
+                Candidates.CandidateReference relRef = candidateList.search(Candidates.FB_ID_KEY, relationid);
+                Candidates.CandidateReference selfRef = candidateList.search(Candidates.FB_ID_KEY, pid);
+                knowsGraph.put(relRef, selfRef);
+                knowsGraph.put(selfRef, relRef);
             }
 
             //events
@@ -122,3 +134,4 @@ public class Facebook implements Source {
     }
 
 }
+

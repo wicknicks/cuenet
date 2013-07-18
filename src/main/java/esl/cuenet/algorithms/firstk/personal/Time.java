@@ -5,9 +5,20 @@ public class Time {
     private final long end;
     private final long start;
 
+    public final boolean isMoment;
+
     protected Time(long start, long end) {
+        isMoment = (start == end);
         this.start = start;
         this.end = end;
+    }
+
+    public long getStart() {
+        return start;
+    }
+
+    public long getEnd() {
+        return end;
     }
 
     public static Time createFromMoment(long tstamp) {
@@ -16,6 +27,19 @@ public class Time {
 
     public static Time createFromInterval(long start, long end) {
         return new Time(start, end);
+    }
+
+    public boolean isMoment() {
+        return isMoment;
+    }
+
+    public Time subtract(long milliseconds) {
+        if (milliseconds > start || milliseconds > end) throw new RuntimeException("milliseconds > start|end");
+        return new Time(this.start - milliseconds, this.end - milliseconds);
+    }
+
+    public Time add(long milliseconds) {
+        return new Time(this.start + milliseconds, this.end + milliseconds);
     }
 
     /**

@@ -12,9 +12,7 @@ import org.apache.log4j.Logger;
 import javax.mail.internet.MailDateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Email implements Source {
 
@@ -31,7 +29,7 @@ public class Email implements Source {
     }
 
     @Override
-    public List<EventContextNetwork> eventsContaining(EventContextNetwork.Person person, Time interval, Location location) {
+    public List<EventContextNetwork> eventsContaining(Candidates.CandidateReference person, Time interval, Location location) {
         return null;
     }
 
@@ -46,18 +44,44 @@ public class Email implements Source {
     }
 
     @Override
-    public List<EventContextNetwork.Person> knows(EventContextNetwork.Person person) {
+    public List<Candidates.CandidateReference> knows(Candidates.CandidateReference person) {
         return null;
     }
 
     @Override
-    public List<EventContextNetwork.Person> knowsAtTime(EventContextNetwork.Person person, Time time) {
-        return null;
+    public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
+        if ( !time.isMoment() ) throw new RuntimeException("time should be a moment");
+        HashSet<Candidates.CandidateReference> candidates = new HashSet<Candidates.CandidateReference>();
+
+        long msGap = (long) 48 * 3600 * 1000;
+        Time start = time.subtract(msGap);
+        Time end = time.add(msGap);
+
+        System.out.println(new Date(start.getStart()) + " " + new Date(end.getStart()));
+
+        List<EventContextNetwork> events = Lists.newArrayList();
+        for (EmailObject email: emails) {
+            if ( start.isBefore(email.time) && email.time.isBefore(end) ) {
+                System.out.println(email.nameMailPairs + " " + new Date(email.time.getStart()));
+                EventContextNetwork network = new EventContextNetwork();
+                EventContextNetwork.ECNRef mailRef = network.createEvent("email-exchange-event", email.time.getStart(), email.time.getEnd());
+
+                candidates.addAll(email.references);
+                for (Candidates.CandidateReference ref: candidates) {
+                    network.createPartiticipationEdge(mailRef, network.createPerson(ref));
+                }
+
+                events.add(network);
+            }
+        }
+
+        return events;
     }
 
 
     public class EmailObject {
         List<Map.Entry<String, String>> nameMailPairs;
+        List<Candidates.CandidateReference> references;
         Time time;
     }
 
@@ -91,7 +115,7 @@ public class Email implements Source {
                 date = obj.getString("date");
                 email.time = getDate(date);
 
-                checkCandidates(email.nameMailPairs);
+                checkCandidates(email);
 
                 emails.add(email);
             }
@@ -99,8 +123,9 @@ public class Email implements Source {
             return emails;
         }
 
-        private void checkCandidates(List<Map.Entry<String, String>> nameMailPairs) {
-            for (Map.Entry<String, String> pair: nameMailPairs) {
+        private void checkCandidates(EmailObject emailObject) {
+            emailObject.references = Lists.newArrayList();
+            for (Map.Entry<String, String> pair: emailObject.nameMailPairs) {
                 String email = pair.getKey().toLowerCase();
                 String name = pair.getValue();
 
@@ -113,6 +138,8 @@ public class Email implements Source {
                 if (cReference == Candidates.UNKNOWN) candidateList.createCandidate(Candidates.EMAIL_KEY, email);
                 candidateList.add(cReference, Candidates.EMAIL_KEY, email);
                 if (name != null) candidateList.add(cReference, Candidates.NAME_KEY, name);
+
+                if ( !emailObject.references.contains(cReference) ) emailObject.references.add(cReference);
             }
         }
 

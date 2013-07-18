@@ -48,12 +48,8 @@ public class EventContextNetwork extends ContextNetwork {
         addAtomic(eventMap.get(reference));
     }
 
-    public ECNRef createPerson (String candidateKey, String candidateValue) {
-        Candidates.CandidateReference reference = candidateSet.search(candidateKey, candidateValue);
 
-        if (reference.equals(Candidates.UNKNOWN))
-            throw new RuntimeException("unknown person " + candidateKey + " " + candidateValue);
-
+    public ECNRef createPerson (Candidates.CandidateReference reference) {
         ECNRef ref;
         if (personCandidateIndex.containsValue(reference))
             ref = personCandidateIndex.inverse().get(reference);
@@ -65,6 +61,15 @@ public class EventContextNetwork extends ContextNetwork {
         Person person = new Person(Ontology.PERSON, ref.id);
         personMap.put(ref, person);
         return ref;
+    }
+
+    public ECNRef createPerson (String candidateKey, String candidateValue) {
+        Candidates.CandidateReference reference = candidateSet.search(candidateKey, candidateValue);
+
+        if (reference.equals(Candidates.UNKNOWN))
+            throw new RuntimeException("unknown person " + candidateKey + " " + candidateValue);
+
+        return createPerson(reference);
     }
 
     public void createSubeventEdge(ECNRef _super, ECNRef _sub) {

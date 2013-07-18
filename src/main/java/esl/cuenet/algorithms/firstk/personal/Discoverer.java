@@ -41,13 +41,13 @@ public class Discoverer {
 
     private void discover(EventContextNetwork.Person person, List<EventContextNetwork> secondaries) {
         for (Source source: sources) {
-            source.eventsContaining(person, time, location);
+
         }
     }
 
     private void discover(EventContextNetwork.Event event, List<EventContextNetwork> secondaries) {
         for (Source source: sources) {
-            source.participants(event);
+
         }
     }
 
