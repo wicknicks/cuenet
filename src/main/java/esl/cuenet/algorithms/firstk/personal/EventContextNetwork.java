@@ -2,12 +2,14 @@ package esl.cuenet.algorithms.firstk.personal;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.generative.structs.ContextNetwork;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class EventContextNetwork extends ContextNetwork {
 
@@ -34,7 +36,7 @@ public class EventContextNetwork extends ContextNetwork {
         int uriID = eventURIHashTable.get(ontologyURI);
         ECNRef ref = ECNRef.newRef();
 
-        Event event = new Event(uriID, ref.id);
+        Event event = new Event(uriID, ref);
         event.setInterval(startTime, endTime);
         if (location != null) event.setLocation(location);
         eventMap.put(ref, event);
@@ -58,9 +60,13 @@ public class EventContextNetwork extends ContextNetwork {
         personCandidateIndex.put(ref, reference);
 
         int id = 0;
-        Person person = new Person(Ontology.PERSON, ref.id);
+        Person person = new Person(Ontology.PERSON, ref);
         personMap.put(ref, person);
         return ref;
+    }
+
+    public Candidates.CandidateReference getCandidateReference(ECNRef ref) {
+        return personCandidateIndex.get(ref);
     }
 
     public ECNRef createPerson (String candidateKey, String candidateValue) {
@@ -85,7 +91,7 @@ public class EventContextNetwork extends ContextNetwork {
             logger.info("Unkown keys = " + event + " " + person);
             return;
         }
-        eventMap.get(event).addPariticipant(personMap.get(person));
+        eventMap.get(event).addPariticipant(person);
     }
 
     public void visit(Visitor visitor) {
@@ -93,6 +99,15 @@ public class EventContextNetwork extends ContextNetwork {
             visitor.visit(event);
             event.visit(visitor);
         }
+    }
+
+    public List<ECNRef> getVotableEntities() {
+        List<ECNRef> participants = Lists.newArrayList();
+        for (Event event: eventMap.values()) {
+            if (eventURIHashTable.get("photo-capture") == event.getId())
+                participants.addAll(event.participants);
+        }
+        return participants;
     }
 
     public static class ECNRef {
@@ -131,28 +146,39 @@ public class EventContextNetwork extends ContextNetwork {
     }
 
 
-    public static class Event extends Instance {
+    public class Event extends Instance {
 
-        public Event(int eventId, int instanceId) {
-            super(eventId, instanceId);
+        ECNRef reference;
+        List<ECNRef> participants = Lists.newArrayList();
+
+        public Event(int eventId, ECNRef ref) {
+            super(eventId, ref.id);
+            this.reference = ref;
         }
 
-        public void addPariticipant(Person person) {
-            if ( !this.participants.contains(person) )
-                this.participants.add(person);
+        public void addPariticipant(ECNRef personReference) {
+            if ( !this.participants.contains(personReference) )
+                this.participants.add(personReference);
         }
 
         public void visit(Visitor visitor) {
-            for (Entity p: this.participants) {
-                visitor.visit((Person) p);
+            for (ECNRef p: this.participants) {
+                visitor.visit(personMap.get(p));
             }
+        }
+
+        public int getId() {
+            return this.id.eventId;
         }
     }
 
-    public static class Person extends Entity {
+    public class Person extends Entity {
 
-        public Person(String type, int id) {
-            super(type, "" + id);
+        ECNRef reference;
+
+        public Person(String type, ECNRef ref) {
+            super(type, "" + ref.id);
+            this.reference = ref;
         }
 
     }

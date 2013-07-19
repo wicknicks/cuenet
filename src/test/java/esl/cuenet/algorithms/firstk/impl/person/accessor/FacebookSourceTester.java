@@ -25,17 +25,17 @@ public class FacebookSourceTester {
 
         Candidates candidateSet = Candidates.getInstance();
 
-        Facebook facebook = new Facebook();
-        Email email = new Email();
-
+        Facebook facebook = Facebook.getInstance();
+        Email email = Email.getInstance();
 
         List<Candidates.CandidateReference> f = facebook.knows (candidateSet.search(Candidates.EMAIL_KEY, PConstants.EMAIL));
         System.out.println(f.size());
 
 
         MailDateFormat format = new MailDateFormat();
-        Date d = format.parse("Tue, 13 Dec 2011 08:22:28 -0800 (PST)");
-        List<EventContextNetwork> nets = email.knowsAtTime(candidateSet.search(Candidates.EMAIL_KEY, PConstants.EMAIL), Time.createFromMoment(d.getTime()));
+        Date d = format.parse("Mon, 21 May 2011 08:22:28 -0800 (PST)");
+        List<EventContextNetwork> nets = email.knowsAtTime(candidateSet.search(Candidates.EMAIL_KEY, PConstants.EMAIL),
+                Time.createFromMoment(d.getTime()));
         System.out.println(nets.size());
     }
 

@@ -5,7 +5,7 @@ public class SourceFactory {
     public static Source[] getSources() {
 
         return new Source[]{
-                new Email(), new Facebook()
+                Email.getInstance(), Facebook.getInstance()
         };
 
     }

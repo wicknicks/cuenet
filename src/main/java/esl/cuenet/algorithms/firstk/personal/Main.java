@@ -39,8 +39,8 @@ public class Main {
 
     public static void main(String[] args) {
         SysLoggerUtils.initLogger();
-        new Facebook();
-        new Email();
+        Facebook.getInstance();
+        Email.getInstance();
         Candidates.getInstance().logistics(false);
 
         EventContextNetwork network = load();

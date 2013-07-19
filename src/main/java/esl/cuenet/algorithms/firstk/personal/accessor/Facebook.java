@@ -20,9 +20,14 @@ public class Facebook implements Source {
     private Multimap<Candidates.CandidateReference, Candidates.CandidateReference> knowsGraph = HashMultimap.create();
 
 
-    public Facebook() {
+    protected Facebook() {
         FBLoader loader = new FBLoader();
         loader.load();
+    }
+
+    private static Facebook instance = new Facebook();
+    public static Facebook getInstance() {
+        return instance;
     }
 
     @Override

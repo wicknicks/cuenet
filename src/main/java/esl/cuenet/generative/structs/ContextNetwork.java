@@ -425,8 +425,8 @@ public class ContextNetwork {
     }
 
     public static class InstanceId {
-        int eventId;
-        int instanceId;
+        public int eventId;
+        public int instanceId;
 
         public InstanceId(int eventId, int instanceId) {
             this.instanceId = instanceId;

@@ -22,10 +22,15 @@ public class Email implements Source {
     private Candidates candidateList = Candidates.getInstance();
 
 
-    public Email() {
+    protected Email() {
         MailLoader loader = new MailLoader();
         this.emails = loader.load();
         logger.info("Loaded " + emails.size() + " emails.");
+    }
+
+    private static Email instance = new Email();
+    public static Email getInstance() {
+        return instance;
     }
 
     @Override
@@ -53,7 +58,7 @@ public class Email implements Source {
         if ( !time.isMoment() ) throw new RuntimeException("time should be a moment");
         HashSet<Candidates.CandidateReference> candidates = new HashSet<Candidates.CandidateReference>();
 
-        long msGap = (long) 48 * 3600 * 1000;
+        long msGap = (long) 120 * 3600 * 1000;
         Time start = time.subtract(msGap);
         Time end = time.add(msGap);
 
@@ -62,7 +67,7 @@ public class Email implements Source {
         List<EventContextNetwork> events = Lists.newArrayList();
         for (EmailObject email: emails) {
             if ( start.isBefore(email.time) && email.time.isBefore(end) ) {
-                System.out.println(email.nameMailPairs + " " + new Date(email.time.getStart()));
+                ///System.out.println(email.nameMailPairs + " " + new Date(email.time.getStart()));
                 EventContextNetwork network = new EventContextNetwork();
                 EventContextNetwork.ECNRef mailRef = network.createEvent("email-exchange-event", email.time.getStart(), email.time.getEnd());
 

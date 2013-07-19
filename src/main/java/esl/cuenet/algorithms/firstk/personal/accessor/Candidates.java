@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 public class Candidates {
@@ -32,6 +33,15 @@ public class Candidates {
 
     public static Candidates getInstance() {
         return instance;
+    }
+
+    public Iterator<CandidateReference> candidateIterator() {
+        List<CandidateReference> refs = Lists.newArrayList(cIndex.keySet());
+        return refs.iterator();
+    }
+
+    public Candidate get(CandidateReference ref) {
+        return cIndex.get(ref);
     }
 
     public void add(CandidateReference ref, String key, String value) {
