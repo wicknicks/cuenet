@@ -39,8 +39,12 @@ public class Main {
 
     public static void main(String[] args) {
         SysLoggerUtils.initLogger();
+
         Facebook.getInstance();
+        Candidates.getInstance().logistics(false);
         Email.getInstance();
+
+        //Candidates.getInstance().merge();
         Candidates.getInstance().logistics(false);
 
         EventContextNetwork network = load();

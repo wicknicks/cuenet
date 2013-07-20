@@ -83,9 +83,25 @@ public class Facebook implements Source {
 
                 //logger.info("user = " + name + " " + id + " " + location );
 
-                Candidates.CandidateReference cReference = null;
+
+                List<String> keys = Lists.newArrayList();
+                List<String> values = Lists.newArrayList();
+
+                keys.add(Candidates.FB_ID_KEY); values.add(id);
+                if (name != null) {
+                    keys.add(Candidates.NAME_KEY); values.add(name);
+                }
+                if (location != null) {
+                    keys.add(Candidates.LOCATION_KEY); values.add(location);
+                }
+                if (email != null) {
+                    keys.add(Candidates.EMAIL_KEY); values.add(email);
+                }
+                candidateList.createEntity(keys, values);
+
+                /*
                 cReference = candidateList.search(Candidates.NAME_KEY, name);
-                if (cReference == Candidates.UNKNOWN) cReference = candidateList.search(Candidates.FB_ID_KEY, id);
+                if (cReference.equals(Candidates.UNKNOWN)) cReference = candidateList.search(Candidates.FB_ID_KEY, id);
                 if (cReference == Candidates.UNKNOWN && email != null) cReference = candidateList.search(Candidates.EMAIL_KEY, email);
 
                 if (cReference == Candidates.UNKNOWN) cReference = candidateList.createCandidate(Candidates.FB_ID_KEY, id);
@@ -93,6 +109,7 @@ public class Facebook implements Source {
                 if (email != null) candidateList.add(cReference, Candidates.EMAIL_KEY, email);
                 if (location != null) candidateList.add(cReference, Candidates.LOCATION_KEY, location);
 
+                */
                 //re-init to null
                 location=null; email=null;
             }
@@ -111,10 +128,12 @@ public class Facebook implements Source {
 
                 //logger.info("relationships = " + pid + " " + relationid);
 
-                Candidates.CandidateReference relRef = candidateList.search(Candidates.FB_ID_KEY, relationid);
-                Candidates.CandidateReference selfRef = candidateList.search(Candidates.FB_ID_KEY, pid);
-                knowsGraph.put(relRef, selfRef);
-                knowsGraph.put(selfRef, relRef);
+                List<Candidates.CandidateReference> relRef = candidateList.search(Candidates.FB_ID_KEY, relationid);
+                List<Candidates.CandidateReference> selfRef = candidateList.search(Candidates.FB_ID_KEY, pid);
+                if (relRef.size() != 1) throw new NullPointerException();
+                if (selfRef.size() != 1) throw new NullPointerException();
+                knowsGraph.put(relRef.get(0), selfRef.get(0));
+                knowsGraph.put(selfRef.get(0), relRef.get(0));
             }
 
             //events

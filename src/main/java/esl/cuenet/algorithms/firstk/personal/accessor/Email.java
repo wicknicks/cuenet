@@ -62,7 +62,7 @@ public class Email implements Source {
         Time start = time.subtract(msGap);
         Time end = time.add(msGap);
 
-        System.out.println(new Date(start.getStart()) + " " + new Date(end.getStart()));
+        //System.out.println(new Date(start.getStart()) + " " + new Date(end.getStart()));
 
         List<EventContextNetwork> events = Lists.newArrayList();
         for (EmailObject email: emails) {
@@ -130,20 +130,33 @@ public class Email implements Source {
 
         private void checkCandidates(EmailObject emailObject) {
             emailObject.references = Lists.newArrayList();
+
             for (Map.Entry<String, String> pair: emailObject.nameMailPairs) {
                 String email = pair.getKey().toLowerCase();
                 String name = pair.getValue();
 
-                if (name != null) name = name.toLowerCase();
+                List<String> keys = Lists.newArrayList();
+                List<String> values = Lists.newArrayList();
+
+                keys.add(Candidates.EMAIL_KEY);
+                values.add(email);
+                if (name != null) {
+                    name = name.toLowerCase();
+                    keys.add(Candidates.NAME_KEY);
+                    values.add(name);
+                }
 
                 Candidates.CandidateReference cReference = null;
+                cReference = candidateList.createEntity(keys, values);
+                /*
                 cReference = candidateList.search(Candidates.EMAIL_KEY, email);
-                if (cReference == Candidates.UNKNOWN && name != null) cReference = candidateList.search(Candidates.NAME_KEY, name);
+                if (cReference.equals(Candidates.UNKNOWN) && name != null) cReference = candidateList.search(Candidates.NAME_KEY, name);
 
-                if (cReference == Candidates.UNKNOWN) candidateList.createCandidate(Candidates.EMAIL_KEY, email);
+                if (cReference.equals(Candidates.UNKNOWN)) cReference = candidateList.createCandidate(Candidates.EMAIL_KEY, email);
                 candidateList.add(cReference, Candidates.EMAIL_KEY, email);
                 if (name != null) candidateList.add(cReference, Candidates.NAME_KEY, name);
 
+                */
                 if ( !emailObject.references.contains(cReference) ) emailObject.references.add(cReference);
             }
         }

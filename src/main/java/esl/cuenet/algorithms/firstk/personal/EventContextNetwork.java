@@ -70,12 +70,12 @@ public class EventContextNetwork extends ContextNetwork {
     }
 
     public ECNRef createPerson (String candidateKey, String candidateValue) {
-        Candidates.CandidateReference reference = candidateSet.search(candidateKey, candidateValue);
+        List<Candidates.CandidateReference> reference = candidateSet.search(candidateKey, candidateValue);
 
-        if (reference.equals(Candidates.UNKNOWN))
+        if (reference.size() != 1)
             throw new RuntimeException("unknown person " + candidateKey + " " + candidateValue);
 
-        return createPerson(reference);
+        return createPerson(reference.get(0));
     }
 
     public void createSubeventEdge(ECNRef _super, ECNRef _sub) {

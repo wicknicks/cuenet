@@ -44,16 +44,76 @@ public class Candidates {
         return cIndex.get(ref);
     }
 
-    public void add(CandidateReference ref, String key, String value) {
-        if (value == null) throw new NullPointerException("value should not be NULL");
-        for (Candidate candidate: candidates) {
-            if (candidate.reference.equals(ref)) {
-                if ( !candidate.map.containsKey(key) )
-                    candidate.map.put(key, value);
-                else if ( !candidate.map.get(key).contains(value) )
-                    candidate.map.put(key, value);
+
+    public CandidateReference createEntity(List<String> keys, List<String> values) {
+        int size = keys.size();
+        if (size > 0 && size != values.size()) throw new RuntimeException("Size");
+
+        List<CandidateReference> refs = Lists.newArrayList();
+
+        for (int i=0; i<size; i++) {
+            String key = keys.get(i);
+            String value = values.get(i);
+
+            if (key.equals(LOCATION_KEY)) continue;
+
+            List<CandidateReference> tempRefs = search(key, value);
+
+            for(CandidateReference s: tempRefs) {
+                if (!refs.contains(s) && mergable(keys, values, s)) {
+                    refs.add(s);
+                    //mergeInto(s, keys, values);
+                }
             }
         }
+
+        if (refs.size() == 0) {
+            CandidateReference c = createCandidate(keys.get(0), values.get(0));
+            mergeInto(c, keys, values);
+            return c;
+        } else  if (refs.size() == 1) {
+            mergeInto(refs.get(0), keys, values);
+            return refs.get(0);
+        } else {
+            Candidate finalCandidate = merge(refs);
+            mergeInto(finalCandidate.reference, keys, values);
+            return finalCandidate.reference;
+        }
+    }
+
+    private boolean mergable(List<String> keys, List<String> values, CandidateReference reference) {
+        Candidate previous = cIndex.get(reference);
+        int size = keys.size();
+        for (int i=0; i<size; i++) {
+            String key = keys.get(i);
+            if (key.equals(FB_ID_KEY) && previous.map.containsKey(FB_ID_KEY)) {
+                String value = values.get(i);
+                String id = previous.map.get(FB_ID_KEY).iterator().next();
+                return value.equals(id);
+            }
+            if (key.equals(EMAIL_KEY) && previous.map.containsKey(FB_ID_KEY)) {
+                String value = values.get(i);
+                if (previous.map.get(EMAIL_KEY).contains(value)) return true;
+            }
+        }
+        return true;
+    }
+
+    public void mergeInto(CandidateReference reference, List<String> keys, List<String> values) {
+        int size = keys.size();
+        for (int i=0; i<size; i++) {
+            add(reference, keys.get(i), values.get(i));
+        }
+    }
+
+    public void add(CandidateReference ref, String key, String value) {
+        if (value == null) throw new NullPointerException("value should not be NULL");
+
+        Candidate candidate = cIndex.get(ref);
+        if ( !candidate.map.containsKey(key) )
+            candidate.map.put(key, value);
+        else if ( !candidate.map.get(key).contains(value) )
+            candidate.map.put(key, value);
     }
 
     public CandidateReference createCandidate(String key, String value) {
@@ -66,7 +126,7 @@ public class Candidates {
         return candidate.reference;
     }
 
-    public CandidateReference search(String key, String value) {
+    public List<CandidateReference> search(String key, String value) {
         List<CandidateReference> references = Lists.newArrayList();
         for (Candidate candidate: candidates) {
             if ( candidate.map.containsKey(key) )
@@ -74,6 +134,8 @@ public class Candidates {
                     references.add(candidate.reference);
         }
 
+        return references;
+        /*
         if (references.size() == 0) {
             return UNKNOWN;
         }
@@ -93,6 +155,7 @@ public class Candidates {
             logger.info("-------- Returned Candidate");
             return c.reference;
         }
+        */
 
     }
 
@@ -128,6 +191,10 @@ public class Candidates {
             reference = new CandidateReference(IDMAX);
             map = HashMultimap.create(); //ArrayListMultimap.create()
             IDMAX++;
+        }
+
+        public String toStringKey(String key) {
+            return map.get(key).toString();
         }
 
         @Override

@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.personal;
 import com.google.common.collect.Lists;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.algorithms.firstk.personal.accessor.Source;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,12 @@ public class Discoverer {
     private final Source[] sources;
     private final Location location;
     private final Time time;
+
+    private Candidates candidateSet = Candidates.getInstance();
+    private Voter voter = new Voter();
+    private Verifier verifier = Verifier.getInstance();
+
+    private Logger logger = Logger.getLogger(Discoverer.class);
 
     public Discoverer(EventContextNetwork network, Source[] sources, Time time, Location location) {
         this.network = network;
@@ -41,31 +48,17 @@ public class Discoverer {
         if (secondaries.size() > 0)
             newInformation = merge(secondaries);
 
-        if ( !newInformation ) vote();
-    }
+        if ( newInformation ) return;
 
-    private void vote() {
-        List<EventContextNetwork.ECNRef> persons = network.getVotableEntities();
+        List<Candidates.CandidateReference> topKList = voter.vote(network, sources, time);
 
-        List<Candidates.CandidateReference> references = Lists.newArrayList();
-        List<EventContextNetwork> secondaries = Lists.newArrayList();
-
-        Voter voter = new Voter();
-
-        for (EventContextNetwork.ECNRef person: persons) {
-            for (Source source: sources) {
-                List<Candidates.CandidateReference> p = source.knows(network.getCandidateReference(person));
-                if (p != null) references.addAll(p);
-                List<EventContextNetwork> e = source.knowsAtTime(network.getCandidateReference(person), time);
-                if (e != null) secondaries.addAll(e);
-            }
+        logger.info("Top Ranked Candidates ====> ");
+        for (Candidates.CandidateReference ref: topKList) {
+            logger.info(verifier.verify(ref) + " " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
         }
-
-        voter.knows(references);
-        voter.knowsAtTime(secondaries);
-
-        voter.printScores();
     }
+
+
 
     private void discover(EventContextNetwork.Person person, List<EventContextNetwork> secondaries) {
         //network.getVotableCandidates();
