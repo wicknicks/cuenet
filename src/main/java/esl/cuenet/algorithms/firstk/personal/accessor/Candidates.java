@@ -194,7 +194,9 @@ public class Candidates {
         }
 
         public String toStringKey(String key) {
-            return map.get(key).toString();
+            return map.get(key).toString()
+                    .replace('\n', '\\')
+                    .replace('\r', '\\');
         }
 
         @Override

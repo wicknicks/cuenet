@@ -16,6 +16,7 @@ public class Verifier {
 
     private String[] annotations;
     private Logger logger = Logger.getLogger(Verifier.class);
+    private int numVerificationCalls = 0;
 
     protected Verifier() {
         try {
@@ -55,6 +56,7 @@ public class Verifier {
     }
 
     public boolean verify(Candidates.CandidateReference reference) {
+        numVerificationCalls++;
         Candidates candidateSet = Candidates.getInstance();
         for (String _ann: annotations) {
             List<Candidates.CandidateReference> result = candidateSet.search(Candidates.NAME_KEY, _ann.toLowerCase());
@@ -64,4 +66,11 @@ public class Verifier {
         return false;
     }
 
+    public int annotationCount() {
+        return annotations.length;
+    }
+
+    public int numVerificationCalls() {
+        return numVerificationCalls;
+    }
 }

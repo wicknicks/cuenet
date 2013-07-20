@@ -1,11 +1,13 @@
 package esl.cuenet.algorithms.firstk.personal;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.algorithms.firstk.personal.accessor.Source;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class Discoverer {
@@ -18,6 +20,8 @@ public class Discoverer {
     private Candidates candidateSet = Candidates.getInstance();
     private Voter voter = new Voter();
     private Verifier verifier = Verifier.getInstance();
+
+    private HashSet<Candidates.CandidateReference> verifiedEntities = Sets.newHashSet();
 
     private Logger logger = Logger.getLogger(Discoverer.class);
 
@@ -54,10 +58,29 @@ public class Discoverer {
 
         logger.info("Top Ranked Candidates ====> ");
         for (Candidates.CandidateReference ref: topKList) {
-            logger.info(verifier.verify(ref) + " " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
+            verify(ref);
+            if (canTerminate()) break;
         }
+
+        if (canTerminate()) return;
+
+        dnm();
     }
 
+    public boolean canTerminate() {
+        return verifiedEntities.size() >= verifier.annotationCount();
+    }
+
+    private void verify(Candidates.CandidateReference ref) {
+        boolean v = verifier.verify(ref);
+        if (v) {
+            EventContextNetwork.ECNRef personRef = network.createPerson(ref);
+            network.createPartiticipationEdge(network.getPhotoCaptureEventRef(), personRef);
+            verifiedEntities.add(ref);
+            logger.info("Verified True on " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
+        }
+
+    }
 
 
     private void discover(EventContextNetwork.Person person, List<EventContextNetwork> secondaries) {

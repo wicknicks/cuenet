@@ -101,6 +101,15 @@ public class EventContextNetwork extends ContextNetwork {
         }
     }
 
+    public ECNRef getPhotoCaptureEventRef() {
+        List<ECNRef> participants = Lists.newArrayList();
+        for (Event event: eventMap.values()) {
+            if (eventURIHashTable.get("photo-capture") == event.getId())
+                return event.reference;
+        }
+        return null;
+    }
+
     public List<ECNRef> getVotableEntities() {
         List<ECNRef> participants = Lists.newArrayList();
         for (Event event: eventMap.values()) {

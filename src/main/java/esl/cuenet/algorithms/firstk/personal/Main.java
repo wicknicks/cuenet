@@ -3,10 +3,13 @@ package esl.cuenet.algorithms.firstk.personal;
 import esl.cuenet.algorithms.firstk.impl.LocalFilePreprocessor;
 import esl.cuenet.algorithms.firstk.personal.accessor.*;
 import esl.system.SysLoggerUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 public class Main {
+
+    private static Logger logger = Logger.getLogger(Main.class);
 
     public static EventContextNetwork load () {
         EventContextNetwork network = new EventContextNetwork();
@@ -34,6 +37,8 @@ public class Main {
         Discoverer discoverer = new Discoverer(network, SourceFactory.getSources(), time, location);
         discoverer.dnm();
 
+        logger.info("Verification Calls = " + Verifier.getInstance().numVerificationCalls());
+        
         return network;
     }
 
