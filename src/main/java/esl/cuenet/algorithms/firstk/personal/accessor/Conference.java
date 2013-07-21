@@ -83,6 +83,9 @@ public class Conference implements Source {
                 confObject.information.put("short", _short);
                 confObject.information.put("url", _url);
 
+                if (object.containsField("hashtag"))
+                    confObject.information.put("hashtag", object.getString("hashtag"));
+
                 conferenceObjs.add(confObject);
 
             }
