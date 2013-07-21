@@ -11,10 +11,10 @@ public class SourceFactory {
     }
 
     protected SourceFactory() {
-        Source email = Email.getInstance();
+        Source facebook = Facebook.getInstance();
         Candidates.getInstance().logistics(false);
 
-        Source facebook = Facebook.getInstance();
+        Source email = Email.getInstance();
         Candidates.getInstance().logistics(false);
 
         Source calendar = Calendar.getInstance();

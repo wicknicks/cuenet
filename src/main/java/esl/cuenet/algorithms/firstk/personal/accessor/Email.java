@@ -102,8 +102,8 @@ public class Email implements Source {
             reader.getAll(new BasicDBObject());
 
             Time moment = Time.createFromMoment(Main.EXIF.timestamp);
-            Time end = moment.add((long) 240 * 3600 * 1000);
-            Time start = moment.subtract((long) 240 * 3600 * 1000);
+            Time end = moment.add((long) 2400 * 3600 * 1000);
+            Time start = moment.subtract((long) 2400 * 3600 * 1000);
 
             String to, from, cc, date;
             List<EmailObject> emails = new ArrayList<EmailObject>();
@@ -116,7 +116,7 @@ public class Email implements Source {
                 email.time = getDate(date);
 
                 boolean f = start.isBefore(email.time) && email.time.isBefore(end);
-                //if (!f) continue;
+                if (!f) continue;
 
                 email.nameMailPairs = Lists.newArrayList();
 
