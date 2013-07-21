@@ -1,6 +1,8 @@
 package esl.cuenet.algorithms.firstk.personal.accessor;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
@@ -14,6 +16,8 @@ public class Conference implements Source {
 
     private Candidates candidateSet = Candidates.getInstance();
     private Logger logger = Logger.getLogger(Conference.class);
+
+    private Multimap<Candidates.CandidateReference, ConferenceObject> candidateIndex = HashMultimap.create();
 
     protected Conference() {
         (new ConferenceLoader()).load();
@@ -92,14 +96,14 @@ public class Conference implements Source {
 
 
             for (ConferenceObject confObject: conferenceObjs)
-                confObject.participants = loadParticipant(confObject.information.getString("url"));
+                confObject.participants = loadParticipant(confObject);
 
             return conferenceObjs;
         }
 
-        private List<Candidates.CandidateReference> loadParticipant(String url) {
+        private List<Candidates.CandidateReference> loadParticipant(ConferenceObject confObject) {
             MongoDB.DBReader reader = startReader("conf_attendees");
-            reader.query(new BasicDBObject("url", url));
+            reader.query(new BasicDBObject("url", confObject.information.getString("url")));
 
             List<Candidates.CandidateReference> attendees = Lists.newArrayList();
 
@@ -109,9 +113,10 @@ public class Conference implements Source {
                 BasicDBObject object = (BasicDBObject) reader.next();
                 Candidates.CandidateReference attn = candidateSet.createEntity(name, Lists.newArrayList(object.getString("name")));
                 attendees.add(attn);
+                candidateIndex.put(attn, confObject);
             }
 
-            logger.info(attendees.size() + " attendees loaded for " + url);
+            logger.info(attendees.size() + " attendees loaded for " + confObject.information.getString("url"));
 
             return attendees;
         }
