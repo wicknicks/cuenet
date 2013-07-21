@@ -166,8 +166,9 @@ public class EventContextNetwork extends ContextNetwork {
         }
 
         public void addPariticipant(ECNRef personReference) {
-            if ( !this.participants.contains(personReference) )
-                this.participants.add(personReference);
+            if ( this.participants.contains(personReference) )
+                return;
+            this.participants.add(personReference);
         }
 
         public void visit(Visitor visitor) {

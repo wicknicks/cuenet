@@ -116,7 +116,7 @@ public class Candidates {
             candidate.map.put(key, value);
     }
 
-    public CandidateReference createCandidate(String key, String value) {
+    private CandidateReference createCandidate(String key, String value) {
         Candidate candidate = new Candidate();
         candidate.map.put(key, value);
 
@@ -124,6 +124,13 @@ public class Candidates {
         cIndex.put(candidate.reference, candidate);
 
         return candidate.reference;
+    }
+
+    public CandidateReference searchLimitOne(String key, String value) {
+        List<CandidateReference> references = search(key, value);
+        if (references.size() > 1) throw new RuntimeException("multiple search results found");
+        if (references.size() == 1) return references.get(0);
+        return null;
     }
 
     public List<CandidateReference> search(String key, String value) {

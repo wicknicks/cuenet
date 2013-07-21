@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
+import esl.cuenet.algorithms.firstk.personal.Main;
 import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.accessors.Utils;
@@ -100,12 +101,23 @@ public class Email implements Source {
             MongoDB.DBReader reader = startReader("emails");
             reader.getAll(new BasicDBObject());
 
+            Time moment = Time.createFromMoment(Main.EXIF.timestamp);
+            Time end = moment.add((long) 240 * 3600 * 1000);
+            Time start = moment.subtract((long) 240 * 3600 * 1000);
+
             String to, from, cc, date;
             List<EmailObject> emails = new ArrayList<EmailObject>();
             while (reader.hasNext()) {
                 BasicDBObject obj = (BasicDBObject) reader.next();
 
                 EmailObject email = new EmailObject();
+
+                date = obj.getString("date");
+                email.time = getDate(date);
+
+                boolean f = start.isBefore(email.time) && email.time.isBefore(end);
+                //if (!f) continue;
+
                 email.nameMailPairs = Lists.newArrayList();
 
                 to = obj.getString("to");
@@ -116,9 +128,6 @@ public class Email implements Source {
 
                 cc = obj.getString("cc");
                 if (cc != null) email.nameMailPairs.addAll(Utils.parseEmailAddresses(cc));
-
-                date = obj.getString("date");
-                email.time = getDate(date);
 
                 checkCandidates(email);
 

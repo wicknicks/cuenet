@@ -1,11 +1,17 @@
 package esl.cuenet.algorithms.firstk.impl.person;
 
+import com.google.common.collect.Lists;
 import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
+import esl.system.SysLoggerUtils;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 public class EventContextNetworkTester {
+
+    static {
+        SysLoggerUtils.initLogger();
+    }
 
     Logger logger = Logger.getLogger(EventContextNetworkTester.class);
 
@@ -13,9 +19,9 @@ public class EventContextNetworkTester {
     public void unitTest() {
 
         Candidates candidates = Candidates.getInstance();
-        candidates.createCandidate("name", "ABCD");
-        candidates.createCandidate("name", "EFGH");
-        candidates.createCandidate("name", "XYZ");
+        candidates.createEntity(Lists.newArrayList("name"), Lists.newArrayList("ABCD"));
+        candidates.createEntity(Lists.newArrayList("name"), Lists.newArrayList("EFGH"));
+        candidates.createEntity(Lists.newArrayList("name"), Lists.newArrayList("XYZ"));
 
         EventContextNetwork network = new EventContextNetwork();
         EventContextNetwork.ECNRef p1 = network.createPerson("name", "ABCD");
@@ -60,9 +66,9 @@ public class EventContextNetworkTester {
 
         network.pruneUp();
 
-        System.out.println("-----------------");
-        System.out.println(" After prune up ");
-        System.out.println("-----------------");
+        logger.info("-----------------");
+        logger.info(" After prune up ");
+        logger.info("-----------------");
 
         network.printTree(true);
 
