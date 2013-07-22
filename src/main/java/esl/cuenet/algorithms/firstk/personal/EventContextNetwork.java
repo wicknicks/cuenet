@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.generative.structs.ContextNetwork;
 import org.apache.log4j.Logger;
@@ -159,6 +160,7 @@ public class EventContextNetwork extends ContextNetwork {
 
         ECNRef reference;
         List<ECNRef> participants = Lists.newArrayList();
+        BasicDBObject information;
 
         public Event(int eventId, ECNRef ref) {
             super(eventId, ref.id);
@@ -179,6 +181,10 @@ public class EventContextNetwork extends ContextNetwork {
 
         public int getId() {
             return this.id.eventId;
+        }
+
+        public BasicDBObject getInformation() {
+            return information;
         }
     }
 
