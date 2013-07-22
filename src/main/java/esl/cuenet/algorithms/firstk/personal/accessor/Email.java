@@ -65,6 +65,7 @@ public class Email implements Source {
 
         //System.out.println(new Date(start.getStart()) + " " + new Date(end.getStart()));
 
+
         List<EventContextNetwork> events = Lists.newArrayList();
         for (EmailObject email: emails) {
             if ( start.isBefore(email.time) && email.time.isBefore(end) ) {
@@ -101,10 +102,17 @@ public class Email implements Source {
             MongoDB.DBReader reader = startReader("emails");
             reader.getAll(new BasicDBObject());
 
-            Time moment = Time.createFromMoment(Main.EXIF.timestamp);
-            Time end = moment.add((long) 2400 * 3600 * 1000);
-            Time start = moment.subtract((long) 2400 * 3600 * 1000);
+            Time moment = null, start = null, end = null;
 
+            if (Main.EXIF != null) {
+                moment = Time.createFromMoment(Main.EXIF.timestamp);
+                end = moment.add((long) 2400 * 3600 * 1000);
+                start = moment.subtract((long) 2400 * 3600 * 1000);
+            }
+
+            logger.info("Loading mails from " + PConstants.DBNAME);
+
+            int ix = 0;
             String to, from, cc, date;
             List<EmailObject> emails = new ArrayList<EmailObject>();
             while (reader.hasNext()) {
@@ -115,8 +123,10 @@ public class Email implements Source {
                 date = obj.getString("date");
                 email.time = getDate(date);
 
-                boolean f = start.isBefore(email.time) && email.time.isBefore(end);
-                if (!f) continue;
+                if (Main.EXIF != null) {
+                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
+                    if (!f) continue;
+                }
 
                 email.nameMailPairs = Lists.newArrayList();
 
@@ -132,6 +142,8 @@ public class Email implements Source {
                 checkCandidates(email);
 
                 emails.add(email);
+                ix++;
+                if (ix % 1000 == 0) logger.info("Loaded " + ix + " emails.");
             }
             close();
             return emails;
