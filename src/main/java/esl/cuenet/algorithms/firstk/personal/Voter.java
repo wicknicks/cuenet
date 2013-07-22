@@ -49,11 +49,6 @@ public class Voter {
         logger.info("Found " + references.size() + " references");
         logger.info("Found " + secondaries.size() + " secondaries.");
 
-        Candidates.CandidateReference target = candidates.searchLimitOne(Candidates.NAME_KEY, "kumud akhila");
-        for (Candidates.CandidateReference ref: references) {
-            if (ref.equals(target)) logger.info("Found");
-        }
-
 
         zeros();
 
@@ -171,9 +166,13 @@ public class Voter {
 
     private HashMap<Candidates.CandidateReference, Double> normCopyScores() {
         int max = Collections.max(voteTable.values());
+
         HashMap<Candidates.CandidateReference, Double> t = Maps.newHashMap();
         for ( Map.Entry<Candidates.CandidateReference, Integer> entry: voteTable.entrySet()) {
-            t.put(entry.getKey(), (double) entry.getValue()/max);
+            if (max == 0)
+                t.put(entry.getKey(), (double) 0);
+            else
+                t.put(entry.getKey(), (double) entry.getValue()/max);
         }
         return t;
     }
