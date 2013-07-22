@@ -32,7 +32,14 @@ public class Discoverer {
         this.location = location;
     }
 
+    int recursionsLimit = 10;
+
     public void dnm () {
+
+        recursionsLimit--;
+        if (recursionsLimit < 0) return;
+
+        logger.info("=================  STARTING ITERATION ====================");
 
         final List<EventContextNetwork> secondaries = new ArrayList<EventContextNetwork>();
         network.visit(new EventContextNetwork.Visitor() {
@@ -65,6 +72,17 @@ public class Discoverer {
         if (canTerminate()) return;
 
         dnm();
+    }
+
+    public void terminate() {
+        logger.info("=================  TERMINATING DnM ====================");
+
+        for (Candidates.CandidateReference ref: verifiedEntities)
+            logger.info("Found: " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
+
+        verifier.reportUnverified(verifiedEntities);
+        logger.info("Verification Calls = " + verifier.numVerificationCalls());
+        candidateSet.logistics(false);
     }
 
     public boolean canTerminate() {

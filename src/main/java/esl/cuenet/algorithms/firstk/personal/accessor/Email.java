@@ -54,12 +54,14 @@ public class Email implements Source {
         return null;
     }
 
+    int days = 5;
+
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
         if ( !time.isMoment() ) throw new RuntimeException("time should be a moment");
         HashSet<Candidates.CandidateReference> candidates = new HashSet<Candidates.CandidateReference>();
 
-        long msGap = (long) 120 * 3600 * 1000;
+        long msGap = (long) days * 24 * 3600 * 1000;
         Time start = time.subtract(msGap);
         Time end = time.add(msGap);
 
@@ -68,19 +70,24 @@ public class Email implements Source {
 
         List<EventContextNetwork> events = Lists.newArrayList();
         for (EmailObject email: emails) {
-            if ( start.isBefore(email.time) && email.time.isBefore(end) ) {
-                ///System.out.println(email.nameMailPairs + " " + new Date(email.time.getStart()));
-                EventContextNetwork network = new EventContextNetwork();
-                EventContextNetwork.ECNRef mailRef = network.createEvent("email-exchange-event", email.time.getStart(), email.time.getEnd());
+            if ( ! ( start.isBefore(email.time) && email.time.isBefore(end) ) ) continue;
+            if ( !email.references.contains(person) ) continue;
 
-                candidates.addAll(email.references);
-                for (Candidates.CandidateReference ref: candidates) {
-                    network.createPartiticipationEdge(mailRef, network.createPerson(ref));
-                }
+            ///System.out.println(email.nameMailPairs + " " + new Date(email.time.getStart()));
 
-                events.add(network);
+            EventContextNetwork network = new EventContextNetwork();
+            EventContextNetwork.ECNRef mailRef = network.createEvent("email-exchange-event", email.time.getStart(), email.time.getEnd());
+
+            candidates.addAll(email.references);
+            for (Candidates.CandidateReference ref: candidates) {
+                network.createPartiticipationEdge(mailRef, network.createPerson(ref));
             }
+
+            events.add(network);
+
         }
+
+        days = 150;
 
         return events;
     }

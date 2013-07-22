@@ -1,15 +1,15 @@
 package esl.cuenet.algorithms.firstk.personal;
 
 import esl.cuenet.algorithms.firstk.impl.LocalFilePreprocessor;
-import esl.cuenet.algorithms.firstk.personal.accessor.*;
+import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
+import esl.cuenet.algorithms.firstk.personal.accessor.PConstants;
+import esl.cuenet.algorithms.firstk.personal.accessor.Source;
+import esl.cuenet.algorithms.firstk.personal.accessor.SourceFactory;
 import esl.system.SysLoggerUtils;
-import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 public class Main {
-
-    private static Logger logger = Logger.getLogger(Main.class);
 
     public static LocalFilePreprocessor.Exif EXIF;
 
@@ -39,8 +39,7 @@ public class Main {
 
         Discoverer discoverer = new Discoverer(network, sources, time, location);
         discoverer.dnm();
-
-        logger.info("Verification Calls = " + Verifier.getInstance().numVerificationCalls());
+        discoverer.terminate();
         
         return network;
     }

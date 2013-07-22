@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class Verifier {
@@ -21,6 +22,12 @@ public class Verifier {
     protected Verifier() {
         try {
             annotations = getAnnotations(PConstants.IMAGE + ".annotations");
+
+            Candidates candidates = Candidates.getInstance();
+            for (String ann: annotations) {
+                logger.info(ann + " -> " + candidates.searchLimitOne(Candidates.NAME_KEY, ann.toLowerCase()));
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,7 +67,7 @@ public class Verifier {
         Candidates candidateSet = Candidates.getInstance();
         for (String _ann: annotations) {
             List<Candidates.CandidateReference> result = candidateSet.search(Candidates.NAME_KEY, _ann.toLowerCase());
-            if (result.size() != 1) throw new RuntimeException();
+            if (result.size() != 1) throw new RuntimeException("Did not find candidate = " + _ann);
             if (result.get(0).equals(reference)) return true;
         }
         return false;
@@ -72,5 +79,14 @@ public class Verifier {
 
     public int numVerificationCalls() {
         return numVerificationCalls;
+    }
+
+    public void reportUnverified(HashSet<Candidates.CandidateReference> verifiedEntities) {
+        Candidates candidateSet = Candidates.getInstance();
+        for (String _ann: annotations) {
+            Candidates.CandidateReference ref = candidateSet.searchLimitOne(Candidates.NAME_KEY, _ann.toLowerCase());
+            if (verifiedEntities.contains(ref)) continue;
+            logger.info("Did not find -> " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
+        }
     }
 }

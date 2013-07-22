@@ -82,6 +82,8 @@ public class Facebook implements Source {
                 id = obj.getString("id");
 
                 //logger.info("user = " + name + " " + id + " " + location );
+                if (id.equals(""))
+                    logger.info("id");
 
 
                 List<String> keys = Lists.newArrayList();

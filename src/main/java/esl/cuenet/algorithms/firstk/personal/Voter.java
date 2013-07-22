@@ -2,6 +2,7 @@ package esl.cuenet.algorithms.firstk.personal;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.algorithms.firstk.personal.accessor.Source;
 import org.apache.log4j.Logger;
@@ -21,15 +22,22 @@ public class Voter {
         zeros();
     }
 
+    private HashSet<Candidates.CandidateReference> previouslyVotedEntities = Sets.newHashSet();
+
     public List<Candidates.CandidateReference> vote(EventContextNetwork network, Source[] sources, Time time) {
         List<EventContextNetwork.ECNRef> _persons = network.getVotableEntities();
         List<Candidates.CandidateReference> votableCandidates = Lists.newArrayList();
-        for (EventContextNetwork.ECNRef p: _persons) votableCandidates.add(network.getCandidateReference(p));
+        for (EventContextNetwork.ECNRef p: _persons) {
+            Candidates.CandidateReference ref = network.getCandidateReference(p);
+            if (previouslyVotedEntities.contains(ref)) continue;
+            votableCandidates.add(ref);
+        }
 
         List<Candidates.CandidateReference> references = Lists.newArrayList();
         List<EventContextNetwork> secondaries = Lists.newArrayList();
 
         for (Candidates.CandidateReference ref: votableCandidates) {
+            logger.info("Discovering for " + candidates.get(ref).toStringKey(Candidates.NAME_KEY));
             for (Source source: sources) {
                 List<Candidates.CandidateReference> p = source.knows(ref);
                 if (p != null) references.addAll(p);
@@ -38,6 +46,17 @@ public class Voter {
             }
         }
 
+        logger.info("Found " + references.size() + " references");
+        logger.info("Found " + secondaries.size() + " secondaries.");
+
+        Candidates.CandidateReference target = candidates.searchLimitOne(Candidates.NAME_KEY, "kumud akhila");
+        for (Candidates.CandidateReference ref: references) {
+            if (ref.equals(target)) logger.info("Found");
+        }
+
+
+        zeros();
+
         knows(references);
         HashMap<Candidates.CandidateReference, Double> knowsScores = normCopyScores();
 
@@ -45,6 +64,8 @@ public class Voter {
 
         knowsAtTime(secondaries);
         HashMap<Candidates.CandidateReference, Double> knowsAtTimesScores = normCopyScores();
+
+        previouslyVotedEntities.addAll(votableCandidates);
 
         return combine(votableCandidates, knowsScores, knowsAtTimesScores);
     }
@@ -59,7 +80,8 @@ public class Voter {
         HashMap<Candidates.CandidateReference, Double> scoresMap = Maps.newHashMap();
 
         for (Candidates.CandidateReference key: knowsScoresMap.keySet()) {
-            scoresMap.put( key,
+            if (votableCandidates.contains(key)) continue;
+            scoresMap.put(key,
                     knowsScoresMap.get(key) * locationWeight + knowsAtTimesMap.get(key) * emailWeight);
         }
 
@@ -88,7 +110,7 @@ public class Voter {
         int i=0;
         while (topK.size() < K && i < scores.size()) {
             Candidates.CandidateReference ref = scores.get(i).getKey();
-            if ( !votableCandidates.contains(ref) ) {
+            if ( !votableCandidates.contains(ref) && !previouslyVotedEntities.contains(ref)) {
                 topK.add(ref);
             }
             i++;

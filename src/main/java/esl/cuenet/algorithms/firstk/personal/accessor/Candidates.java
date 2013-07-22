@@ -226,6 +226,11 @@ public class Candidates {
         String id;
 
         @Override
+        public String toString() {
+            return this.id;
+        }
+
+        @Override
         public boolean equals (Object ref2) {
             if (ref2 instanceof CandidateReference) {
                 CandidateReference r = (CandidateReference)ref2;
