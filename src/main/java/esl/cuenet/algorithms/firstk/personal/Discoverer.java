@@ -84,7 +84,7 @@ public class Discoverer {
         for (Candidates.CandidateReference ref: verifiedEntities)
             logger.info("Found: " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
 
-        verifier.reportUnverified(verifiedEntities);
+        verifier.reportUnverified(verifiedEntities, voter);
         logger.info("Verification Calls = " + verifier.numVerificationCalls());
         candidateSet.logistics(false);
     }

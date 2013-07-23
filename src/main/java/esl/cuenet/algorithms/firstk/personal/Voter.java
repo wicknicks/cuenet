@@ -65,6 +65,8 @@ public class Voter {
         return combine(votableCandidates, knowsScores, knowsAtTimesScores);
     }
 
+    List<Map.Entry<Candidates.CandidateReference, Double>> scores = null;
+
     private List<Candidates.CandidateReference> combine(List<Candidates.CandidateReference> votableCandidates,
                                                         Map<Candidates.CandidateReference, Double> knowsScoresMap,
                                                         Map<Candidates.CandidateReference, Double> knowsAtTimesMap) {
@@ -96,7 +98,7 @@ public class Voter {
 
         ballot.addAll(scoresMap.entrySet());
 
-        List<Map.Entry<Candidates.CandidateReference, Double>> scores = Lists.newArrayList();
+        scores = Lists.newArrayList();
         while ( !ballot.isEmpty() ) {
             Map.Entry<Candidates.CandidateReference, Double> entry = ballot.remove();
             if (entry.getValue() > 0) scores.add(entry);
@@ -114,6 +116,16 @@ public class Voter {
         print(scores);
 
         return topK;
+    }
+
+    public int getRankOf(Candidates.CandidateReference cRef) {
+        if (scores == null) return -1;
+        int ix = 0;
+        for (Map.Entry<Candidates.CandidateReference, Double> score: scores) {
+            ix++;
+            if (score.getKey().equals(cRef)) return ix;
+        }
+        return -2;
     }
 
     private void print(List<Map.Entry<Candidates.CandidateReference, Double>> scores) {

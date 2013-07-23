@@ -81,12 +81,13 @@ public class Verifier {
         return numVerificationCalls;
     }
 
-    public void reportUnverified(HashSet<Candidates.CandidateReference> verifiedEntities) {
+    public void reportUnverified(HashSet<Candidates.CandidateReference> verifiedEntities, Voter voter) {
         Candidates candidateSet = Candidates.getInstance();
         for (String _ann: annotations) {
             Candidates.CandidateReference ref = candidateSet.searchLimitOne(Candidates.NAME_KEY, _ann.toLowerCase());
             if (verifiedEntities.contains(ref)) continue;
-            logger.info("Did not find -> " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY));
+            logger.info("Did not find -> " + candidateSet.get(ref).toStringKey(Candidates.NAME_KEY) +
+                    "; " + voter.getRankOf(ref));
         }
     }
 }

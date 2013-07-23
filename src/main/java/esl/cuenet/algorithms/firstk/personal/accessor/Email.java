@@ -54,7 +54,7 @@ public class Email implements Source {
         return null;
     }
 
-    int days = 30;
+    int days = 15;
 
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
@@ -109,13 +109,13 @@ public class Email implements Source {
             MongoDB.DBReader reader = startReader("emails");
             reader.getAll(new BasicDBObject());
 
-//            Time moment = null, start = null, end = null;
-//
-//            if (Main.EXIF != null) {
-//                moment = Time.createFromMoment(Main.EXIF.timestamp);
-//                end = moment.add((long) 2400 * 3600 * 1000);
-//                start = moment.subtract((long) 2400 * 3600 * 1000);
-//            }
+            Time moment = null, start = null, end = null;
+
+            if (Main.EXIF != null) {
+                moment = Time.createFromMoment(Main.EXIF.timestamp);
+                end = moment.add((long) 25 * 24 * 3600 * 1000);
+                start = moment.subtract((long) 25 * 24 * 3600 * 1000);
+            }
 
             logger.info("Loading mails from " + PConstants.DBNAME);
 
@@ -132,10 +132,10 @@ public class Email implements Source {
 
                 email.time = getDate(date);
 
-//                if (Main.EXIF != null) {
-//                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
-//                    if (!f) continue;
-//                }
+                if (Main.EXIF != null) {
+                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
+                    if (!f) continue;
+                }
 
                 email.nameMailPairs = Lists.newArrayList();
 
