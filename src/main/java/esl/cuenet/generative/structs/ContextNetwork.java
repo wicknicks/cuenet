@@ -123,6 +123,7 @@ public class ContextNetwork {
             Instance new_root = other.root.attributeClone();
             Instance old_root = subtree.root;
             subtree.root = new_root;
+            if ( !subtree.instanceMap.containsKey(new_root.id) ) subtree.instanceMap.put(new_root.id, new_root);
             addSubeventEdge(subtree.root, subtree.root, old_root);
 //            System.out.println("new root " + other.root + " " + subtree.root);
             for (InstanceId oSubeventId: other.root.immediateSubevents) {
@@ -282,10 +283,7 @@ public class ContextNetwork {
                     InstanceId i = stack.pop();
                     Instance inst = lookup(this, i);
                     if ( printEntities ) {
-                        out.write(inst.toString().getBytes());
-                        out.write(" : ".getBytes());
-                        out.write(Arrays.toString(inst.participants.toArray()).getBytes());
-                        out.write("\n".getBytes());
+                        inst.print(out);
                     }
                     for (InstanceId subids: inst.immediateSubevents) {
                         out.write(i.toString().getBytes());
@@ -365,7 +363,7 @@ public class ContextNetwork {
 
     public static class Instance {
         protected final InstanceId id;
-        protected List<InstanceId> immediateSubevents;
+        public List<InstanceId> immediateSubevents;
         protected List<Entity> participants;
         protected long intervalStart, intervalEnd;
         protected String location;
@@ -421,6 +419,13 @@ public class ContextNetwork {
             if ( !this.location.equals(other.location) )
                 return false;
             return true;
+        }
+
+        public void print(PrintStream out) throws IOException {
+            out.write(this.toString().getBytes());
+            out.write(" : ".getBytes());
+            out.write(Arrays.toString(this.participants.toArray()).getBytes());
+            out.write("\n".getBytes());
         }
     }
 

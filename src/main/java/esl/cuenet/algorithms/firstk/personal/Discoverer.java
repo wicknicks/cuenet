@@ -55,9 +55,13 @@ public class Discoverer {
             }
         });
 
+        logger.info("Initiating Merges");
+
         boolean newInformation = false;
         if (secondaries.size() > 0)
             newInformation = merge(secondaries);
+
+        logger.info("Merge Complete");
 
         if ( newInformation ) return;
 
@@ -102,10 +106,13 @@ public class Discoverer {
 
 
     private void discover(EventContextNetwork.Person person, List<EventContextNetwork> secondaries) {
-        //network.getVotableCandidates();
+
         for (Source source: sources) {
-            source.eventsContaining(network.getCandidateReference(person.reference), time, location);
+            List<EventContextNetwork> nets =
+                    source.eventsContaining(network.getCandidateReference(person.reference), time, location);
+            if (nets != null) secondaries.addAll(nets);
         }
+
     }
 
     private void discover(EventContextNetwork.Event event, List<EventContextNetwork> secondaries) {
@@ -115,7 +122,32 @@ public class Discoverer {
     }
 
     private boolean merge(List<EventContextNetwork> secondaries) {
+
+        final List<Candidates.CandidateReference> secCandidates = Lists.newArrayList();
+
+        for (final EventContextNetwork secondary: secondaries ) {
+
+            secondary.visit(new EventContextNetwork.Visitor() {
+                @Override
+                public void visit(EventContextNetwork.Event event) {
+
+                }
+
+                @Override
+                public void visit(EventContextNetwork.Person person) {
+                    secCandidates.add( secondary.getCandidateReference(person.reference) );
+                }
+            });
+
+        }
+
+        for (Candidates.CandidateReference cRef: secCandidates) {
+            if (verifiedEntities.contains(cRef)) continue;
+            verify(cRef);
+        }
+
         return false;
+
     }
 
 }

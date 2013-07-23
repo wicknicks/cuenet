@@ -9,8 +9,9 @@ import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import esl.cuenet.generative.structs.ContextNetwork;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.List;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.*;
 
 public class EventContextNetwork extends ContextNetwork {
 
@@ -51,6 +52,16 @@ public class EventContextNetwork extends ContextNetwork {
         addAtomic(eventMap.get(reference));
     }
 
+    public int eventCount() {
+        return eventMap.size();
+    }
+
+    public int personCount() {
+        int count = 0;
+        for (Event e: eventMap.values())
+            count += e.participants.size();
+        return count;
+    }
 
     public ECNRef createPerson (Candidates.CandidateReference reference) {
         ECNRef ref;
@@ -120,6 +131,30 @@ public class EventContextNetwork extends ContextNetwork {
         return participants;
     }
 
+    @Override
+    public void pruneUp() {
+        if (eventTrees.size() == 0) return;
+        pruneUpEventTree(eventTrees.get(0), (Event) eventTrees.get(0).root);
+    }
+
+    private Set<ECNRef> pruneUpEventTree(IndexedSubeventTree e, Event parent) {
+
+        Set<ECNRef> entities = new HashSet<ECNRef>();
+
+        List<ECNRef> participants = parent.participants;
+        for (InstanceId sub: parent.immediateSubevents) {
+            Instance is = lookup(e, sub);
+            Set<ECNRef> entitiesSeenSoFar = pruneUpEventTree(e, (Event) is);
+            for (ECNRef es: entitiesSeenSoFar) {
+                if (participants.contains(es)) participants.remove(es);
+            }
+            entities.addAll(entitiesSeenSoFar);
+        }
+
+        entities.addAll(parent.participants);
+        return entities;
+    }
+
     public static class ECNRef {
         int id;
 
@@ -185,6 +220,14 @@ public class EventContextNetwork extends ContextNetwork {
 
         public BasicDBObject getInformation() {
             return information;
+        }
+
+        @Override
+        public void print(PrintStream out) throws IOException {
+            out.write(this.toString().getBytes());
+            out.write(" : ".getBytes());
+            out.write(Arrays.toString(this.participants.toArray()).getBytes());
+            out.write("\n".getBytes());
         }
     }
 

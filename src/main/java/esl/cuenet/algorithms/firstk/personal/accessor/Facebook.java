@@ -34,14 +34,34 @@ public class Facebook implements Source {
     @Override
     public List<EventContextNetwork> eventsContaining(Candidates.CandidateReference person, Time interval, Location location) {
 
-
+        List<EventContextNetwork> nets = null;
         for (FBEvent event: events) {
             if (event.time.contains(interval) && event.participants.contains(person)) {
-                logger.info("Containing event = " + event.information.getString("title"));
+                if (nets == null) nets = Lists.newArrayList();
+                addToNets(nets, event, location);
             }
         }
 
-        return null;
+        if (nets != null && nets.size() > 0) logger.info("Found " + nets.size() + " facebook event.");
+        return nets;
+    }
+
+    private void addToNets(List<EventContextNetwork> nets, FBEvent event, Location location) {
+
+        if (event.sent) return;
+
+        EventContextNetwork network = new EventContextNetwork();
+
+        EventContextNetwork.ECNRef eventRef = network.createEvent("event", event.time.getStart(), event.time.getEnd(), location.getFullAddress());
+        network.initializeSubeventTree(eventRef);
+
+        for (Candidates.CandidateReference candidate: event.participants) {
+            EventContextNetwork.ECNRef pRef = network.createPerson(candidate);
+            network.createPartiticipationEdge(eventRef, pRef);
+        }
+
+        event.sent = true;
+        nets.add(network);
     }
 
     @Override
@@ -69,6 +89,7 @@ public class Facebook implements Source {
         Time time;
         BasicDBObject information;
         List<Candidates.CandidateReference> participants;
+        boolean sent = false;
     }
 
     public class FBLoader extends MongoDB {
