@@ -54,7 +54,7 @@ public class Email implements Source {
         return null;
     }
 
-    int days = 5;
+    int days = 30;
 
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
@@ -128,6 +128,8 @@ public class Email implements Source {
                 EmailObject email = new EmailObject();
 
                 date = obj.getString("date");
+                if (date.length() < 1) continue;
+
                 email.time = getDate(date);
 
                 if (Main.EXIF != null) {

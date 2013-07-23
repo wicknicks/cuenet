@@ -3,9 +3,7 @@ package esl.cuenet.algorithms.firstk.personal.accessor;
 import com.google.common.collect.*;
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Candidates {
 
@@ -167,6 +165,15 @@ public class Candidates {
     }
 
     private Candidate merge(List<CandidateReference> references) {
+        Collections.sort(references, new Comparator<CandidateReference>() {
+            @Override
+            public int compare(CandidateReference o1, CandidateReference o2) {
+                int o2id = Integer.parseInt(o2.id);
+                int o1id = Integer.parseInt(o1.id);
+                return o1id - o2id;
+            }
+        });
+
         Candidate main = cIndex.get(references.get(0));
         for (int i=1; i<references.size();i++) {
             Candidate redun = cIndex.get(references.get(i));
@@ -185,7 +192,7 @@ public class Candidates {
 
         if (printAll) {
             for (Candidate c: candidates) {
-                logger.info(c);
+                logger.info(c.reference.id + " " + c);
             }
         }
     }
