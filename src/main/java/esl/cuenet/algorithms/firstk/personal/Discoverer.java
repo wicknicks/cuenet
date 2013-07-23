@@ -104,7 +104,7 @@ public class Discoverer {
     private void discover(EventContextNetwork.Person person, List<EventContextNetwork> secondaries) {
         //network.getVotableCandidates();
         for (Source source: sources) {
-
+            source.eventsContaining(network.getCandidateReference(person.reference), time, location);
         }
     }
 

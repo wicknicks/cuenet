@@ -18,6 +18,7 @@ public class Facebook implements Source {
     private Candidates candidateList = Candidates.getInstance();
 
     private Multimap<Candidates.CandidateReference, Candidates.CandidateReference> knowsGraph = HashMultimap.create();
+    private List<FBEvent> events = Lists.newArrayList();
 
 
     protected Facebook() {
@@ -32,6 +33,14 @@ public class Facebook implements Source {
 
     @Override
     public List<EventContextNetwork> eventsContaining(Candidates.CandidateReference person, Time interval, Location location) {
+
+
+        for (FBEvent event: events) {
+            if (event.time.contains(interval) && event.participants.contains(person)) {
+                logger.info("Containing event = " + event.information.getString("title"));
+            }
+        }
+
         return null;
     }
 
@@ -56,6 +65,11 @@ public class Facebook implements Source {
         return null;
     }
 
+    class FBEvent {
+        Time time;
+        BasicDBObject information;
+        List<Candidates.CandidateReference> participants;
+    }
 
     public class FBLoader extends MongoDB {
 
@@ -82,9 +96,6 @@ public class Facebook implements Source {
                 id = obj.getString("id");
 
                 //logger.info("user = " + name + " " + id + " " + location );
-                if (id.equals(""))
-                    logger.info("id");
-
 
                 List<String> keys = Lists.newArrayList();
                 List<String> values = Lists.newArrayList();
@@ -142,22 +153,47 @@ public class Facebook implements Source {
             reader = startReader("fb_events");
             reader.getAll(new BasicDBObject());
             long start=0, end=0;
-            Time interval;
-            String title;
             while (reader.hasNext()) {
                 BasicDBObject obj = (BasicDBObject) reader.next();
-                title = obj.getString("name");
-                start = Long.parseLong(obj.getString("start_time"));
-                end = Long.parseLong(obj.getString("end_time"));
-                interval = Time.createFromInterval(start, end);
-                //logger.info("events = " + interval + " " + title);
+                FBEvent fbEvent = new FBEvent();
+                start = (Long.parseLong(obj.getString("start_time")) + 4 * 3600) * 1000;
+                end = (Long.parseLong(obj.getString("end_time")) + 4 * 3600) * 1000;
+
+                fbEvent.time = Time.createFromInterval(start, end);
+                fbEvent.information = new BasicDBObject();
+
+                fbEvent.information.put("eid", obj.getString("eid"));
+                if (obj.containsField("name")) fbEvent.information.put("title", obj.getString("name"));
+                if (obj.containsField("location")) fbEvent.information.put("location", obj.getString("location"));
+                if (obj.containsField("description")) fbEvent.information.put("description", obj.getString("description"));
+
+                events.add(fbEvent);
             }
 
+            logger.info("Loaded " + events.size() + " events.");
+
+            for (FBEvent e: events) loadAttendees(e);
 
             close();
         }
 
-    }
+        private void loadAttendees(FBEvent event) {
+            MongoDB.DBReader reader = startReader("fb_event_attendees");
+            reader.query(new BasicDBObject("eid", event.information.get("eid")));
+            event.participants = Lists.newArrayList();
+            while(reader.hasNext()) {
+                BasicDBObject obj = (BasicDBObject) reader.next();
+                Candidates.CandidateReference ref = candidateList.searchLimitOne(Candidates.FB_ID_KEY, obj.getString("id"));
+                if (ref == null) {
+                    logger.info("Ref = null for id " +  obj.getString("name"));
+                    continue;
+                }
+                event.participants.add(ref);
+            }
 
+            if (event.participants.size() > 0)
+                logger.info("Event has " + event.participants.size() + " attendees");
+        }
+    }
 }
 
