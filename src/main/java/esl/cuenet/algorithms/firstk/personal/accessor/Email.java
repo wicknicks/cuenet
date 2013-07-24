@@ -54,7 +54,7 @@ public class Email implements Source {
         return null;
     }
 
-    int days = 15;
+    int days = 1;
 
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {

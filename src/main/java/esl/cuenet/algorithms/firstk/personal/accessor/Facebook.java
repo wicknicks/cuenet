@@ -177,8 +177,8 @@ public class Facebook implements Source {
             while (reader.hasNext()) {
                 BasicDBObject obj = (BasicDBObject) reader.next();
                 FBEvent fbEvent = new FBEvent();
-                start = (Long.parseLong(obj.getString("start_time")) + 4 * 3600) * 1000;
-                end = (Long.parseLong(obj.getString("end_time")) + 4 * 3600) * 1000;
+                start = (Long.parseLong(obj.getString("start_time")) + 0 * 3600) * 1000;
+                end = (Long.parseLong(obj.getString("end_time")) + 0 * 3600) * 1000;
 
                 fbEvent.time = Time.createFromInterval(start, end);
                 fbEvent.information = new BasicDBObject();

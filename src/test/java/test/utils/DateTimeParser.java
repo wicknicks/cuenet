@@ -9,11 +9,13 @@ import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import javax.mail.internet.MailDateFormat;
+import javax.xml.bind.DatatypeConverter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class DateTimeParser {
@@ -64,6 +66,24 @@ public class DateTimeParser {
 
         Location l = Location.createFromAddress("Irvine", model);
         System.out.println(l.getOntClass());
+    }
+
+    @Test
+    public void readISO8601() {
+
+        long start = 1287349200000L;
+        long end = 1287363600000L;
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(start);
+        logger.info("START = "  + cal.getTime());
+        cal.setTimeInMillis(end);
+        logger.info("END = "  + cal.getTime());
+
+        cal.setTimeInMillis(1287358309000L);
+        logger.info(" MID = "  + cal.getTime());
+
+        logger.info(start < 1287358309000L && 1287358309000L < end);
     }
 
 }
