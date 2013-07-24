@@ -36,7 +36,7 @@ public class Facebook implements Source {
 
         List<EventContextNetwork> nets = null;
         for (FBEvent event: events) {
-            if (event.time.contains(interval) && event.participants.contains(person)) {
+            if (event.time.contains(interval) && event.participants.contains(person))  {
                 if (nets == null) nets = Lists.newArrayList();
                 addToNets(nets, event, location);
             }

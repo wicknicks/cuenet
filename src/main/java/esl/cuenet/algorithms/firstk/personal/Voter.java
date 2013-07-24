@@ -14,7 +14,7 @@ public class Voter {
     private HashMap<Candidates.CandidateReference, Integer> voteTable =
             new HashMap<Candidates.CandidateReference, Integer>();
     private Candidates candidates = Candidates.getInstance();
-    private final int K = 30;
+    private final int K = 30 ;
 
     private Logger logger = Logger.getLogger(Voter.class);
 

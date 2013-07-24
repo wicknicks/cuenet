@@ -40,7 +40,7 @@ public class Email implements Source {
     }
 
     @Override
-    public List<EventContextNetwork> participants(EventContextNetwork.Event event) {
+    public List<EventContextNetwork> participants(EventContextNetwork.Event event)  {
         return null;
     }
 
