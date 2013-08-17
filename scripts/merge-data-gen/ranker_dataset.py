@@ -185,9 +185,9 @@ def pepper_entities(instance, maxEntity):
    
 
 if __name__ == '__main__':
-  NC = 10   # number of event types
-  XN = 50   # maximum number of entities
-  IC = 1000 # number of instances to be generated
+  NC = 10      # number of event types
+  XN = 50      # maximum number of entities
+  IC = 1000000 # number of instances to be generated
 
   # O = create_subsumption_graph(10)
   # draw(O)
@@ -206,13 +206,16 @@ if __name__ == '__main__':
     subevents.append(load_from_file('/data/ranker/subevent_edgelist.' + \
       str(NC) + '.' + str(i) + '.txt'))
 
-  instances = []
-  for instance in create_instances(O, subevents):
-    pepper_entities(instance, XN)
-    instances.append(instance)
-    if len(instances) == IC: break
-
   with open('/data/ranker/instances.' + str(NC) + '.ic.' + str(IC) + '.txt', 'w') as dest:
-    for a in instances: 
-      serialize_instance_graph(a, dest)
+    instance_count = 0
+    for instance in create_instances(O, subevents):
+      pepper_entities(instance, XN)
+      serialize_instance_graph(instance, dest)
       dest.write('=========================================\n')
+      #instances.append(instance)
+      instance_count += 1
+      if instance_count % 50000 == 0: print instance_count
+      if instance_count == IC: break
+
+  print 'Created', IC, 'instances'
+      
