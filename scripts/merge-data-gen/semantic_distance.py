@@ -27,8 +27,49 @@ def draw(z):
   os.remove('___file.png')
 
 
-def isA_distance(G):
-  return 0
+def desc(G, node):
+  descendants = set()
+  descendants.add(node)
+
+  level = [node]
+  while len(level) > 0:
+    newlevel = []
+    for k in level:
+        for d in dict.keys(G[k]):
+          descendants.add(d)
+          newlevel.append(d)
+    level = newlevel
+  return descendants 
+
+def ancestor(G, node):
+  ancestors = set()
+  level = [node]
+  while len(level) > 0:
+    newlevel = []
+    for k in level:
+      preds = G.predecessors(k)
+      for p in preds: ancestors.add(p)
+      newlevel.extend(preds)
+    level = newlevel
+  return ancestors
+
+def exAncestor(G, n1, n2):
+  anc1 = ancestor(G, n1)
+  anc2 = ancestor(G, n2)
+  return anc1.union(anc2) - anc1.intersection(anc2)
+
+def isA_distance(G, n1, n2):
+  ancEx = exAncestor(G, n1, n2)
+  exclusiveAncestors = set()
+  for i in ancEx: 
+    for d in desc(G, i):  exclusiveAncestors.add( d )
+  union = exclusiveAncestors.union(desc(G, n1)).union(desc(G, n2))
+  print union
+
+  inter = desc(G, n1).intersection(desc(G, n2))
+  print inter
+
+  return union - inter
 
 def load_from_file(filename):
   return nx.read_edgelist(filename, nodetype=int, create_using=nx.DiGraph())
@@ -41,12 +82,15 @@ if __name__ == '__main__':
   a.add_edge('T', 'c')
   a.add_edge('s', 'a')
   a.add_edge('s', 'x')
-  a.add_edge('s',' y')
+  a.add_edge('s', 'y')
   a.add_edge('ss', 'y')
   a.add_edge('ss', 'b')
   a.add_edge('x', 'z')
   a.add_edge('y', 'z')
-  draw(a)
+  # draw(a)
 
-  b = load_from_file('/data/ranker/ontology_edgelist.10.txt')
-  draw(b)
+  print desc(a, 'ss')
+  print ancestor(a, 'y')
+  print exAncestor(a, 'x', 'y')
+  print isA_distance(a, 'x', 'y'), len(isA_distance(a, 'x', 'y'))
+  print isA_distance(a, 'T', 'b'), len(isA_distance(a, 'T', 'b'))
