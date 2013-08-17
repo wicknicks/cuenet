@@ -64,12 +64,21 @@ def isA_distance(G, n1, n2):
   for i in ancEx: 
     for d in desc(G, i):  exclusiveAncestors.add( d )
   union = exclusiveAncestors.union(desc(G, n1)).union(desc(G, n2))
-  print union
+  # print union
 
   inter = desc(G, n1).intersection(desc(G, n2))
-  print inter
+  # print inter
 
   return union - inter
+
+def compute_matrix(G):
+  matrix = {}
+  for n1 in G.nodes():
+    matrix[n1] = {}
+    for n2 in G.nodes():
+      matrix[n1][n2] = len(isA_distance(G, n1, n2))
+  return matrix
+
 
 def load_from_file(filename):
   return nx.read_edgelist(filename, nodetype=int, create_using=nx.DiGraph())
@@ -89,8 +98,11 @@ if __name__ == '__main__':
   a.add_edge('y', 'z')
   # draw(a)
 
-  print desc(a, 'ss')
-  print ancestor(a, 'y')
-  print exAncestor(a, 'x', 'y')
-  print isA_distance(a, 'x', 'y'), len(isA_distance(a, 'x', 'y'))
-  print isA_distance(a, 'T', 'b'), len(isA_distance(a, 'T', 'b'))
+  # print desc(a, 'ss')
+  # print ancestor(a, 'y')
+  # print exAncestor(a, 'x', 'y')
+  # print isA_distance(a, 'x', 'y'), len(isA_distance(a, 'x', 'y'))
+  # print isA_distance(a, 'T', 'b'), len(isA_distance(a, 'T', 'b'))
+
+  matrix = compute_matrix(a)
+  print matrix['T']
