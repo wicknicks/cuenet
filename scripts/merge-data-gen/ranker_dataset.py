@@ -85,24 +85,30 @@ def create_subevent_hierarchies(ontology, fanout=2, depth=2):
     subevent_hierarchies.append(sg)
     populate_hierarchy(sg, list(nodes), fanout, depth)  
 
-  print superevents
   return subevent_hierarchies
 
 def serialize_graph(G, filename):
   nx.write_edgelist(G, filename)
 
 def serialize_instance_graph(G, stream):
-  if len(a.edges()) == 0:
+  if len(G.edges()) == 0:
     for n in G.nodes():
       stream.write(str(n) + " " + str(G.node[n]['instance_id']) + "\n")
 
-  for edge in a.edges(): 
+  for edge in G.edges(): 
     stream.write(str(edge[0]) + ",")
-    stream.write(str(a.node[edge[0]]['instance_id']))
+    stream.write(str(G.node[edge[0]]['instance_id']))
     stream.write(' -> ')
     stream.write(str(edge[1]) + ",")
-    stream.write(str(a.node[edge[1]]['instance_id']))
+    stream.write(str(G.node[edge[1]]['instance_id']))
     stream.write("\n")
+
+  for n in G.nodes():
+    if len(G.node[n]['entities']) == 0: continue
+    stream.write(str(n) + ", [")
+    stream.write(','.join(map(lambda a: str(a), G.node[n]['entities'])))
+    stream.write("]\n")
+
 
 def load_from_file(filename):
   return nx.read_edgelist(filename, nodetype=int, create_using=nx.DiGraph())
@@ -128,7 +134,7 @@ def instantiate_subevent(subevent, instance_counts):
   I = nx.DiGraph()
 
   instance_counts[root] += 1
-  I.add_node(root, {'instance_id': instance_counts[root]})
+  I.add_node(root, {'instance_id': instance_counts[root], 'entities': []})
 
   level = [root]
   while len(level) > 0:
@@ -140,13 +146,13 @@ def instantiate_subevent(subevent, instance_counts):
         if random.randint(1, 100) < 40: continue
         instance_counts[o] += 1
         newlevel.append(o)
-        I.add_node(o, {'instance_id': instance_counts[o]})
+        I.add_node(o, {'instance_id': instance_counts[o], 'entities': []})
         I.add_edge(l, o)
     level = newlevel
 
   return I
 
-def create_instances(ontology, subevents, count=100):
+def create_instances(ontology, subevents):
   nodes = ontology.nodes()
   instance_counts = [0]
   for i in nodes: instance_counts.append(0)
@@ -154,48 +160,59 @@ def create_instances(ontology, subevents, count=100):
   smap = {}
   for se in subevents: smap[get_root(se)] = se
 
-  instances = []
-  while count > 0:
+  while True:
     n = random.randint(0, len(nodes)-1)
     if n in smap: 
-      instances.append(instantiate_subevent(smap[n], instance_counts))
+      I = instantiate_subevent(smap[n], instance_counts)
     else: 
-      I = nx.DiGraph()
       instance_counts[n] += 1
-      I.add_node(n, {'instance_id': instance_counts[n]})
-      instances.append( I )
-    count -= 1
-  return instances
+      I = nx.DiGraph()
+      I.add_node(n, {'instance_id': instance_counts[n], 'entities': []})
+    
+    yield I
+
+
+def pepper_entities(instance, maxEntity):
+  # if random.choice([True, False]) == False: break
+  i = 0
+  while i < len(instance.nodes()):
+    if random.choice([True, False]): 
+    #if random.randint(1, 100) < 25: 
+      i+=1
+      continue
+    node = instance.nodes()[i]
+    instance.node[node]['entities'].append(random.randint(1, maxEntity))
+   
 
 if __name__ == '__main__':
-  NC = 10
+  NC = 10   # number of event types
+  XN = 50   # maximum number of entities
+  IC = 1000 # number of instances to be generated
+
   # O = create_subsumption_graph(10)
-  # O = load_from_file('/data/ranker/ontology_edgelist.10.txt')
-  # draw(O)
-  O = load_from_file('/data/ranker/ontology_edgelist.' + str(NC) + '.txt')
   # draw(O)
   # serialize_graph(O, '/data/ranker/ontology_edgelist.txt')
+
+  # SH = create_subevent_hierarchies(O)
+  # for sg in SH: draw(sg)
+  # for i in range(len(SH)): serialize_graph(SH[i], \
+  #   '/data/ranker/subevent_edgelist.' + str(NC) + '.' + str(i) + '.txt')
+
+  O = load_from_file('/data/ranker/ontology_edgelist.' + str(NC) + '.txt')
+  # draw(O)
 
   subevents = []
   for i in range(3): 
     subevents.append(load_from_file('/data/ranker/subevent_edgelist.' + \
       str(NC) + '.' + str(i) + '.txt'))
 
-  instances = create_instances(O, subevents, 5)
-  # for i in instances: draw(i)
+  instances = []
+  for instance in create_instances(O, subevents):
+    pepper_entities(instance, XN)
+    instances.append(instance)
+    if len(instances) == IC: break
 
-  # a = nx.DiGraph()
-  # a.add_node(1, {'instance_id': 1})
-  # a.add_node(2, {'instance_id': 2})
-  # a.add_node(3, {'instance_id': 3})
-  # a.add_edge(1, 2)
-  # a.add_edge(2, 3)
-
-  for a in instances: 
-    serialize_instance_graph(a, sys.stdout)
-    print ' ========================================= '
-
-  # SH = create_subevent_hierarchies(O)
-  # for sg in SH: draw(sg)
-  # for i in range(len(SH)): serialize_graph(SH[i], 
-  #   '/data/ranker/subevent_edgelist.' + str(NC) + '.' + str(i) + '.txt')
+  with open('/data/ranker/instances.' + str(NC) + '.ic.' + str(IC) + '.txt', 'w') as dest:
+    for a in instances: 
+      serialize_instance_graph(a, dest)
+      dest.write('=========================================\n')
