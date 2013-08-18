@@ -1,7 +1,14 @@
 package esl.cuenet.generative.structs;
 
+import com.google.common.collect.Maps;
+import com.mongodb.BasicDBList;
+import com.mongodb.util.JSON;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 public class NetworkBuildingHelper {
@@ -37,6 +44,76 @@ public class NetworkBuildingHelper {
         //checktimes(temp, temp.root);
         checkTree(network, temp, temp.root);
     }
+
+    public static ContextNetwork loadNetworkForPropagation(String filename) throws IOException {
+        LineIterator iter = FileUtils.lineIterator(new File(filename));
+        ContextNetwork network = new ContextNetwork();
+
+        ContextNetwork tempNet = new ContextNetwork();
+        boolean readOneLine = true;
+        ContextNetwork.Instance root = null;
+        HashMap<Integer,ContextNetwork.Instance> instanceMap = Maps.newHashMap();
+
+        time = 0;
+
+
+        while (iter.hasNext()) {
+
+            String line = iter.next();
+            if (line.contains("->")) { /* edge */
+                String[] parts = line.split(" -> ");
+                String[] e1 = parts[0].split(",");
+                String[] e2 = parts[1].split(",");
+
+                ContextNetwork.Instance parent = new ContextNetwork.Instance(Integer.parseInt(e1[0]), Integer.parseInt(e1[1]));
+                ContextNetwork.Instance child = new ContextNetwork.Instance(Integer.parseInt(e2[0]), Integer.parseInt(e2[1]));
+
+                instanceMap.put(Integer.parseInt(e1[0]), parent);
+                instanceMap.put(Integer.parseInt(e2[0]), child);
+
+                if (readOneLine) {
+                    root = parent;
+                    tempNet.addAtomic(root);
+                    readOneLine = false;
+                }
+
+                tempNet.addSubeventEdge(root, parent, child);
+            } else if (line.contains("[")) { /* entity */
+
+                int ix = line.indexOf(',');
+                String[] parts = new String[2];
+                parts[0] = line.substring(0, ix);
+                parts[1] = line.substring(ix + 1);
+
+                ContextNetwork.Instance instance = instanceMap.get(Integer.parseInt(parts[0]));
+
+                BasicDBList list = (BasicDBList) JSON.parse(parts[1]);
+                for (Object item: list) {
+                    //logger.info(item + " " + instance);
+                    instance.participants.add(new ContextNetwork.Entity("person", item.toString()));
+                }
+
+            } else if (line.contains("=====")) { /* end of object*/
+                readOneLine = true;
+                network.eventTrees.add(tempNet.eventTrees.get(0));
+                tempNet = new ContextNetwork();
+                instanceMap = Maps.newHashMap();
+                root = null;
+            }
+            else { /* single node */
+                String[] e1 = line.split("\\s+");
+                root = new ContextNetwork.Instance(Integer.parseInt(e1[0]), Integer.parseInt(e1[1]));
+                instanceMap.put(Integer.parseInt(e1[0]), root);
+                tempNet.addAtomic(root);
+            }
+
+        }
+
+        time = 0;
+
+        return network;
+    }
+
 
     public static void downwardTime(ContextNetwork network, ContextNetwork.IndexedSubeventTree root, ContextNetwork.Instance start) {
         if (start.immediateSubevents.size() == 0) {
