@@ -19,7 +19,9 @@ public class PropagationTests {
 
     @Test
     public void propagate() throws IOException {
-        ContextNetwork network = NetworkBuildingHelper.loadNetworkForPropagation("/data/ranker/instances.10.ic.1000.txt");
+        ContextNetwork network = NetworkBuildingHelper.loadNetworkForPropagation(
+                "/data/ranker/instances.10.ic.1000.txt",
+                "/data/osm/uci.osm.locations.samples");
         logger.info(network.count());
     }
 }
