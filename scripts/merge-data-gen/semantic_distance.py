@@ -84,18 +84,18 @@ def load_from_file(filename):
   return nx.read_edgelist(filename, nodetype=int, create_using=nx.DiGraph())
 
 if __name__ == '__main__':
-  a = nx.DiGraph()
-  a.add_nodes_from(['T', 's', 'ss', 'c', 'a', 'x', 'y', 'z', 'b'])
-  a.add_edge('T', 's' )
-  a.add_edge('T', 'ss')
-  a.add_edge('T', 'c')
-  a.add_edge('s', 'a')
-  a.add_edge('s', 'x')
-  a.add_edge('s', 'y')
-  a.add_edge('ss', 'y')
-  a.add_edge('ss', 'b')
-  a.add_edge('x', 'z')
-  a.add_edge('y', 'z')
+  # a = nx.DiGraph()
+  # a.add_nodes_from(['T', 's', 'ss', 'c', 'a', 'x', 'y', 'z', 'b'])
+  # a.add_edge('T', 's' )
+  # a.add_edge('T', 'ss')
+  # a.add_edge('T', 'c')
+  # a.add_edge('s', 'a')
+  # a.add_edge('s', 'x')
+  # a.add_edge('s', 'y')
+  # a.add_edge('ss', 'y')
+  # a.add_edge('ss', 'b')
+  # a.add_edge('x', 'z')
+  # a.add_edge('y', 'z')
   # draw(a)
 
   # print desc(a, 'ss')
@@ -104,5 +104,10 @@ if __name__ == '__main__':
   # print isA_distance(a, 'x', 'y'), len(isA_distance(a, 'x', 'y'))
   # print isA_distance(a, 'T', 'b'), len(isA_distance(a, 'T', 'b'))
 
+  # matrix = compute_matrix(a)
+  # print matrix['T']
+
+  a = load_from_file('/data/ranker/ontology_edgelist.10.txt')
+  # draw(a) 
   matrix = compute_matrix(a)
-  print matrix['T']
+  print matrix[1]
