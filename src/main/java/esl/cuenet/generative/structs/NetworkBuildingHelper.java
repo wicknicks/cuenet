@@ -45,7 +45,7 @@ public class NetworkBuildingHelper {
         checkTree(network, temp, temp.root);
     }
 
-    public static ContextNetwork loadNetworkForPropagation(String networkDataFilename, String locationSampleFilename) throws IOException {
+    public static ContextNetwork loadNetworkForPropagation(String networkDataFilename, SpaceTimeValueGenerators stGenerator) throws IOException {
         LineIterator iter = FileUtils.lineIterator(new File(networkDataFilename));
         ContextNetwork network = new ContextNetwork();
 
@@ -54,7 +54,6 @@ public class NetworkBuildingHelper {
         ContextNetwork.Instance root = null;
         HashMap<Integer,ContextNetwork.Instance> instanceMap = Maps.newHashMap();
 
-        SpaceTimeValueGenerators stGenerator = new SpaceTimeValueGenerators(locationSampleFilename);
         Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
         long timeRangeStart = 1;
         long timeRangeEnd = 10000;
