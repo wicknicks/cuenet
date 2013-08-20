@@ -1,5 +1,8 @@
 package esl.cuenet.algorithms.firstk.personal.accessor;
 
+import java.io.File;
+import java.io.IOException;
+
 public class SourceFactory {
 
     private Source[] sources = null;
@@ -23,6 +26,15 @@ public class SourceFactory {
         sources = new Source[] {
                 email, facebook, calendar
         };
+
+        File instanceFile = new File("/data/ranker/real/instances." + PConstants.DBNAME + ".txt");
+        try {
+            facebook.writeInstances(instanceFile);
+            calendar.writeInstances(instanceFile);
+            email.writeInstances(instanceFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 

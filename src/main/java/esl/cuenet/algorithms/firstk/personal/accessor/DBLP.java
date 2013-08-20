@@ -4,6 +4,7 @@ import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
 import esl.cuenet.algorithms.firstk.personal.Time;
 
+import java.io.File;
 import java.util.List;
 
 public class DBLP implements Source {
@@ -31,6 +32,10 @@ public class DBLP implements Source {
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
         return null;
+    }
+
+    @Override
+    public void writeInstances(File instanceFile) {
     }
 
 }

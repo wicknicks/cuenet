@@ -8,9 +8,13 @@ import esl.cuenet.algorithms.firstk.personal.Main;
 import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.accessors.Utils;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.mail.internet.MailDateFormat;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -92,6 +96,25 @@ public class Email implements Source {
         return events;
     }
 
+    @Override
+    public void writeInstances(File instanceFile) throws IOException {
+        FileWriter writer = new FileWriter(instanceFile);
+
+        int instance_count = 0;
+        int email_event_id = 7;
+
+        for (EmailObject obj: emails) {
+            instance_count++;
+            writer.write(email_event_id + " " + instance_count);
+            writer.write('\n');
+            writer.write(email_event_id + ", " + obj.references.toString() + ", " + obj.time.getStart());
+            writer.write('\n');
+            writer.write("=========================================\n");
+        }
+
+        writer.close();
+    }
+
 
     public class EmailObject {
         List<Map.Entry<String, String>> nameMailPairs;
@@ -132,10 +155,10 @@ public class Email implements Source {
 
                 email.time = getDate(date);
 
-                if (Main.EXIF != null) {
-                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
-                    if (!f) continue;
-                }
+//                if (Main.EXIF != null) {
+//                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
+//                    if (!f) continue;
+//                }
 
                 email.nameMailPairs = Lists.newArrayList();
 

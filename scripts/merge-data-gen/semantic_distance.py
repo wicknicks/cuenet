@@ -108,12 +108,12 @@ if __name__ == '__main__':
   # matrix = compute_matrix(a)
   # print matrix['T']
 
-  a = load_from_file('/data/ranker/ontology_edgelist.10.txt')
-  # draw(a) 
+  a = load_from_file('/data/ranker/ontology_cuenet.txt')
+  draw(a) 
   matrix = compute_matrix(a)
   print matrix[1]
 
-  with open('/data/ranker/ontology_edgelist.10.distances.txt', 'w') as dfile:
+  with open('/data/ranker/ontology_cuenet.distances.txt', 'w') as dfile:
     for key in matrix.keys():
       s = json.dumps(matrix[key])
       dfile.write(str(key) + " -> " + s + "\n")

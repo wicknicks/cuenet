@@ -10,6 +10,7 @@ import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.util.List;
 
 public class Conference implements Source {
@@ -51,6 +52,10 @@ public class Conference implements Source {
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
         return null;
+    }
+
+    @Override
+    public void writeInstances(File instanceFile) {
     }
 
     private class ConferenceObject {

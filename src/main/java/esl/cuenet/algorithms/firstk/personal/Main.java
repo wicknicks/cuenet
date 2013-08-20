@@ -30,16 +30,16 @@ public class Main {
 
         Source[] sources = SourceFactory.getFactory().getSources();
 
-        EventContextNetwork.ECNRef pc = network.createEvent("photo-capture", EXIF.timestamp,
-                EXIF.timestamp, location.getFullAddress());
-        EventContextNetwork.ECNRef user = network.createPerson(Candidates.NAME_KEY, PConstants.USERNAME);
-
-        network.initializeSubeventTree(pc);
-        network.createPartiticipationEdge(pc, user);
-
-        Discoverer discoverer = new Discoverer(network, sources, time, location);
-        discoverer.dnm();
-        discoverer.terminate();
+//        EventContextNetwork.ECNRef pc = network.createEvent("photo-capture", EXIF.timestamp,
+//                EXIF.timestamp, location.getFullAddress());
+//        EventContextNetwork.ECNRef user = network.createPerson(Candidates.NAME_KEY, PConstants.USERNAME);
+//
+//        network.initializeSubeventTree(pc);
+//        network.createPartiticipationEdge(pc, user);
+//
+//        Discoverer discoverer = new Discoverer(network, sources, time, location);
+//        discoverer.dnm();
+//        discoverer.terminate();
         
         return network;
     }

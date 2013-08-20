@@ -10,6 +10,9 @@ import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class Facebook implements Source {
@@ -83,6 +86,16 @@ public class Facebook implements Source {
     @Override
     public List<EventContextNetwork> knowsAtTime(Candidates.CandidateReference person, Time time) {
         return null;
+    }
+
+    @Override
+    public void writeInstances(File instanceFile) throws IOException {
+        FileWriter writer = new FileWriter(instanceFile);
+
+        int instance_count = 0;
+        int email_event_id = 7;
+
+        writer.close();
     }
 
     class FBEvent {
