@@ -8,16 +8,17 @@ import esl.cuenet.algorithms.firstk.personal.Main;
 import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import esl.cuenet.source.accessors.Utils;
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import javax.mail.internet.MailDateFormat;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 
 public class Email implements Source {
 
@@ -97,22 +98,18 @@ public class Email implements Source {
     }
 
     @Override
-    public void writeInstances(File instanceFile) throws IOException {
-        FileWriter writer = new FileWriter(instanceFile);
-
+    public void writeInstances(FileWriter instanceFileWriter) throws IOException {
         int instance_count = 0;
         int email_event_id = 7;
 
         for (EmailObject obj: emails) {
             instance_count++;
-            writer.write(email_event_id + " " + instance_count);
-            writer.write('\n');
-            writer.write(email_event_id + ", " + obj.references.toString() + ", " + obj.time.getStart());
-            writer.write('\n');
-            writer.write("=========================================\n");
+            instanceFileWriter.write(email_event_id + " " + instance_count);
+            instanceFileWriter.write('\n');
+            instanceFileWriter.write(email_event_id + ", " + obj.references.toString() + ", " + obj.time.getStart());
+            instanceFileWriter.write('\n');
+            instanceFileWriter.write("=========================================\n");
         }
-
-        writer.close();
     }
 
 

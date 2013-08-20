@@ -9,7 +9,7 @@ import esl.cuenet.algorithms.firstk.personal.Utils.RFC3339DateFormatter;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.FileWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -60,7 +60,7 @@ public class Calendar implements Source {
     }
 
     @Override
-    public void writeInstances(File instanceFile) {
+    public void writeInstances(FileWriter instanceFile) {
     }
 
     private class CalendarObject {

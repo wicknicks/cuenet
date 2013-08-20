@@ -3,6 +3,7 @@ package esl.cuenet.algorithms.firstk.personal.accessor;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
@@ -10,9 +11,11 @@ import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class Facebook implements Source {
@@ -22,6 +25,7 @@ public class Facebook implements Source {
 
     private Multimap<Candidates.CandidateReference, Candidates.CandidateReference> knowsGraph = HashMultimap.create();
     private List<FBEvent> events = Lists.newArrayList();
+    private List<FBPhoto> photos = Lists.newArrayList();
 
 
     protected Facebook() {
@@ -89,13 +93,18 @@ public class Facebook implements Source {
     }
 
     @Override
-    public void writeInstances(File instanceFile) throws IOException {
-        FileWriter writer = new FileWriter(instanceFile);
-
+    public void writeInstances(FileWriter instanceFileWriter) throws IOException {
         int instance_count = 0;
-        int email_event_id = 7;
+        int event_id = 8;
 
-        writer.close();
+        for (FBPhoto obj: photos) {
+            instance_count++;
+            instanceFileWriter.write(event_id + " " + instance_count);
+            instanceFileWriter.write('\n');
+            instanceFileWriter.write(event_id + ", " + obj.participants.toString() + ", " + (obj.time.getStart() + obj.time.getEnd())/2);
+            instanceFileWriter.write('\n');
+            instanceFileWriter.write("====================================\n");
+        }
     }
 
     class FBEvent {
@@ -105,7 +114,15 @@ public class Facebook implements Source {
         boolean sent = false;
     }
 
+    class FBPhoto {
+        Time time;
+        String id;
+        List<Candidates.CandidateReference> participants;
+    }
+
     public class FBLoader extends MongoDB {
+
+        private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
         public FBLoader() {
             super(PConstants.DBNAME);
@@ -208,7 +225,73 @@ public class Facebook implements Source {
 
             for (FBEvent e: events) loadAttendees(e);
 
+            loadPhotos();
+
             close();
+        }
+
+        private void loadPhotos() {
+
+            logger.info("Loading FB Photos");
+
+            DBReader reader = this.startReader("fb_photos");
+            BasicDBObject keys = new BasicDBObject();
+            keys.put("_id", 0);
+
+            reader.getAll(keys);
+
+            String tagId, tagName, date;
+
+            while (reader.hasNext()) {
+                BasicDBObject obj = (BasicDBObject) reader.next();
+
+                if ( !obj.containsField("created_time") ) {
+                    logger.error("object doesn't have 'created_time' field: " + obj);
+                    continue;
+                }
+
+                date = obj.getString("created_time");
+                long t = parseFBDate(date).getTime();
+
+                FBPhoto photo = new FBPhoto();
+                photo.time = Time.createFromMoment(t);
+                photo.participants = Lists.newArrayList();
+
+                if (obj.containsField("tags")) {
+                    BasicDBObject _tags = (BasicDBObject) obj.get("tags");
+                    if (_tags.containsField("data")) {
+                        for (Object o: (BasicDBList) _tags.get("data")) {
+
+                            tagId = null; tagName = null;
+                            BasicDBObject tag = (BasicDBObject) o;
+
+                            if (tag.containsField("id")) tagId = tag.getString("id");
+
+                            Candidates.CandidateReference ref = candidateList.searchLimitOne(Candidates.FB_ID_KEY, tagId);
+                            if (ref == Candidates.UNKNOWN || ref == null) continue;
+
+                            photo.participants.add(ref);
+                        }
+                    }
+                }
+                photos.add(photo);
+            }
+        }
+
+        private Date parseFBDate(String sDate) {
+            if (sDate == null) return new Date(0);
+
+            Date dt;
+            try {
+                dt = dateFormat.parse(sDate);
+            } catch (ParseException e) {
+                logger.error("Date couldn't be parsed: "  + sDate);
+                logger.error("MESSAGE: " + e.getMessage());
+                dt = new Date(0);
+            }
+
+            return dt;
+
         }
 
         private void loadAttendees(FBEvent event) {

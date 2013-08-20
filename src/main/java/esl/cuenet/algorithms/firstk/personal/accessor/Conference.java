@@ -10,7 +10,7 @@ import esl.cuenet.algorithms.firstk.personal.Time;
 import esl.cuenet.query.drivers.mongodb.MongoDB;
 import org.apache.log4j.Logger;
 
-import java.io.File;
+import java.io.FileWriter;
 import java.util.List;
 
 public class Conference implements Source {
@@ -55,7 +55,7 @@ public class Conference implements Source {
     }
 
     @Override
-    public void writeInstances(File instanceFile) {
+    public void writeInstances(FileWriter instanceFile) {
     }
 
     private class ConferenceObject {

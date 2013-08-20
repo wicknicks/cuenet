@@ -1,6 +1,7 @@
 package esl.cuenet.algorithms.firstk.personal.accessor;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 public class SourceFactory {
@@ -29,9 +30,13 @@ public class SourceFactory {
 
         File instanceFile = new File("/data/ranker/real/instances." + PConstants.DBNAME + ".txt");
         try {
-            facebook.writeInstances(instanceFile);
-            calendar.writeInstances(instanceFile);
-            email.writeInstances(instanceFile);
+            FileWriter writer = new FileWriter(instanceFile);
+
+            facebook.writeInstances(writer);
+            calendar.writeInstances(writer);
+            email.writeInstances(writer);
+
+            writer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

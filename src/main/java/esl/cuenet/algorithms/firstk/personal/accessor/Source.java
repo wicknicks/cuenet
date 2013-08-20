@@ -4,7 +4,7 @@ import esl.cuenet.algorithms.firstk.personal.EventContextNetwork;
 import esl.cuenet.algorithms.firstk.personal.Location;
 import esl.cuenet.algorithms.firstk.personal.Time;
 
-import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -20,5 +20,5 @@ public interface Source {
 
     public List<EventContextNetwork> knowsAtTime (Candidates.CandidateReference person, Time time);
 
-    public void writeInstances(File instanceFile) throws IOException;
+    public void writeInstances(FileWriter instanceFileWriter) throws IOException;
 }
