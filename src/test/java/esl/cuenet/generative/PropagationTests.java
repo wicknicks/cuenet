@@ -38,6 +38,11 @@ public class PropagationTests {
         double l1delta = propagator.propagateOnce();
         logger.info(l1delta);
 
+
+        for (int i=0; i<10; i++) {
+            l1delta = propagator.propagateOnce(); logger.info(l1delta);
+        }
+
         //propagator.dispScores();
     }
 
