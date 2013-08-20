@@ -74,7 +74,27 @@ def sample_locations(locfile):
   locs.close()
   locsamples.close()
 
+def sample_to_kml(samplefile):
+  sfile = open(samplefile)
+  kmlfile = open(samplefile + '.kml', 'w')
+
+  kmlfile.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+  kmlfile.write('<kml xmlns="http://www.opengis.net/kml/2.2"> <Document>\n')
+
+  for line in sfile.readlines():
+    line = line[:-1]
+    parts = line.split(',')
+    kmlfile.write('<Placemark><Point><coordinates>')
+    kmlfile.write(parts[2] + "," + parts[1] + ",0")
+    kmlfile.write('</coordinates></Point></Placemark>\n')
+
+  kmlfile.write('</Document> </kml>\n')
+  kmlfile.close()
+  sfile.close()
+
+
 if __name__ == '__main__':
   # write_location_list('/data/osm/uci.osm')
-  sample_locations('/data/osm/uci.osm.locations')
+  #sample_locations('/data/osm/uci.osm.locations')
+  sample_to_kml('/data/osm/uci.osm.locations.samples')
   
