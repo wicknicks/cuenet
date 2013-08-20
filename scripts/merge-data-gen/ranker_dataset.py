@@ -161,7 +161,7 @@ def create_instances(ontology, subevents):
   for se in subevents: smap[get_root(se)] = se
 
   while True:
-    n = random.randint(0, len(nodes)-1)
+    n = nodes[random.randint(0, len(nodes)-1)]
     if n in smap: 
       I = instantiate_subevent(smap[n], instance_counts)
     else: 
@@ -187,7 +187,7 @@ def pepper_entities(instance, maxEntity):
 if __name__ == '__main__':
   NC = 10      # number of event types
   XN = 50      # maximum number of entities
-  IC = 1000000 # number of instances to be generated
+  IC = 100     # number of instances to be generated
 
   # O = create_subsumption_graph(10)
   # draw(O)

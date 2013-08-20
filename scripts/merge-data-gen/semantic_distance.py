@@ -2,6 +2,7 @@ import random, os, sys
 import networkx as nx
 import pygraphviz as pgv
 from PIL import Image
+import json
 
 # 
 # Implementation of ontological distance for a given subsumption (is-A) hierarchy. 
@@ -111,3 +112,8 @@ if __name__ == '__main__':
   # draw(a) 
   matrix = compute_matrix(a)
   print matrix[1]
+
+  with open('/data/ranker/ontology_edgelist.10.distances.txt', 'w') as dfile:
+    for key in matrix.keys():
+      s = json.dumps(matrix[key])
+      dfile.write(str(key) + " -> " + s + "\n")

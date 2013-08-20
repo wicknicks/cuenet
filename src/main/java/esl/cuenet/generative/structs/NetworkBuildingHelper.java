@@ -45,8 +45,8 @@ public class NetworkBuildingHelper {
         checkTree(network, temp, temp.root);
     }
 
-    public static ContextNetwork loadNetworkForPropagation(String filename) throws IOException {
-        LineIterator iter = FileUtils.lineIterator(new File(filename));
+    public static ContextNetwork loadNetworkForPropagation(String networkDataFilename, SpaceTimeValueGenerators stGenerator) throws IOException {
+        LineIterator iter = FileUtils.lineIterator(new File(networkDataFilename));
         ContextNetwork network = new ContextNetwork();
 
         ContextNetwork tempNet = new ContextNetwork();
@@ -54,8 +54,11 @@ public class NetworkBuildingHelper {
         ContextNetwork.Instance root = null;
         HashMap<Integer,ContextNetwork.Instance> instanceMap = Maps.newHashMap();
 
-        time = 0;
-
+        Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
+        long timeRangeStart = 1;
+        long timeRangeEnd = 10000;
+        String locationKey = locationKeyIterator.next();
+        long timestamp = stGenerator.getUniformTimestamp(1, 10000);
 
         while (iter.hasNext()) {
 
@@ -67,6 +70,11 @@ public class NetworkBuildingHelper {
 
                 ContextNetwork.Instance parent = new ContextNetwork.Instance(Integer.parseInt(e1[0]), Integer.parseInt(e1[1]));
                 ContextNetwork.Instance child = new ContextNetwork.Instance(Integer.parseInt(e2[0]), Integer.parseInt(e2[1]));
+
+                parent.setInterval(timestamp, timestamp);
+                parent.setLocation(locationKey);
+                child.setInterval(timestamp, timestamp);
+                child.setLocation(locationKey);
 
                 instanceMap.put(Integer.parseInt(e1[0]), parent);
                 instanceMap.put(Integer.parseInt(e2[0]), child);
@@ -99,17 +107,20 @@ public class NetworkBuildingHelper {
                 tempNet = new ContextNetwork();
                 instanceMap = Maps.newHashMap();
                 root = null;
+
+                locationKey = locationKeyIterator.next();
+                timestamp = stGenerator.getUniformTimestamp(timeRangeStart, timeRangeEnd);
             }
             else { /* single node */
                 String[] e1 = line.split("\\s+");
                 root = new ContextNetwork.Instance(Integer.parseInt(e1[0]), Integer.parseInt(e1[1]));
                 instanceMap.put(Integer.parseInt(e1[0]), root);
+                root.setInterval(timestamp, timestamp);
+                root.setLocation(locationKey);
                 tempNet.addAtomic(root);
             }
 
         }
-
-        time = 0;
 
         return network;
     }

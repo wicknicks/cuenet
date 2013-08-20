@@ -56,7 +56,7 @@ def sample_locations(locfile):
   locsamples = open(locfile + '.samples', 'w')
   latmu = (bounds[0] + bounds[2]) / 2
   lonmu = (bounds[1] + bounds[3]) / 2
-  LIM = 100
+  LIM = 10000
   while LIM > 0:
     lat = random.gauss(latmu, 0.2)
     lon = random.gauss(lonmu, 0.2)
@@ -94,7 +94,6 @@ def sample_to_kml(samplefile):
 
 
 if __name__ == '__main__':
-  # write_location_list('/data/osm/uci.osm')
-  #sample_locations('/data/osm/uci.osm.locations')
-  sample_to_kml('/data/osm/uci.osm.locations.samples')
+  write_location_list('/data/osm/uci.osm')
+  sample_locations('/data/osm/uci.osm.locations')
   
