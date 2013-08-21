@@ -245,7 +245,7 @@ public class Propagate {
         for (Table.Cell<ContextNetwork.Instance, ContextNetwork.Entity, Double> cell: scoreTable.cellSet()) {
             temp = timeScore.get(cell.getRowKey(), cell.getColumnKey());
             score = (temp == null? 0 : temp);
-            newScore.put(cell.getRowKey(), cell.getColumnKey(), score);
+            newScore.put(cell.getRowKey(), cell.getColumnKey(), d * score);
         }
 
         double delta = computeDeltaTable(scoreTable, newScore);
