@@ -529,10 +529,26 @@ public class Propagate {
 
     public void printScores(int event_id, int instance_id) {
         Map<ContextNetwork.Entity, Double> map = scoreTable.row(new ContextNetwork.Instance(event_id, instance_id));
+        PriorityQueue<Map.Entry<ContextNetwork.Entity, Double>> objBallot = new PriorityQueue<Map.Entry<ContextNetwork.Entity, Double>>(map.entrySet().size(),
+                new Comparator<Map.Entry<ContextNetwork.Entity, Double>>() {
+            @Override
+            public int compare(Map.Entry<ContextNetwork.Entity, Double> o1, Map.Entry<ContextNetwork.Entity, Double> o2) {
+                if (o2.getValue() > o1.getValue()) return 1;
+                if (o2.getValue() < o1.getValue()) return -1;
+                return 0;
+            }
+        });
+
+        objBallot.addAll(map.entrySet());
 
 
-        for (Map.Entry<ContextNetwork.Entity, Double> entry: map.entrySet()) {
+        while ( !objBallot.isEmpty() ) {
+            Map.Entry<ContextNetwork.Entity, Double> entry = objBallot.remove();
             if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
         }
+
+//        for (Map.Entry<ContextNetwork.Entity, Double> entry: map.entrySet()) {
+//            if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
+//        }
     }
 }

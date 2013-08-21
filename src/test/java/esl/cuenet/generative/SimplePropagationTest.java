@@ -87,7 +87,7 @@ public class SimplePropagationTest {
         for (int i=0; i<10; i++) {
             l1delta = propagator.propagateOnceTable();
             logger.info("delta = " + l1delta);
-            propagator.printScores(4, 9);
+            //propagator.printScores(4, 9);
             deltas[i] = l1delta;
         }
 
