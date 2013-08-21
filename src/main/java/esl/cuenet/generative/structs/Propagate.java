@@ -110,7 +110,7 @@ public class Propagate {
     private void findEventsWithinSTRange(ContextNetwork.IndexedSubeventTree tree) {
         for (ContextNetwork.IndexedSubeventTree otherTree: network.eventTrees) {
             if (otherTree == tree) continue;
-            if (Math.abs(tree.root.intervalStart - otherTree.root.intervalStart) < (5 * timespan/100)) {
+            if (Math.abs(tree.root.intervalStart - otherTree.root.intervalStart) < (50 * timespan/100)) {
 
                 for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
                     for (ContextNetwork.Instance otherInstance: otherTree.instanceMap.values()) {
@@ -222,9 +222,9 @@ public class Propagate {
             double score = 0;
             score += timeScore.get(item);
             //score += spatialScore.get(item);
-            score += objectScore.get(item);
-            score += typeScore.get(item);
-            score += structuralScore.get(item);
+            //score += objectScore.get(item);
+            //score += typeScore.get(item);
+            //score += structuralScore.get(item);
             newScore.put(item, d * score);
         }
 
@@ -244,7 +244,7 @@ public class Propagate {
             for (ContextNetwork.Instance neighbor: eventsWithinTemporalRange.get(instance)) {
                 double neighScore = eventScoreTable.get(neighbor);
                 if (Double.compare(neighScore, 0) == 0) continue;
-                intervalDiff = 1 - (Math.abs((double)instance.intervalStart - neighbor.intervalStart) / timespan);
+                 intervalDiff = 1- (Math.abs((double)instance.intervalStart - neighbor.intervalStart) / timespan);
 
                 neighScore = neighScore * intervalDiff;  //linear drop
                 neighScore /= eventsWithinTemporalRange.get(neighbor).size(); //normalize using temporal fanout from each neighbor

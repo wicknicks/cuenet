@@ -39,7 +39,7 @@ public class BasicRankerTest {
         Ranker ranker = new BasicRanker(network, entityBase);
 
         //Me
-//        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Arjun Satish").getId(), 1.0);
+        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Arjun Satish").getId(), 1.0);
 
         //Work
 //        ranker.assign(entityBase.lookup(EntityBase.V_FB_ID, "6028816").getId(), 1.0);
@@ -50,8 +50,8 @@ public class BasicRankerTest {
 //        ranker.assign(entityBase.lookup(EntityBase.V_EMAIL, "alexander.behm@gmail.com").getId(), 1.0);
 
         //Family
-        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Prasanna Satish").getId(), 1.0);
-        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Adarsh Satish").getId(), 1.0);
+//        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Prasanna Satish").getId(), 1.0);
+//        ranker.assign(entityBase.lookup(EntityBase.V_NAME, "Adarsh Satish").getId(), 1.0);
 
         PropagationFunction[] functions = new PropagationFunction[]{
                 new SubEventPropagationFunction(),

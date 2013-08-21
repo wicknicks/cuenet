@@ -1,13 +1,17 @@
 package esl.cuenet.generative.structs;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mongodb.BasicDBList;
 import com.mongodb.util.JSON;
+import esl.cuenet.algorithms.firstk.impl.LocalFilePreprocessor;
+import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -43,6 +47,67 @@ public class NetworkBuildingHelper {
         downwardTime(network, temp, temp.root);
         //checktimes(temp, temp.root);
         checkTree(network, temp, temp.root);
+    }
+
+    public static ContextNetwork coloredLoad(String eventsFile, List<String> annotationsFiles) throws IOException {
+
+        ContextNetwork network = new ContextNetwork();
+        LocalFilePreprocessor.ExifExtractor extractor = new LocalFilePreprocessor.ExifExtractor();
+
+        LocalFilePreprocessor.Exif exif = null;
+        ContextNetwork tempNet;
+        FileWriter sWriter = new FileWriter("/data/ranker/colored/tempLocations.txt");
+        sWriter.write("bounds\n");
+
+        int ix = 0;
+        Candidates candidateSet = Candidates.getInstance();
+
+        for (String line: FileUtils.readLines(new File(eventsFile))) {
+            String[] parts = line.split(",");
+            ContextNetwork.Instance root = new ContextNetwork.Instance(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+
+            exif = extractor.extractExif(parts[0]);
+
+            logger.info(exif);
+            tempNet = new ContextNetwork();
+
+            root.setInterval(exif.timestamp/1000, exif.timestamp/1000);
+
+            String sid = UUID.randomUUID().toString();
+            sWriter.write(sid + "," + exif.GPSLatitude + "," + exif.GPSLongitude);
+            sWriter.write('\n');
+
+            root.setLocation(sid);
+
+            for (String annotation: FileUtils.readLines(new File(annotationsFiles.get(ix)))) {
+                annotation = annotation.replace('"', ' ').trim();
+                if (annotation.length() < 1) continue;
+                Candidates.CandidateReference ref =
+                        candidateSet.createEntity(Lists.newArrayList(Candidates.NAME_KEY), Lists.newArrayList(annotation));
+                root.participants.add(new ContextNetwork.Entity("person", ref.toString()));
+            }
+
+            tempNet.addAtomic(root);
+            network.eventTrees.add(tempNet.eventTrees.get(0));
+            ix++;
+        }
+
+        sWriter.close();
+        return network;
+    }
+
+    public static ContextNetwork createNetwork(long nTimestamp, String locationKey, int event_type, int instance_count, Iterable<String> objects) {
+        ContextNetwork net = new ContextNetwork();
+        ContextNetwork.Instance root = new ContextNetwork.Instance(event_type, instance_count);
+        root.setInterval(nTimestamp, nTimestamp);
+        root.setLocation(locationKey);
+        for (String ref: objects) root.participants.add(new ContextNetwork.Entity("person", ref));
+        net.addAtomic(root);
+        return net;
+    }
+
+    public static void addToNetwork(ContextNetwork network, ContextNetwork tempNet) {
+        network.eventTrees.add(tempNet.eventTrees.get(0));
     }
 
     public static ContextNetwork loadNetworkForPropagation(String networkDataFilename, SpaceTimeValueGenerators stGenerator) throws IOException {
