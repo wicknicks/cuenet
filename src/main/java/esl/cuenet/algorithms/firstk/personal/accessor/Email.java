@@ -102,10 +102,13 @@ public class Email implements Source {
         int instance_count = 0;
         int email_event_id = 7;
 
+        Candidates.CandidateReference user = new Candidates.CandidateReference(0);
+
         for (EmailObject obj: emails) {
             instance_count++;
             instanceFileWriter.write(email_event_id + " " + instance_count);
             instanceFileWriter.write('\n');
+            obj.references.remove(user);
             instanceFileWriter.write(email_event_id + ", " + obj.references.toString() + ", " + obj.time.getStart());
             instanceFileWriter.write('\n');
             instanceFileWriter.write("=========================================\n");
@@ -152,10 +155,10 @@ public class Email implements Source {
 
                 email.time = getDate(date);
 
-//                if (Main.EXIF != null) {
-//                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
-//                    if (!f) continue;
-//                }
+                if (Main.EXIF != null) {
+                    boolean f = start.isBefore(email.time) && email.time.isBefore(end);
+                    if (!f) continue;
+                }
 
                 email.nameMailPairs = Lists.newArrayList();
 

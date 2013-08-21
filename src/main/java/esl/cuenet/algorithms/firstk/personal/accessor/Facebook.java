@@ -225,7 +225,7 @@ public class Facebook implements Source {
 
             for (FBEvent e: events) loadAttendees(e);
 
-            loadPhotos();
+            //loadPhotos();
 
             close();
         }
@@ -276,6 +276,8 @@ public class Facebook implements Source {
                 }
                 photos.add(photo);
             }
+
+            logger.info("Loaded " + photos.size() + " Photos");
         }
 
         private Date parseFBDate(String sDate) {

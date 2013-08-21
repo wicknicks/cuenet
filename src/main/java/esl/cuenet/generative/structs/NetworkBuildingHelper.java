@@ -54,10 +54,11 @@ public class NetworkBuildingHelper {
         ContextNetwork.Instance root = null;
         HashMap<Integer,ContextNetwork.Instance> instanceMap = Maps.newHashMap();
 
-        Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
+        //Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
         long timeRangeStart = 1;
         long timeRangeEnd = 10000;
-        String locationKey = locationKeyIterator.next();
+        //String locationKey = locationKeyIterator.next();
+        String locationKey = null;
         long timestamp = stGenerator.getUniformTimestamp(1, 10000);
 
         while (iter.hasNext()) {
@@ -89,9 +90,11 @@ public class NetworkBuildingHelper {
             } else if (line.contains("[")) { /* entity */
 
                 int ix = line.indexOf(',');
-                String[] parts = new String[2];
+                String[] parts = new String[3];
                 parts[0] = line.substring(0, ix);
                 parts[1] = line.substring(ix + 1);
+                int eix = line.indexOf(']');
+                parts[2] = line.substring(eix+3);
 
                 ContextNetwork.Instance instance = instanceMap.get(Integer.parseInt(parts[0]));
 
@@ -101,6 +104,11 @@ public class NetworkBuildingHelper {
                     instance.participants.add(new ContextNetwork.Entity("person", item.toString()));
                 }
 
+                if (parts.length == 3) {
+                    timestamp = Long.parseLong(parts[2]);
+                    instance.setInterval(timestamp, timestamp);
+                }
+
             } else if (line.contains("=====")) { /* end of object*/
                 readOneLine = true;
                 network.eventTrees.add(tempNet.eventTrees.get(0));
@@ -108,7 +116,7 @@ public class NetworkBuildingHelper {
                 instanceMap = Maps.newHashMap();
                 root = null;
 
-                locationKey = locationKeyIterator.next();
+                //locationKey = locationKeyIterator.next();
                 timestamp = stGenerator.getUniformTimestamp(timeRangeStart, timeRangeEnd);
             }
             else { /* single node */

@@ -3,6 +3,7 @@ package esl.cuenet.generative.structs;
 import com.google.common.collect.*;
 import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
+import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.log4j.Logger;
@@ -25,7 +26,7 @@ public class Propagate {
     private Multimap<ContextNetwork.Instance, ContextNetwork.Instance> eventsWithinSpatialRange;
     private Multimap<ContextNetwork.Instance, ContextNetwork.Instance> eventsWithinTemporalRange;
 
-    final private int timespan = 10000;
+    private long timespan;
     private final SpaceTimeValueGenerators stGenerators;
     private final int maxSemanticDistance;
     private int maxCommonSubevents = 0;
@@ -58,6 +59,17 @@ public class Propagate {
         }
 
         maxSemanticDistance = maxDistance;
+
+        long mintime = Long.MAX_VALUE, maxtime = Long.MIN_VALUE;
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            if (tree.root.intervalStart < mintime) mintime = tree.root.intervalStart;
+            if (tree.root.intervalStart > maxtime) maxtime = tree.root.intervalStart;
+        }
+
+        timespan = maxtime - mintime;
+        logger.info("Timespan = " + timespan);
+
+        logger.info("MaxSemanticDistance = " + maxDistance);
     }
 
     public void prepare(HashSet<String> entities) {
@@ -86,13 +98,19 @@ public class Propagate {
         for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
             findEventsWithinSTRange(tree);
         }
+    }
 
+    private int gzCount() {
+        int a=0;
+        for (double v: eventScoreTable.values()) if (v > 0) a++;
+        logger.info("Events with score > 0 = " + a);
+        return a;
     }
 
     private void findEventsWithinSTRange(ContextNetwork.IndexedSubeventTree tree) {
         for (ContextNetwork.IndexedSubeventTree otherTree: network.eventTrees) {
             if (otherTree == tree) continue;
-            if (Math.abs(tree.root.intervalStart - otherTree.root.intervalStart) < timespan/20) {
+            if (Math.abs(tree.root.intervalStart - otherTree.root.intervalStart) < (5 * timespan/100)) {
 
                 for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
                     for (ContextNetwork.Instance otherInstance: otherTree.instanceMap.values()) {
@@ -192,9 +210,8 @@ public class Propagate {
     }
 
     public double propagateOnce() {
-
         Map<ContextNetwork.Instance, Double> timeScore = temporalPropagation();
-        Map<ContextNetwork.Instance, Double> spatialScore = spatialPropagation();
+        //Map<ContextNetwork.Instance, Double> spatialScore = spatialPropagation();
         Map<ContextNetwork.Instance, Double> objectScore = objectPropagation();
         Map<ContextNetwork.Instance, Double> typeScore = typePropagation();
         Map<ContextNetwork.Instance, Double> structuralScore = structuralPropagation();
@@ -204,7 +221,7 @@ public class Propagate {
         for (ContextNetwork.Instance item: eventScoreTable.keySet()) {
             double score = 0;
             score += timeScore.get(item);
-            score += spatialScore.get(item);
+            //score += spatialScore.get(item);
             score += objectScore.get(item);
             score += typeScore.get(item);
             score += structuralScore.get(item);
@@ -226,8 +243,8 @@ public class Propagate {
             sum = 0;
             for (ContextNetwork.Instance neighbor: eventsWithinTemporalRange.get(instance)) {
                 double neighScore = eventScoreTable.get(neighbor);
-                if (neighScore == 0) continue;
-                intervalDiff = 1 - (Math.abs(instance.intervalStart - neighbor.intervalStart) / timespan);
+                if (Double.compare(neighScore, 0) == 0) continue;
+                intervalDiff = 1 - (Math.abs((double)instance.intervalStart - neighbor.intervalStart) / timespan);
 
                 neighScore = neighScore * intervalDiff;  //linear drop
                 neighScore /= eventsWithinTemporalRange.get(neighbor).size(); //normalize using temporal fanout from each neighbor
@@ -294,7 +311,9 @@ public class Propagate {
         for (ContextNetwork.Instance instance: eventScoreTable.keySet()) {
             sum = 0;
             for (ContextNetwork.Instance neighbor: sparseObjectCountTable.row(instance).keySet()) {
-                scoreDiff = (double) getCommonSubeventCount(instance, neighbor) / maxCommonSubevents;
+                scoreDiff = 0;
+                if (maxCommonSubevents > 0)
+                    scoreDiff = (double) getCommonSubeventCount(instance, neighbor) / maxCommonSubevents;
                 scoreDiff += (double) semanticDistances.get(instance.id.eventId, neighbor.id.eventId) / maxSemanticDistance;
                 sum = scoreDiff/2;
             }
@@ -337,6 +356,74 @@ public class Propagate {
         for (Map.Entry<ContextNetwork.Instance, Double> entry: eventScoreTable.entrySet()) {
             if (entry.getValue() > 0) logger.info(entry.getKey() + " " + entry.getValue());
         }
+    }
+
+    public List<Map.Entry<String,Double>> orderObjects() {
+        Set<Map.Entry<ContextNetwork.Instance,Double>> entrySet = eventScoreTable.entrySet();
+
+        PriorityQueue<Map.Entry<ContextNetwork.Instance,Double>> ballot =
+                new PriorityQueue<Map.Entry<ContextNetwork.Instance,Double>>(entrySet.size(), new Comparator<Map.Entry<ContextNetwork.Instance,Double>>() {
+
+                    @Override
+                    public int compare(Map.Entry<ContextNetwork.Instance,Double> o1, Map.Entry<ContextNetwork.Instance,Double> o2) {
+                        if (o2.getValue() > o1.getValue()) return 1;
+                        if (o2.getValue() < o1.getValue()) return -1;
+                        return 0;
+                    }
+
+                });
+
+        ballot.addAll(entrySet);
+
+        List<Map.Entry<ContextNetwork.Instance,Double>> sortedList = Lists.newArrayList();
+        while ( !ballot.isEmpty() ) {
+            Map.Entry<ContextNetwork.Instance,Double> entry = ballot.remove();
+            if (entry.getValue() > 0) sortedList.add(entry);
+        }
+
+        HashMap<String, Double> objectScoreTable = new HashMap<String, Double>();
+
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees)
+            for (ContextNetwork.Instance instance: tree.instanceMap.values())
+                for (ContextNetwork.Entity e: instance.participants)
+                    objectScoreTable.put(e.id, 0D);
+
+
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
+                double score = eventScoreTable.get(instance);
+                int size = instance.participants.size();
+                if (size == 0) continue;
+                for (ContextNetwork.Entity e: instance.participants) {
+                    double s = objectScoreTable.get(e.id);
+                    s += score/size;
+                    objectScoreTable.put(e.id, s);
+                }
+            }
+        }
+
+        PriorityQueue<Map.Entry<String, Double>> objBallot =
+                new PriorityQueue<Map.Entry<String, Double>>(entrySet.size(), new Comparator<Map.Entry<String, Double>>() {
+
+                    @Override
+                    public int compare(Map.Entry<String, Double> o1, Map.Entry<String, Double> o2) {
+                        if (o2.getValue() > o1.getValue()) return 1;
+                        if (o2.getValue() < o1.getValue()) return -1;
+                        return 0;
+                    }
+
+                });
+
+        objBallot.addAll(objectScoreTable.entrySet());
+
+        List<Map.Entry<String, Double>> list = Lists.newArrayList();
+        while ( !objBallot.isEmpty() ) {
+            Map.Entry<String, Double> entry = objBallot.remove();
+            if (entry.getValue() > 0) list.add(entry);
+        }
+
+        return list;
+
     }
 
 }

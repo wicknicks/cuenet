@@ -75,6 +75,7 @@ public class SpaceTimeValueGenerators {
     }
 
     public double distance (String key1, String key2) {
+        if (key1 == null || key2 == null) return 0;
         return locationsMap.get(key1).distance(locationsMap.get(key2));
     }
 
