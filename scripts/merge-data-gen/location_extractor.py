@@ -56,7 +56,7 @@ def sample_locations(locfile):
   locsamples = open(locfile + '.samples', 'w')
   latmu = (bounds[0] + bounds[2]) / 2
   lonmu = (bounds[1] + bounds[3]) / 2
-  LIM = 10000
+  LIM = 100000
   while LIM > 0:
     lat = random.gauss(latmu, 0.2)
     lon = random.gauss(lonmu, 0.2)

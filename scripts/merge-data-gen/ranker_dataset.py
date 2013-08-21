@@ -187,7 +187,7 @@ def pepper_entities(instance, maxEntity):
 if __name__ == '__main__':
   NC = 10      # number of event types
   XN = 50      # maximum number of entities
-  IC = 100     # number of instances to be generated
+  IC = 10000   # number of instances to be generated
 
   # O = create_subsumption_graph(10)
   # draw(O)

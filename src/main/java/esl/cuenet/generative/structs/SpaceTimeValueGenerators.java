@@ -29,6 +29,37 @@ public class SpaceTimeValueGenerators {
 
     private final double maxDist;
 
+    public SpaceTimeValueGenerators(Iterator<String> iter) {
+
+        String bounds = null;
+        if (iter.hasNext()) bounds = iter.next();
+        else throw new RuntimeException();
+
+        double minLat = 1000, minLon = 1000;
+        double maxLat = -1000, maxLon = -1000;
+
+        String tmp;
+        while (iter.hasNext()) {
+            tmp = iter.next();
+            String[] parts = tmp.split(",");
+            locationKeyList.add(parts[0]);
+
+            LatLonPair p = new LatLonPair(parts[1], parts[2]);
+            locationsMap.put(parts[0], p);
+            if (p.latitude < minLat) minLat = p.latitude;
+            if (p.latitude > maxLat) maxLat = p.latitude;
+            if (p.longitude < minLon) minLon = p.longitude;
+            if (p.longitude > maxLon) maxLon = p.longitude;
+        }
+
+        logger.info("bounds = " + minLat + ", " + minLon + " -> " + maxLat + ", " + maxLon);
+
+        LatLonPair p1 = new LatLonPair(minLat, minLon);
+        LatLonPair p2 = new LatLonPair(maxLat, maxLon);
+
+        maxDist = p1.distance(p2);
+    }
+
     public SpaceTimeValueGenerators(String locationValuesFilename) throws IOException {
 
         LineIterator iter = FileUtils.lineIterator(new File(locationValuesFilename));

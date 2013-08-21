@@ -17,7 +17,7 @@ public class Propagate {
     private Logger logger = Logger.getLogger(getClass());
 
     private final ContextNetwork network;
-    private final double d = 0.25;
+    private final double d = 0.85;
 
     private Map<ContextNetwork.Instance, Double> eventScoreTable;
     private final Table<Integer, Integer, Integer> semanticDistances;
@@ -299,14 +299,27 @@ public class Propagate {
     private Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> temporalPropagationTable() {
         Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore = HashBasedTable.create();
 
-        long range = 20 * timespan/100;
+        long range = 5 * timespan/100;
         long diff; double fraction, ns;
 
+        HashMap<ContextNetwork.Instance, Integer> neighborCount = Maps.newHashMap();
         for (ContextNetwork.Instance instance: eventScoreTable.keySet()) {
+            int n = 0;
             for (ContextNetwork.Instance neighbor: eventScoreTable.keySet()) {
                 if (instance == neighbor) continue;
-                if (instance.id.toString().equals("4_2") && neighbor.id.toString().equals("4_9"))
-                    logger.info("Asdasd");
+                diff = Math.abs(instance.intervalStart - neighbor.intervalStart);
+                if (diff > range) continue;
+                n++;
+            }
+            neighborCount.put(instance, n);
+        }
+
+
+        for (ContextNetwork.Instance instance: eventScoreTable.keySet()) {
+            int numOfNeighbors = neighborCount.get(instance);
+            if (numOfNeighbors == 0) continue;
+            for (ContextNetwork.Instance neighbor: eventScoreTable.keySet()) {
+                if (instance == neighbor) continue;
 
                 diff = Math.abs(instance.intervalStart - neighbor.intervalStart);
                 if (diff > range) continue;
@@ -318,9 +331,11 @@ public class Propagate {
                 for(Map.Entry<ContextNetwork.Entity, Double> entry: scoresAtInstance.entrySet()) {
 
                     if (Double.compare(entry.getValue(), 0) == 0) continue;
-                    ns = scoreTable.get(neighbor, entry.getKey());
-                    ns = ns + fraction * entry.getValue();
+                    //ns = scoreTable.get(neighbor, entry.getKey());
+                    //ns = ns + fraction * entry.getValue();
                     //if (ns > 1) ns = 1;
+
+                    ns = fraction * entry.getValue() / numOfNeighbors;
 
                     newScore.put(neighbor, entry.getKey(), ns);
                 }

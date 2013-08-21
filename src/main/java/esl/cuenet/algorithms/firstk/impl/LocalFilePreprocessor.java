@@ -196,7 +196,7 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
             try {
                 exif = new Exif();
 
-                logger.info(command + " " + exifImage);
+                //logger.info(command + " " + exifImage);
 
                 proc = Runtime.getRuntime().exec(command + " " + exifImage);
                 exifStream = new DataInputStream(proc.getInputStream());

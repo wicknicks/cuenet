@@ -46,14 +46,14 @@ public class PropagationTests {
     @Test
     public void propagate() throws IOException {
 
-        load();
-        logger.info(Main.EXIF);
+        //load();
+        //logger.info(Main.EXIF);
 
         String locationSamplesFile = "/data/osm/uci.osm.locations.samples";
-//        String instanceFile = "/data/ranker/instances.10.ic.100.txt";
-//        String distanceFile = "/data/ranker/ontology_edgelist.10.distances.txt";
-        String instanceFile = "/data/ranker/real/instances.arjun.txt";
-        String distanceFile = "/data/ranker/real/ontology_cuenet.distances.txt";
+        String instanceFile = "/data/ranker/instances.10.ic.10000.txt";
+        String distanceFile = "/data/ranker/ontology_edgelist.10.distances.txt";
+//        String instanceFile = "/data/ranker/real/instances.arjun.txt";
+//        String distanceFile = "/data/ranker/real/ontology_cuenet.distances.txt";
 
         SpaceTimeValueGenerators stGenerator = new SpaceTimeValueGenerators(locationSamplesFile);
         ContextNetwork network = NetworkBuildingHelper.loadNetworkForPropagation(
@@ -63,12 +63,12 @@ public class PropagationTests {
         Propagate propagator = new Propagate(network, distanceFile, stGenerator);
         propagator.show();
 
-        String[] entities = new String[12];
-        //for (int i=1; i<=10; i++) entities[i-1] = "" + i;
-        loadEntities(PConstants.IMAGE + ".annotations", entities);
+        String[] entities = new String[10];
+        for (int i=1; i<=10; i++) entities[i-1] = "" + i;
+        //loadEntities(PConstants.IMAGE + ".annotations", entities);
 
 
-        //////////propagator.prepare(Sets.newHashSet(entities));
+        propagator.prepare(Sets.newHashSet(entities));
 
         double l1delta;
         double[] deltas = new double[10];
@@ -82,14 +82,14 @@ public class PropagationTests {
         logger.info(Arrays.toString(deltas));
         //propagator.dispScores();
 
-        Candidates candidateSet = Candidates.getInstance();
-        List<Map.Entry<String,Double>> objects = propagator.orderObjects();
+//        Candidates candidateSet = Candidates.getInstance();
+//        List<Map.Entry<String,Double>> objects = propagator.orderObjects();
 
-        int _x = 25;
-        for (Map.Entry<String, Double> o: objects) {
-            logger.info(o.getKey() + " " + candidateSet.get(new Candidates.CandidateReference(Integer.parseInt(o.getKey()))));
-            if (_x-- == 0) break;
-        }
+//        int _x = 25;
+//        for (Map.Entry<String, Double> o: objects) {
+//            logger.info(o.getKey() + " " + candidateSet.get(new Candidates.CandidateReference(Integer.parseInt(o.getKey()))));
+//            if (_x-- == 0) break;
+//        }
 
 
     }

@@ -1,17 +1,19 @@
 package esl.cuenet.generative.structs;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import com.google.common.collect.*;
+import com.google.common.io.PatternFilenameFilter;
 import com.mongodb.BasicDBList;
 import com.mongodb.util.JSON;
 import esl.cuenet.algorithms.firstk.impl.LocalFilePreprocessor;
 import esl.cuenet.algorithms.firstk.personal.accessor.Candidates;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 
@@ -121,13 +123,14 @@ public class NetworkBuildingHelper {
         ContextNetwork.Instance root = null;
         HashMap<Integer,ContextNetwork.Instance> instanceMap = Maps.newHashMap();
 
-        //Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
+        Iterator<String> locationKeyIterator = stGenerator.getLocationValueIterator();
         long timeRangeStart = 1;
         long timeRangeEnd = 10000;
-        //String locationKey = locationKeyIterator.next();
-        String locationKey = null;
+        String locationKey = locationKeyIterator.next();
+        //String locationKey = null;
         long timestamp = stGenerator.getUniformTimestamp(1, 10000);
 
+        int maxevents = 1500;
         while (iter.hasNext()) {
 
             String line = iter.next();
@@ -161,7 +164,7 @@ public class NetworkBuildingHelper {
                 parts[0] = line.substring(0, ix);
                 parts[1] = line.substring(ix + 1);
                 int eix = line.indexOf(']');
-                parts[2] = line.substring(eix+3);
+                //parts[2] = line.substring(eix+3);
 
                 ContextNetwork.Instance instance = instanceMap.get(Integer.parseInt(parts[0]));
 
@@ -171,7 +174,7 @@ public class NetworkBuildingHelper {
                     instance.participants.add(new ContextNetwork.Entity("person", item.toString()));
                 }
 
-                if (parts.length == 3) {
+                if (parts[2] != null && parts[2].length() > 0) {
                     timestamp = Long.parseLong(parts[2]);
                     instance.setInterval(timestamp, timestamp);
                 }
@@ -183,8 +186,10 @@ public class NetworkBuildingHelper {
                 instanceMap = Maps.newHashMap();
                 root = null;
 
-                //locationKey = locationKeyIterator.next();
+                locationKey = locationKeyIterator.next();
                 timestamp = stGenerator.getUniformTimestamp(timeRangeStart, timeRangeEnd);
+
+                if (maxevents-- <= 0) {logger.info("Maxevent Reached");   break;}
             }
             else { /* single node */
                 String[] e1 = line.split("\\s+");
@@ -197,6 +202,81 @@ public class NetworkBuildingHelper {
 
         }
 
+        return network;
+    }
+
+    public static ContextNetwork loadForUnitPropagationTest(List<String> locationStrings) throws IOException {
+        String[] folders = new String[]{"/home/arjun/Dataset/mm13/d6-mm09-beijing-jain/",
+                "/home/arjun/Dataset/mm13/d1-vldb09-arjun/",
+                "/data/test_photos/arjun/c1/",
+                "/data/test_photos/arjun/c5/"};
+
+        String[] annotations = new String[]{
+                "/home/arjun/Dataset/mm13/annotations/ann-d6.txt",
+                "/home/arjun/Dataset/mm13/annotations/ann-d1.txt",
+                "/data/test_photos/arjun/c1/DSC_0586.JPG.annotations",
+                "/data/test_photos/arjun/c5/DSC_0174.JPG.annotations"};
+
+        double[] locationsLatitudes = new double[]{39.909308, 45.784345, 33.642068, 36.269155};
+        double[] locationsLongitudes = new double[]{116.409073, 4.85208, -117.833104, -121.808300};
+        int locix = 0;
+
+        Multimap<Integer, String> refMap = HashMultimap.create();
+
+        Candidates candidateSet = Candidates.getInstance();
+        for (int i=0; i<annotations.length; i++) {
+            String an = annotations[i];
+            for (String cand: FileUtils.readLines(new File(an))) {
+                Candidates.CandidateReference ref = candidateSet.createEntity(Lists.newArrayList(Candidates.NAME_KEY), Lists.newArrayList(cand));
+                refMap.put(i, ref.toString());
+                if (refMap.get(i).size() > 10) break;
+            }
+        }
+
+        ContextNetwork net = new ContextNetwork();
+
+        int inst_id = 0;
+        for (String f: folders) {
+            File directory = new File(f);
+            File[] photos = directory.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.toLowerCase().endsWith("jpg");
+                }
+            });
+            if (photos == null) continue;
+
+            String locationKey = UUID.randomUUID().toString();
+            locationStrings.add(locationKey + "," + locationsLatitudes[locix] + "," + locationsLongitudes[locix]);
+
+            for (int i=0; i<10; i++) {
+                ContextNetwork temp = loadFromPhoto(photos[i], ++inst_id, locationKey, refMap.get(locix));
+                net.eventTrees.add(temp.eventTrees.get(0));
+            }
+
+            locix++;
+        }
+
+
+        return net;
+    }
+
+    private static ContextNetwork loadFromPhoto(File photo, int instance_id, String location, Collection<String> refIds) {
+        ContextNetwork network = new ContextNetwork();
+        try {
+            LocalFilePreprocessor.Exif exif = (new LocalFilePreprocessor.ExifExtractor()).extractExif(photo.getAbsolutePath());
+            ContextNetwork.Instance root = new ContextNetwork.Instance(8, instance_id);
+
+            network.addAtomic(root);
+            root.setInterval(exif.timestamp/1000, exif.timestamp/1000);
+
+            if (instance_id % 10 != 5)
+                for (String ref: refIds) root.participants.add(new ContextNetwork.Entity("person", ref));
+
+            root.setLocation(location);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         return network;
     }
 
