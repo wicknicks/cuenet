@@ -79,7 +79,9 @@ public class NetworkBuildingHelper {
 
             root.setLocation(sid);
 
+            int maxAnnotations = 10;
             for (String annotation: FileUtils.readLines(new File(annotationsFiles.get(ix)))) {
+                if (maxAnnotations-- <= 0) break;
                 annotation = annotation.replace('"', ' ').trim();
                 if (annotation.length() < 1) continue;
                 Candidates.CandidateReference ref =

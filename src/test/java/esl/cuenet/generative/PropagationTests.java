@@ -66,7 +66,9 @@ public class PropagationTests {
         String[] entities = new String[12];
         //for (int i=1; i<=10; i++) entities[i-1] = "" + i;
         loadEntities(PConstants.IMAGE + ".annotations", entities);
-        propagator.prepare(Sets.newHashSet(entities));
+
+
+        //////////propagator.prepare(Sets.newHashSet(entities));
 
         double l1delta;
         double[] deltas = new double[10];

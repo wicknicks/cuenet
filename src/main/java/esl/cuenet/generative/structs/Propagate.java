@@ -31,6 +31,10 @@ public class Propagate {
     private final int maxSemanticDistance;
     private int maxCommonSubevents = 0;
 
+    private Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> scoreTable = HashBasedTable.create();
+    private HashSet<ContextNetwork.Entity> allEntites;
+
+
 
     public Propagate(ContextNetwork network, String semanticDistanceFile, SpaceTimeValueGenerators generators) {
         this.network = network;
@@ -50,7 +54,7 @@ public class Propagate {
 
             }
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
 
         int maxDistance = -1;
@@ -80,12 +84,15 @@ public class Propagate {
         eventsWithinSpatialRange = HashMultimap.create(nc, 100);
         eventsWithinTemporalRange = HashMultimap.create(nc, 100);
 
+        allEntites = new HashSet<ContextNetwork.Entity>();
+
         logger.info("Initializing scores");
         double score;
         for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
             for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
                 score = 0;
                 for (ContextNetwork.Entity person: instance.participants) {
+                    allEntites.add(person);
                     if (entities.contains(person.id)) {
                         score++;
                     }
@@ -98,6 +105,25 @@ public class Propagate {
         for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
             findEventsWithinSTRange(tree);
         }
+
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
+                for (ContextNetwork.Entity entity: allEntites) {
+                    scoreTable.put(instance, entity, 0.0);
+                }
+            }
+        }
+
+        for (ContextNetwork.IndexedSubeventTree tree: network.eventTrees) {
+            for (ContextNetwork.Instance instance: tree.instanceMap.values()) {
+                for (ContextNetwork.Entity entity: instance.participants) {
+                    scoreTable.put(instance, entity, 1.0);
+                }
+            }
+        }
+
+        logger.info(scoreTable.size());
+
     }
 
     private int gzCount() {
@@ -209,6 +235,42 @@ public class Propagate {
         return subTypes;
     }
 
+    public double propagateOnceTable() {
+        Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> timeScore = temporalPropagationTable();
+        //Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> typeScore = typePropagationTable();
+
+        Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore = HashBasedTable.create();
+
+        double score; Double temp;
+        for (Table.Cell<ContextNetwork.Instance, ContextNetwork.Entity, Double> cell: scoreTable.cellSet()) {
+            temp = timeScore.get(cell.getRowKey(), cell.getColumnKey());
+            score = (temp == null? 0 : temp);
+            newScore.put(cell.getRowKey(), cell.getColumnKey(), score);
+        }
+
+        double delta = computeDeltaTable(scoreTable, newScore);
+        scoreTable = newScore;
+        return delta;
+    }
+
+    private double computeDeltaTable(Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> scoreTable,
+                                     Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore) {
+
+        double l1norm = -1;
+        for (ContextNetwork.Instance instance: scoreTable.rowKeySet()) {
+            Map<ContextNetwork.Entity, Double> original = scoreTable.row(instance);
+            Map<ContextNetwork.Entity, Double> updates = newScore.row(instance);
+            double l1 = 0;
+            for (ContextNetwork.Entity object: original.keySet()) {
+                l1 += Math.abs(original.get(object) - updates.get(object));
+            }
+            l1norm = Math.max(l1norm, l1);
+            //logger.info("Delta " + instance + " " + l1);
+        }
+
+        return l1norm;
+    }
+
     public double propagateOnce() {
         Map<ContextNetwork.Instance, Double> timeScore = temporalPropagation();
         //Map<ContextNetwork.Instance, Double> spatialScore = spatialPropagation();
@@ -232,6 +294,45 @@ public class Propagate {
         eventScoreTable = newScore;
 
         return delta;
+    }
+
+    private Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> temporalPropagationTable() {
+        Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore = HashBasedTable.create();
+
+        long range = 20 * timespan/100;
+        long diff; double fraction, ns;
+
+        for (ContextNetwork.Instance instance: eventScoreTable.keySet()) {
+            for (ContextNetwork.Instance neighbor: eventScoreTable.keySet()) {
+                if (instance == neighbor) continue;
+                if (instance.id.toString().equals("4_2") && neighbor.id.toString().equals("4_9"))
+                    logger.info("Asdasd");
+
+                diff = Math.abs(instance.intervalStart - neighbor.intervalStart);
+                if (diff > range) continue;
+
+                fraction = 1 - (double)diff/range;
+
+                Map<ContextNetwork.Entity, Double> scoresAtInstance = scoreTable.row(instance);
+
+                for(Map.Entry<ContextNetwork.Entity, Double> entry: scoresAtInstance.entrySet()) {
+
+                    if (Double.compare(entry.getValue(), 0) == 0) continue;
+                    ns = scoreTable.get(neighbor, entry.getKey());
+                    ns = ns + fraction * entry.getValue();
+                    //if (ns > 1) ns = 1;
+
+                    newScore.put(neighbor, entry.getKey(), ns);
+                }
+            }
+        }
+
+        return newScore;
+    }
+
+    private Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> typePropagationTable() {
+        Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore = HashBasedTable.create();
+        return newScore;
     }
 
     private Map<ContextNetwork.Instance, Double> temporalPropagation() {
@@ -426,4 +527,12 @@ public class Propagate {
 
     }
 
+    public void printScores(int event_id, int instance_id) {
+        Map<ContextNetwork.Entity, Double> map = scoreTable.row(new ContextNetwork.Instance(event_id, instance_id));
+
+
+        for (Map.Entry<ContextNetwork.Entity, Double> entry: map.entrySet()) {
+            if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
+        }
+    }
 }
