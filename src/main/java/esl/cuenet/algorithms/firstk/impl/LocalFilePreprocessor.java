@@ -13,6 +13,7 @@ import esl.cuenet.algorithms.firstk.exceptions.EventGraphException;
 import esl.cuenet.model.Constants;
 import esl.datastructures.Location;
 import esl.datastructures.TimeInterval;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import java.io.DataInputStream;
@@ -21,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 public class LocalFilePreprocessor implements Preprocessing<File> {
 
@@ -145,6 +148,9 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
         private Exif exif = null;
         private Logger logger = Logger.getLogger(ExifExtractor.class);
 
+        private HashMap<String, Exif> cache  = new HashMap<String, Exif>();
+        private String cacheFile = "/data/test_photos/tina/highres/exif.cache";
+
         public ExifExtractor() {
             StringBuilder builder = new StringBuilder();
             builder.append(exiftoolPath);
@@ -154,6 +160,22 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
                 builder.append(' ');
             }
             command = builder.substring(0);
+
+            File file = new File(cacheFile);
+            if ( ! file.exists() ) return;
+
+            try {
+                for (String line: FileUtils.readLines(file)) {
+                    String[] parts = line.split(" ");
+                    Exif e = new Exif();
+                    e.timestamp = Long.parseLong(parts[1]);
+                    e.GPSLatitude = Double.parseDouble(parts[2]);
+                    e.GPSLongitude = Double.parseDouble(parts[3]);
+                    cache.put(parts[0], e);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public int getWidth() {
@@ -178,6 +200,8 @@ public class LocalFilePreprocessor implements Preprocessing<File> {
 
 
         public Exif extractExif(String exifImage) throws IOException {
+
+            if (cache.containsKey(exifImage)) return cache.get(exifImage);
 
             StringBuilder exifBuilder = new StringBuilder();
             exif = null;

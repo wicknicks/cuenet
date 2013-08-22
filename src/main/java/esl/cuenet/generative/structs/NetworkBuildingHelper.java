@@ -205,6 +205,46 @@ public class NetworkBuildingHelper {
         return network;
     }
 
+    public static ContextNetwork loadOneDatasetForPropagationTest(List<String> locationStrings, Multimap<Integer, String> refMap) throws IOException {
+        File directory = new File("/data/test_photos/tina/highres/");
+
+        double lat=33.671506, lon=-117.833928;
+        String locationKey = UUID.randomUUID().toString();
+        locationStrings.add(locationKey + "," + lat + "," + lon);
+
+        File[] photos = directory.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.toLowerCase().endsWith("jpg");
+            }
+        });
+
+        Arrays.sort(photos);
+
+        ContextNetwork network = new ContextNetwork();
+
+        Candidates candidateSet = Candidates.getInstance();
+        int instance_id = 0;
+        for (File p: photos) {
+            logger.info(instance_id + " " + p.getAbsoluteFile() + " " + candidateSet.count());
+            List<String> groundTruth = FileUtils.readLines(new File(p.getAbsolutePath() + ".annotations"));
+            for (String cand: groundTruth) {
+                Candidates.CandidateReference ref = candidateSet.createEntity(Lists.newArrayList(Candidates.NAME_KEY), Lists.newArrayList(cand));
+                refMap.put(instance_id, ref.toString());
+            }
+
+            ContextNetwork temp = loadFromPhoto(p, instance_id, locationKey, refMap.get(instance_id));
+            network.eventTrees.add(temp.eventTrees.get(0));
+
+            instance_id++;
+        }
+
+        candidateSet.logistics(true);
+
+        return network;
+
+    }
+
     public static ContextNetwork loadForUnitPropagationTest(List<String> locationStrings) throws IOException {
         String[] folders = new String[]{"/home/arjun/Dataset/mm13/d6-mm09-beijing-jain/",
                 "/home/arjun/Dataset/mm13/d1-vldb09-arjun/",
@@ -275,7 +315,7 @@ public class NetworkBuildingHelper {
 
             root.setLocation(location);
         } catch (IOException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         return network;
     }

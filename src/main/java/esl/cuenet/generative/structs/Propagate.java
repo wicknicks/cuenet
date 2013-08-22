@@ -299,7 +299,7 @@ public class Propagate {
     private Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> temporalPropagationTable() {
         Table<ContextNetwork.Instance, ContextNetwork.Entity, Double> newScore = HashBasedTable.create();
 
-        long range = 5 * timespan/100;
+        long range = 1 * timespan/100;
         long diff; double fraction, ns;
 
         HashMap<ContextNetwork.Instance, Integer> neighborCount = Maps.newHashMap();
@@ -561,9 +561,52 @@ public class Propagate {
             Map.Entry<ContextNetwork.Entity, Double> entry = objBallot.remove();
             if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
         }
-
-//        for (Map.Entry<ContextNetwork.Entity, Double> entry: map.entrySet()) {
-//            if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
-//        }
     }
+
+    public int[] findObjectPositions(int event_id, int instance_id, List<String> objects) {
+        int[] objectsPositions = new int[objects.size()];
+        Map<ContextNetwork.Entity, Double> map = scoreTable.row(new ContextNetwork.Instance(event_id, instance_id));
+        PriorityQueue<Map.Entry<ContextNetwork.Entity, Double>> objBallot = new PriorityQueue<Map.Entry<ContextNetwork.Entity, Double>>(map.entrySet().size(),
+                new Comparator<Map.Entry<ContextNetwork.Entity, Double>>() {
+                    @Override
+                    public int compare(Map.Entry<ContextNetwork.Entity, Double> o1, Map.Entry<ContextNetwork.Entity, Double> o2) {
+                        if (o2.getValue() > o1.getValue()) return 1;
+                        if (o2.getValue() < o1.getValue()) return -1;
+                        return 0;
+                    }
+                });
+
+        objBallot.addAll(map.entrySet());
+
+        double[] precisions = new double[objBallot.size()];
+        double[] recalls = new double[objBallot.size()];
+
+        double precision, recall;
+        int ix = 0, jx = 0;
+        int PR = 0;
+        while ( !objBallot.isEmpty() ) {
+            Map.Entry<ContextNetwork.Entity, Double> entry = objBallot.remove();
+            //if (entry.getValue() > 0) logger.info(entry.getKey() + "\t" + entry.getValue());
+
+            int searchIx = objects.indexOf(entry.getKey().id);
+            if (searchIx >= 0)
+                objectsPositions[jx++] = ix;
+
+            ix++;
+
+            precision = (double) jx / ix;
+            recall = (double) jx / objects.size();
+
+            precisions[PR] = precision;
+            recalls[PR] = recall;
+            PR++;
+
+        }
+
+        logger.info("Precision" + instance_id +  " <- c" + Arrays.toString(precisions));
+        logger.info("Recalls" + instance_id +  " <- c" + Arrays.toString(recalls));
+
+        return objectsPositions;
+    }
+
 }

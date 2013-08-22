@@ -200,6 +200,10 @@ public class Candidates {
         }
     }
 
+    public long count() {
+        return candidates.size();
+    }
+
     public class Candidate {
         CandidateReference reference;
         Multimap<String, String> map;
