@@ -77,15 +77,46 @@ with codecs.open('/data/facebook/tag-propagation/user_album.txt', 'w') as channe
 with codecs.open('/data/facebook/tag-propagation/album_photo.txt', 'w') as channel:
   for k in album_photo.keys():
     channel.write(k)
-    channel.write(' _$ ')
+    channel.write(' _$_ ')
     channel.write(json.dumps(album_photo[k], sort_keys=True))
     channel.write('\n')
 
 with codecs.open('/data/facebook/tag-propagation/all_photos.txt', 'w') as channel:
   for k in all_photos.keys():
     channel.write(k)
-    channel.write(' _$ ')
+    channel.write(' _$_ ')
     channel.write(json.dumps(all_photos[k], sort_keys=True))
     channel.write('\n')    
 
-    
+
+#
+# New album
+#
+
+for albid in album_photo.keys():
+  albtags = set()
+  for albphoto in album_photo[albid]:
+    photo = all_photos[albphoto]
+    if 'tags' not in photo: continue
+    for tag in photo['tags']['data']:
+      if 'id' not in tag: continue
+      if 'name' not in tag: continue
+      albtags.add(tag['id'])
+      id_user[tag['id']] = tag['name']
+  if len(albtags) > 0: album_tags[albid] = list(albtags)
+
+print len(album_tags), len(id_user)
+
+with codecs.open('/data/facebook/tag-propagation/album_tags.txt', 'w') as channel:
+  for k in album_tags.keys():
+    channel.write(k)
+    channel.write(' _$_ ')
+    channel.write(json.dumps(album_tags[k], sort_keys=True))
+    channel.write('\n')
+
+with codecs.open('/data/facebook/tag-propagation/id_user.txt', 'w') as channel:
+  for k in id_user.keys():
+    channel.write(k)
+    channel.write(' _$_ ')
+    channel.write(json.dumps(id_user[k], sort_keys=True))
+    channel.write('\n')
