@@ -1,4 +1,4 @@
-import math, json
+import math, json, random
 import dateutil.parser as parser
 import pickle
 
@@ -14,7 +14,7 @@ with open('/data/facebook/tag-propagation/album_tags_finals.txt') as dataset:
     participant_tags[parts[0]] = json.loads(parts[1])
 
 candidateSet = set()
-with open('/data/facebook/tag-propagation/candidates.txt') as dataset:
+with open('/data/facebook/tag-propagation/candidates_multi_occurrence.txt') as dataset:
   for line in dataset.readlines(): 
     candidateSet.add(line.strip())
 
@@ -34,7 +34,13 @@ with open('/data/facebook/tag-propagation/albums.txt') as albums:
     locations[parts[0]] = (j['place']['location']['latitude'], j['place']['location']['latitude'])
     times[parts[0]] = int(parser.parse(j['created_time']).strftime("%s")) - 1147773369
     participants[parts[0]] = set(participant_tags[parts[0]])
-    for p in participants[parts[0]]: scores[parts[0]][candidateSet.index(p)] = 1
+    for p in participants[parts[0]]: 
+      if p not in candidateSet: continue
+      scores[parts[0]][candidateSet.index(p)] = 1
+    if sum(scores[parts[0]]) == 0:
+      del scores[parts[0]]
+      del locations[parts[0]]
+      del times[parts[0]]
 
 for key in scores.keys():
   Jq[key] = {}
@@ -46,19 +52,27 @@ for key in scores.keys():
 tkey = None
 tix = None
 bkupScore = {}
+tkeylist = []
+
 for key in scores:
   if sum(scores[key]) <= 1: continue
-  bkupScore = list(scores[key])
-  tix = scores[key].index(1)
-  scores[key][tix] = 0
-  tkey = key
-  print tkey, tix
-  break
+  tkeylist.append(key)
 
-with open('bkupScore', 'w') as t:
+tkey = tkeylist[ random.randint(0, len(tkeylist)-1 ) ]
+  
+bkupScore = list(scores[tkey])
+tix = scores[tkey].index(1)
+scores[tkey][tix] = 0
+
+print 'tkey', tkey, '; tix', tix
+
+print 'len(scores[tkey])', len(scores[tkey])
+print 'len(scores)', len(scores)
+
+with open('bkupScore.logs', 'w') as t:
   t.write(json.dumps(bkupScore))
 
-with open('score', 'w') as t:
+with open('score.logs', 'w') as t:
   t.write(json.dumps(scores[tkey]))
 
 Lmax = 50
@@ -107,7 +121,7 @@ for iteration in range(2):
 
 print len(candidateSet)
 
-with open('result', 'w') as t:
+with open('result.logs', 'w') as t:
   t.write(json.dumps(scores[tkey]))
 
 results = []
@@ -119,7 +133,7 @@ for r in scores[tkey]:
 results.sort()
 ix = 0
 for r in results:
-  if r[1] == tix: print 'Position', ix
+  if r[1] == tix: print 'Position', len(candidateSet) - ix
   ix += 1
 
 
