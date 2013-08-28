@@ -6,6 +6,7 @@ import esl.cuenet.algorithms.firstk.personal.accessor.PConstants;
 import esl.cuenet.algorithms.firstk.personal.accessor.Source;
 import esl.cuenet.algorithms.firstk.personal.accessor.SourceFactory;
 import esl.system.SysLoggerUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
@@ -46,6 +47,10 @@ public class Main {
 
     public static void main(String[] args) {
         SysLoggerUtils.initLogger();
+
+        Logger logger = Logger.getLogger(Main.class);
+        logger.info("DB = " + PConstants.DBNAME + "; USER = " + PConstants.USERNAME + "; EMAIL = " +
+                PConstants.EMAIL + "; IMAGE = " + PConstants.IMAGE);
 
         EventContextNetwork network = load();
         if (network == null) return;
